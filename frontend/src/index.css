@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for jewelry theme */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #fafafa;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.silver-gradient {
+  background: linear-gradient(135deg, #64748b, #475569);
+}

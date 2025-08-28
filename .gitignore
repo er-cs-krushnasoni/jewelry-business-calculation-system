@@ -1,0 +1,185 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+backend/dist/
+frontend/dist/
+backend/build/
+frontend/build/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+backend/.env
+frontend/.env
+backend/.env.local
+frontend/.env.local
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+.npm
+.eslintcache
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# PWA service worker files
+sw.js
+sw.js.map
+workbox-*.js
+workbox-*.js.map
+precache-manifest.*.js
+
+# Vite specific
+frontend/vite.config.js.timestamp-*
+
+# Database files (if using local SQLite for testing)
+*.sqlite
+*.sqlite3
+*.db
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Test coverage
+coverage/
+.coverage
+
+# Deployment files
+.vercel
+.netlify
+
+# Lock files (choose one based on your package manager)
+# If using npm, uncomment the next line and remove yarn.lock from ignore
+# package-lock.json
+# If using yarn, uncomment the next line and remove package-lock.json from ignore
+# yarn.lock
+
+# Local development certificates
+*.pem
+*.key
+*.crt
+
+# MongoDB local database files (if running locally)
+data/
+mongodb/
+
+# Upload directories (if any)
+uploads/
+temp/
+
+# Error screenshots or videos (testing)
+cypress/screenshots/
+cypress/videos/
+
+# Storybook build outputs
+storybook-static/
+
+# Temporary folders
+.tmp/
+.cache/
