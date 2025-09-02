@@ -1,0 +1,111 @@
+jewellery-calculation-system
+│   .gitignore
+│   structure.txt
+│
+├── backend
+│   │   .env
+│   │   package-lock.json
+│   │   package.json
+│   │
+│   ├── node_modules
+│   └── src
+│       │   server.js
+│       │
+│       ├── config
+│       │   └── database.js
+│       │
+│       ├── controllers
+│       │   ├── authController.js
+│       │   ├── calculatorController.js
+│       │   ├── categoryController.js
+│       │   ├── rateController.js
+│       │   ├── superAdminController.js
+│       │   └── userController.js
+│       │
+│       ├── middleware
+│       │   ├── auth.js
+│       │   ├── errorHandler.js
+│       │   ├── rateLimit.js
+│       │   └── validation.js
+│       │
+│       ├── models
+│       │   ├── Category.js
+│       │   ├── Rate.js
+│       │   ├── Shop.js
+│       │   └── User.js
+│       │
+│       └── routes
+│           ├── authRoutes.js
+│           ├── calculatorRoutes.js
+│           ├── categoryRoutes.js
+│           ├── rateRoutes.js
+│           └── superAdminRoutes.js
+│
+└── frontend
+    │   .env
+    │   eslint.config.js
+    │   index.html
+    │   package-lock.json
+    │   package.json
+    │   postcss.config.js
+    │   README.md
+    │   tailwind.config.js
+    │   vite.config.js
+    │
+    ├── node_modules
+    ├── public
+    │   └── vite.svg
+    │
+    └── src
+        │   App.css
+        │   App.jsx
+        │   index.css
+        │   main.jsx
+        │
+        ├── assets
+        │   └── react.svg
+        │
+        ├── components
+        │   ├── auth
+        │   │   ├── LoginForm.jsx
+        │   │   └── ProtectedRoute.jsx
+        │   │
+        │   ├── calculator
+        │   │
+        │   ├── layout
+        │   │   ├── Header.jsx
+        │   │   ├── Layout.jsx
+        │   │   └── Sidebar.jsx
+        │   │
+        │   └── ui
+        │       ├── Button.jsx
+        │       ├── Input.jsx
+        │       ├── LoadingSpinner.jsx
+        │       └── Modal.jsx
+        │
+        ├── constants
+        │   ├── languages.js
+        │   └── roles.js
+        │
+        ├── contexts
+        │   ├── AuthContext.jsx
+        │   ├── LanguageContext.jsx
+        │   └── SocketContext.jsx
+        │
+        ├── hooks
+        │
+        ├── pages
+        │   ├── admin
+        │   ├── auth
+        │   ├── calculator
+        │   └── dashboard
+        │
+        ├── services
+        │   ├── api.js
+        │   ├── authService.js
+        │   └── socketService.js
+        │
+        └── utils
+            ├── constants.js
+            ├── helpers.js
+            └── validation.js
