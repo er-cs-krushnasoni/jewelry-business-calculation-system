@@ -49,6 +49,14 @@ const authenticate = async (req, res, next) => {
         });
       }
 
+      // For shop users, check if shop is active
+      if (user.shopId && !user.shopId.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Shop account is deactivated'
+        });
+      }
+
       // Attach user to request
       req.user = user;
       next();
@@ -160,19 +168,17 @@ const authorizeManagerOrAdmin = (req, res, next) => {
   next();
 };
 
-// Check if user must change password
-const checkPasswordChangeRequired = (req, res, next) => {
-  if (req.user && req.user.mustChangePassword) {
-    // Allow access to change password endpoint and logout
-    const allowedPaths = ['/auth/change-password', '/auth/logout', '/auth/me'];
-    if (!allowedPaths.includes(req.path)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Password change required',
-        mustChangePassword: true
-      });
-    }
+// Check if user can change passwords/usernames (Super Admin or Shop Admin only)
+const authorizePasswordManagement = (req, res, next) => {
+  const allowedRoles = ['super_admin', 'admin'];
+  
+  if (!req.user || !allowedRoles.includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Only Super Admin or Shop Admin can manage passwords and usernames'
+    });
   }
+  
   next();
 };
 
@@ -184,5 +190,5 @@ module.exports = {
   authorizeSuperAdmin,
   authorizeShopAdmin,
   authorizeManagerOrAdmin,
-  checkPasswordChangeRequired
+  authorizePasswordManagement
 };

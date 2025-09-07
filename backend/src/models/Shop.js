@@ -56,6 +56,12 @@ const shopSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  // NEW: Master encryption key for encrypting shop user passwords
+  masterEncryptionKey: {
+    type: String,
+    required: false, // Will be generated in pre-save middleware
+    select: false // Don't include in normal queries for security
+  },
   settings: {
     rateUpdateDeadlineHour: {
       type: Number,
@@ -82,10 +88,11 @@ shopSchema.index({ isActive: 1 });
 shopSchema.index({ createdBy: 1 });
 shopSchema.index({ shopCode: 1 });
 
-// Pre-save middleware to generate unique shop code
+// Pre-save middleware to generate unique shop code AND master encryption key
 shopSchema.pre('save', async function(next) {
-  if (!this.shopCode) {
-    try {
+  try {
+    // Generate shop code if not exists
+    if (!this.shopCode) {
       let code;
       let exists = true;
       let attempts = 0;
@@ -104,12 +111,17 @@ shopSchema.pre('save', async function(next) {
       }
       
       this.shopCode = code;
-      next();
-    } catch (error) {
-      next(error);
     }
-  } else {
+
+    // Generate master encryption key if not exists
+    if (!this.masterEncryptionKey) {
+      const PasswordEncryption = require('../utils/encryption');
+      this.masterEncryptionKey = PasswordEncryption.generateShopMasterKey();
+    }
+
     next();
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -152,6 +164,8 @@ shopSchema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
     delete ret.__v;
+    // Never expose master encryption key in JSON responses
+    delete ret.masterEncryptionKey;
     return ret;
   }
 });

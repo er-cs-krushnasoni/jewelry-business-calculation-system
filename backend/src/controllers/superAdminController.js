@@ -1,6 +1,203 @@
 const User = require('../models/User');
 const Shop = require('../models/Shop');
 
+// Update shop information AND shop name
+const updateShop = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { shopName, contactInfo, notes, defaultLanguage, isActive } = req.body;
+
+    // Find shop
+    const shop = await Shop.findById(shopId);
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shop not found'
+      });
+    }
+
+    // Update shop fields - Super Admin can update shop name
+    if (shopName) shop.shopName = shopName.trim();
+    if (contactInfo) shop.contactInfo = contactInfo;
+    if (notes !== undefined) shop.notes = notes?.trim() || '';
+    if (defaultLanguage) shop.defaultLanguage = defaultLanguage;
+    if (isActive !== undefined) shop.isActive = isActive;
+
+    await shop.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Shop updated successfully',
+      shop: {
+        _id: shop._id,
+        shopName: shop.shopName,
+        shopCode: shop.shopCode,
+        adminUsername: shop.adminUsername,
+        contactInfo: shop.contactInfo,
+        notes: shop.notes,
+        defaultLanguage: shop.defaultLanguage,
+        isActive: shop.isActive,
+        updatedAt: shop.updatedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Update shop error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating shop'
+    });
+  }
+};
+
+// Update shop admin credentials (username/password) - Super Admin only
+// IMPORTANT: Super Admin can UPDATE but NOT VIEW passwords
+const updateShopAdminCredentials = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { username, password } = req.body;
+
+    // At least one field must be provided
+    if (!username && !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username or password must be provided'
+      });
+    }
+
+    // Find shop
+    const shop = await Shop.findById(shopId);
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shop not found'
+      });
+    }
+
+    // Find shop admin
+    const shopAdmin = await User.findOne({ 
+      shopId: shopId, 
+      role: 'admin' 
+    });
+
+    if (!shopAdmin) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shop admin not found'
+      });
+    }
+
+    // If username is being updated, check global uniqueness
+    if (username && username.toLowerCase() !== shopAdmin.username) {
+      const existingUser = await User.findByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'Username already exists. Please choose a different username.'
+        });
+      }
+      
+      shopAdmin.username = username.toLowerCase().trim();
+      shop.adminUsername = username.toLowerCase().trim();
+    }
+
+    // If password is being updated, validate and set
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: 'Password must be at least 6 characters long'
+        });
+      }
+      
+      // For admin users, we DON'T use encrypted passwords
+      // Only set the regular password field (will be hashed by pre-save middleware)
+      shopAdmin.password = password;
+    }
+
+    await shopAdmin.save();
+    await shop.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Shop admin credentials updated successfully',
+      admin: {
+        _id: shopAdmin._id,
+        username: shopAdmin.username,
+        role: shopAdmin.role,
+        updatedAt: shopAdmin.updatedAt
+      },
+      note: 'Password updated but not shown for security reasons'
+    });
+
+  } catch (error) {
+    console.error('Update shop admin credentials error:', error);
+    
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username already exists'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating shop admin credentials'
+    });
+  }
+};
+
+// Get shop details with users (NO passwords shown to super admin)
+const getShopDetails = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+
+    // Find shop with creator info
+    const shop = await Shop.findById(shopId).populate('createdBy', 'username');
+    if (!shop) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shop not found'
+      });
+    }
+
+    // Get all users for this shop (excluding ALL password fields)
+    const users = await User.find({ shopId: shopId })
+      .select('-password -loginHistory -encryptedPassword') // Super admin CANNOT see passwords
+      .sort({ role: 1, createdAt: -1 });
+
+    // Get user role summary
+    const roleCount = {
+      admin: 0,
+      manager: 0,
+      pro_client: 0,
+      client: 0
+    };
+
+    users.forEach(user => {
+      if (roleCount.hasOwnProperty(user.role)) {
+        roleCount[user.role]++;
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      shop,
+      users,
+      userCount: users.length,
+      roleCount,
+      securityNote: 'Passwords are not visible to Super Admin for security reasons'
+    });
+
+  } catch (error) {
+    console.error('Get shop details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error getting shop details'
+    });
+  }
+};
+
 // Get all shops
 const getAllShops = async (req, res) => {
   try {
@@ -52,7 +249,7 @@ const createShop = async (req, res) => {
       });
     }
 
-    // Create shop first
+    // Create shop first (it will auto-generate masterEncryptionKey)
     const shop = await Shop.create({
       shopName: shopName.trim(),
       contactInfo: contactInfo || {},
@@ -61,19 +258,18 @@ const createShop = async (req, res) => {
       defaultLanguage: defaultLanguage || 'en',
       createdBy: req.user._id,
       isActive: true
+      // masterEncryptionKey will be auto-generated by the pre-save middleware
     });
 
-    // Create shop admin user
+    // Create shop admin user - NO encrypted password needed for admin
     const shopAdmin = await User.create({
       username: adminUsername.toLowerCase().trim(),
-      password: adminPassword,
+      password: adminPassword, // Only hashed, not encrypted
       role: 'admin',
       shopId: shop._id,
-      isActive: true,
-      mustChangePassword: true // Force password change on first login
+      isActive: true
     });
 
-    // Return shop data with admin info
     res.status(201).json({
       success: true,
       message: 'Shop and admin account created successfully',
@@ -91,8 +287,7 @@ const createShop = async (req, res) => {
       admin: {
         _id: shopAdmin._id,
         username: shopAdmin.username,
-        role: shopAdmin.role,
-        mustChangePassword: shopAdmin.mustChangePassword
+        role: shopAdmin.role
       }
     });
 
@@ -110,106 +305,13 @@ const createShop = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'Shop code or username already exists'
+        message: 'Username already exists'
       });
     }
 
     res.status(500).json({
       success: false,
       message: 'Server error creating shop'
-    });
-  }
-};
-
-// Update shop information
-const updateShop = async (req, res) => {
-  try {
-    const { shopId } = req.params;
-    const { shopName, contactInfo, notes, defaultLanguage, isActive } = req.body;
-
-    // Find shop
-    const shop = await Shop.findById(shopId);
-    if (!shop) {
-      return res.status(404).json({
-        success: false,
-        message: 'Shop not found'
-      });
-    }
-
-    // Update shop fields
-    if (shopName) shop.shopName = shopName.trim();
-    if (contactInfo) shop.contactInfo = contactInfo;
-    if (notes !== undefined) shop.notes = notes?.trim() || '';
-    if (defaultLanguage) shop.defaultLanguage = defaultLanguage;
-    if (isActive !== undefined) shop.isActive = isActive;
-
-    await shop.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Shop updated successfully',
-      shop
-    });
-
-  } catch (error) {
-    console.error('Update shop error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error updating shop'
-    });
-  }
-};
-
-// Reset shop admin password
-const resetShopAdminPassword = async (req, res) => {
-  try {
-    const { shopId } = req.params;
-    const { newPassword } = req.body;
-
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters long'
-      });
-    }
-
-    // Find shop
-    const shop = await Shop.findById(shopId);
-    if (!shop) {
-      return res.status(404).json({
-        success: false,
-        message: 'Shop not found'
-      });
-    }
-
-    // Find shop admin
-    const shopAdmin = await User.findOne({ 
-      shopId: shopId, 
-      role: 'admin' 
-    });
-
-    if (!shopAdmin) {
-      return res.status(404).json({
-        success: false,
-        message: 'Shop admin not found'
-      });
-    }
-
-    // Update password
-    shopAdmin.password = newPassword;
-    shopAdmin.mustChangePassword = true;
-    await shopAdmin.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Shop admin password reset successfully'
-    });
-
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error resetting password'
     });
   }
 };
@@ -262,41 +364,6 @@ const deleteShop = async (req, res) => {
   }
 };
 
-// Get shop details with users
-const getShopDetails = async (req, res) => {
-  try {
-    const { shopId } = req.params;
-
-    // Find shop with creator info
-    const shop = await Shop.findById(shopId).populate('createdBy', 'username');
-    if (!shop) {
-      return res.status(404).json({
-        success: false,
-        message: 'Shop not found'
-      });
-    }
-
-    // Get all users for this shop
-    const users = await User.find({ shopId: shopId })
-      .select('-password -loginHistory')
-      .sort({ role: 1, createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      shop,
-      users,
-      userCount: users.length
-    });
-
-  } catch (error) {
-    console.error('Get shop details error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error getting shop details'
-    });
-  }
-};
-
 // Get dashboard stats
 const getDashboardStats = async (req, res) => {
   try {
@@ -339,9 +406,9 @@ const getDashboardStats = async (req, res) => {
 module.exports = {
   getAllShops,
   createShop,
-  updateShop,
-  resetShopAdminPassword,
+  updateShop,                    // Enhanced to allow shop name updates
+  updateShopAdminCredentials,    // Super Admin can update but NOT view passwords
   deleteShop,
-  getShopDetails,
+  getShopDetails,               // NO passwords shown
   getDashboardStats
 };

@@ -3,33 +3,33 @@ const router = express.Router();
 const {
   login,
   getMe,
+  getMyProfile,
   changePassword,
   logout,
   createSuperAdmin,
   checkSuperAdmin
 } = require('../controllers/authController');
-const { 
-  authenticate,
-  checkPasswordChangeRequired 
-} = require('../middleware/auth');
 
-// Public routes
+const { authenticate, authorize } = require('../middleware/auth');
+
+// Public routes (no authentication required)
 router.post('/login', login);
-router.get('/check-superadmin', checkSuperAdmin);
-router.post('/create-superadmin', createSuperAdmin);
+router.post('/create-super-admin', createSuperAdmin); // Only works if no super admin exists
+router.get('/check-super-admin', checkSuperAdmin);
 
-// Protected routes
-router.get('/me', authenticate, getMe);
-router.post('/change-password', authenticate, changePassword);
-router.post('/logout', authenticate, logout);
+// Protected routes (authentication required)
+router.use(authenticate); // All routes below require authentication
 
-// Test route
-router.get('/test', (req, res) => {
-  res.json({ 
-    success: true, 
-    message: 'Authentication system working',
-    timestamp: new Date().toISOString()
-  });
-});
+// Current user info
+router.get('/me', getMe);
+
+// Profile management for Super Admin and Shop Admin
+router.get('/profile', authorize('super_admin', 'admin'), getMyProfile);
+
+// Password management for Super Admin and Shop Admin only
+router.post('/change-password', authorize('super_admin', 'admin'), changePassword);
+
+// Logout
+router.post('/logout', logout);
 
 module.exports = router;

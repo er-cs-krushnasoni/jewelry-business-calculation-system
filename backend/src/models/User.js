@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+// Global variable to temporarily store plain password during save
+let tempPlainPassword = null;
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -16,6 +19,11 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters']
   },
+  // Encrypted password for shop admin viewing (only for specific shop roles)
+  encryptedPassword: {
+    type: String,
+    required: false // Will be set directly in controller for relevant roles
+  },
   role: {
     type: String,
     enum: ['super_admin', 'admin', 'manager', 'pro_client', 'client'],
@@ -29,10 +37,6 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  },
-  mustChangePassword: {
-    type: Boolean,
-    default: false // true when Super Admin creates/resets password
   },
   lastLogin: {
     type: Date,
@@ -65,25 +69,79 @@ userSchema.index({ username: 1 }, {
 // Index for efficient shop-based queries
 userSchema.index({ shopId: 1 });
 userSchema.index({ role: 1 });
+userSchema.index({ shopId: 1, role: 1 });
 
-// Pre-save middleware to hash password
-userSchema.pre('save', async function(next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified('password')) return next();
-
+// Pre-validate middleware for role constraints
+userSchema.pre('validate', async function(next) {
   try {
-    // Hash password with cost of 12
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
+    await this.constructor.validateRoleConstraints(this.role, this.shopId, this._id);
     next();
   } catch (error) {
     next(error);
   }
 });
 
-// Instance method to check password
+// Simplified pre-save middleware - only handles password hashing
+userSchema.pre('save', async function(next) {
+  console.log('Pre-save middleware triggered for user:', this.username, 'isModified(password):', this.isModified('password'));
+  
+  if (!this.isModified('password')) {
+    console.log('Pre-save: Password not modified, skipping');
+    return next();
+  }
+
+  try {
+    // Get the plain password
+    const plainPassword = tempPlainPassword || this.password;
+    console.log('Pre-save: Plain password available:', !!plainPassword);
+    
+    if (!plainPassword) {
+      console.error('Pre-save: No plain password available');
+      return next(new Error('Plain password is required for hashing'));
+    }
+
+    // Hash password for authentication
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(plainPassword, salt);
+    console.log('Pre-save: Password hashed successfully');
+
+    // Clear the temporary plain password
+    tempPlainPassword = null;
+    console.log('Pre-save: Completed successfully');
+
+    next();
+  } catch (error) {
+    // Clear the temporary plain password on error
+    tempPlainPassword = null;
+    console.error('Pre-save: Error occurred:', error);
+    next(error);
+  }
+});
+
+// Instance method to check password (uses hashed password)
 userSchema.methods.matchPassword = async function(enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Instance method to get decrypted password (ONLY for manager, pro_client, client)
+userSchema.methods.getDecryptedPassword = async function() {
+  if (['super_admin', 'admin'].includes(this.role)) {
+    throw new Error('Admin passwords cannot be decrypted for security reasons');
+  }
+
+  if (!this.encryptedPassword) {
+    throw new Error('Encrypted password not available');
+  }
+
+  const Shop = mongoose.model('Shop');
+  const shop = await Shop.findById(this.shopId).select('+masterEncryptionKey');
+  
+  if (!shop || !shop.masterEncryptionKey) {
+    throw new Error('Shop encryption key not found');
+  }
+
+  const PasswordEncryption = require('../utils/encryption');
+  return PasswordEncryption.decryptPassword(this.encryptedPassword, shop.masterEncryptionKey);
 };
 
 // Instance method to check if user belongs to a shop
@@ -92,36 +150,142 @@ userSchema.methods.belongsToShop = function(shopId) {
   return this.shopId && this.shopId.toString() === shopId.toString();
 };
 
+// Instance method to check if user can access shop data
+userSchema.methods.canAccessShop = function(shopId) {
+  if (this.role === 'super_admin') return true;
+  return this.belongsToShop(shopId);
+};
+
+// Instance method to get user's role hierarchy level
+userSchema.methods.getRoleLevel = function() {
+  const roleLevels = {
+    'super_admin': 5,
+    'admin': 4,
+    'manager': 3,
+    'pro_client': 2,
+    'client': 1
+  };
+  return roleLevels[this.role] || 0;
+};
+
 // Static method to find user with case-insensitive username
 userSchema.statics.findByUsername = function(username) {
   return this.findOne({ username: username.toLowerCase() });
 };
 
-// Static method to validate role constraints
-userSchema.statics.validateRoleConstraints = async function(role, shopId) {
+// Enhanced static method to validate role constraints
+userSchema.statics.validateRoleConstraints = async function(role, shopId, userId = null) {
+  const SHOP_ROLES = ['admin', 'manager', 'pro_client', 'client'];
+  const SINGLE_ROLE_PER_SHOP = ['admin', 'manager', 'pro_client', 'client'];
+  
+  // Validate super_admin constraints
   if (role === 'super_admin') {
     if (shopId) {
-      throw new Error('Super Admin cannot belong to a shop');
+      const error = new Error('Super Admin cannot belong to a shop');
+      error.code = 'ROLE_CONSTRAINT_VIOLATION';
+      error.details = {
+        role,
+        constraint: 'super_admin_no_shop',
+        message: 'Super Admin users must not have a shopId'
+      };
+      throw error;
     }
     return true;
   }
 
-  if (!shopId) {
-    throw new Error('Shop users must belong to a shop');
+  // Validate shop user constraints
+  if (SHOP_ROLES.includes(role)) {
+    if (!shopId) {
+      const error = new Error(`${role} must belong to a shop`);
+      error.code = 'ROLE_CONSTRAINT_VIOLATION';
+      error.details = {
+        role,
+        constraint: 'shop_user_requires_shop',
+        message: `${role} users must have a shopId`
+      };
+      throw error;
+    }
+
+    // Verify shop exists and is active
+    const Shop = mongoose.model('Shop');
+    const shopExists = await Shop.findById(shopId);
+    if (!shopExists) {
+      const error = new Error('Invalid shop reference');
+      error.code = 'SHOP_NOT_FOUND';
+      throw error;
+    }
+
+    if (!shopExists.isActive) {
+      const error = new Error('Cannot assign users to inactive shop');
+      error.code = 'SHOP_INACTIVE';
+      throw error;
+    }
   }
 
-  // Check if role already exists in the shop (except for multiple super_admins)
-  if (['admin', 'manager', 'pro_client', 'client'].includes(role)) {
-    const existingUser = await this.findOne({ shopId, role });
+  // Check single role per shop constraint
+  if (SINGLE_ROLE_PER_SHOP.includes(role)) {
+    const query = { shopId, role, isActive: true };
+    
+    if (userId) {
+      query._id = { $ne: userId };
+    }
+
+    const existingUser = await this.findOne(query);
     if (existingUser) {
-      throw new Error(`Only one ${role} is allowed per shop`);
+      const error = new Error(`Only one ${role} is allowed per shop`);
+      error.code = 'ROLE_CONSTRAINT_VIOLATION';
+      error.details = {
+        role,
+        shopId,
+        constraint: 'single_role_per_shop',
+        existingUser: existingUser.username,
+        message: `Shop already has a ${role}: ${existingUser.username}`
+      };
+      throw error;
     }
   }
 
   return true;
 };
 
-// Virtual for full user info (excluding password)
+// Static method to get role constraints info
+userSchema.statics.getRoleConstraints = function() {
+  return {
+    super_admin: {
+      shopId: false,
+      multipleAllowed: true,
+      description: 'Platform administrator with global access'
+    },
+    admin: {
+      shopId: true,
+      multipleAllowed: false,
+      description: 'Shop administrator with full shop control'
+    },
+    manager: {
+      shopId: true,
+      multipleAllowed: false,
+      description: 'Shop manager with rate and calculation access'
+    },
+    pro_client: {
+      shopId: true,
+      multipleAllowed: false,
+      description: 'Professional client with margin visibility'
+    },
+    client: {
+      shopId: true,
+      multipleAllowed: false,
+      description: 'Basic client with calculation access only'
+    }
+  };
+};
+
+// Static method to set temporary plain password (used before save)
+userSchema.statics.setTempPlainPassword = function(password) {
+  tempPlainPassword = password;
+  console.log('Static: Temporary plain password set for hashing');
+};
+
+// Virtual for safe user info (excluding passwords)
 userSchema.virtual('safeUserInfo').get(function() {
   return {
     _id: this._id,
@@ -129,7 +293,6 @@ userSchema.virtual('safeUserInfo').get(function() {
     role: this.role,
     shopId: this.shopId,
     isActive: this.isActive,
-    mustChangePassword: this.mustChangePassword,
     lastLogin: this.lastLogin,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt
@@ -141,6 +304,7 @@ userSchema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
     delete ret.password;
+    delete ret.encryptedPassword; // Never expose encrypted password in normal responses
     delete ret.loginHistory;
     delete ret.__v;
     return ret;

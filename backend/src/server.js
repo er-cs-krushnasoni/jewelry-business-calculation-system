@@ -43,7 +43,6 @@ try {
   console.error('Error loading auth routes:', error.message);
 }
 
-// In server.js, add after auth routes:
 try {
   const superAdminRoutes = require('./routes/superAdminRoutes');
   app.use('/api/super-admin', superAdminRoutes);
@@ -52,9 +51,27 @@ try {
   console.error('Error loading super admin routes:', error.message);
 }
 
-// Test super admin routes
+// Add user management routes for shop admins
+try {
+  const userRoutes = require('./routes/userRoutes');
+  app.use('/api/users', userRoutes);
+  console.log('User management routes loaded successfully');
+} catch (error) {
+  console.error('Error loading user management routes:', error.message);
+}
+
+// Test routes
 app.get('/api/super-admin/test', (req, res) => {
   res.json({ success: true, message: 'Super admin test route working' });
+});
+
+app.get('/api/test/roles', (req, res) => {
+  res.json({ 
+    success: true, 
+    message: 'Role testing endpoint',
+    supportedRoles: ['super_admin', 'admin', 'manager', 'pro_client', 'client'],
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handling
@@ -66,11 +83,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
+});
 
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/api/health`);
+  console.log(`Available routes:`);
+  console.log(`- Authentication: http://localhost:${PORT}/api/auth/*`);
+  console.log(`- Super Admin: http://localhost:${PORT}/api/super-admin/*`);
+  console.log(`- User Management: http://localhost:${PORT}/api/users/*`);
 });
 
 module.exports = app;

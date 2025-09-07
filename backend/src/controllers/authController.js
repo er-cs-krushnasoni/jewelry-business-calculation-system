@@ -2,7 +2,121 @@ const User = require('../models/User');
 const Shop = require('../models/Shop');
 const { generateToken } = require('../middleware/auth');
 
-// Login user (all roles including Super Admin)
+// Enhanced change password - Super Admin and Shop Admin can change their own password
+const changePassword = async (req, res) => {
+  try {
+    // Only Super Admin and Shop Admin can change their own password
+    const allowedRoles = ['super_admin', 'admin'];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to change password. Contact your administrator.'
+      });
+    }
+
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    // Validate input
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'All password fields are required'
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and confirm password do not match'
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long'
+      });
+    }
+
+    // Get current user
+    const user = await User.findById(req.user._id);
+
+    // Verify current password
+    const isCurrentPasswordValid = await user.matchPassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password (will be hashed by pre-save middleware)
+    user.password = newPassword;
+    await user.save();
+
+    // Generate new token with updated info
+    const newToken = generateToken(user);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password changed successfully. Please use your new password for future logins.',
+      token: newToken, // Provide new token
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        shopId: user.shopId
+      }
+    });
+
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error changing password'
+    });
+  }
+};
+
+// Shop Admin Profile Management - View and Update Own Profile
+const getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('shopId');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Only show relevant profile info, NO passwords
+    res.status(200).json({
+      success: true,
+      profile: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        shopId: user.shopId?._id || null,
+        shopName: user.shopId?.shopName || null,
+        shopCode: user.shopId?.shopCode || null,
+        isActive: user.isActive,
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error getting profile'
+    });
+  }
+};
+
+// Login user (all roles)
 const login = async (req, res) => {
   try {
     const { username, password, deviceInfo, ipAddress } = req.body;
@@ -68,7 +182,7 @@ const login = async (req, res) => {
     // Generate JWT token
     const token = generateToken(user);
 
-    // Prepare response data based on user role
+    // Prepare response data
     const responseData = {
       success: true,
       message: 'Login successful',
@@ -79,8 +193,8 @@ const login = async (req, res) => {
         role: user.role,
         shopId: user.shopId?._id || null,
         shopName: user.shopId?.shopName || null,
+        shopCode: user.shopId?.shopCode || null,
         isActive: user.isActive,
-        mustChangePassword: user.mustChangePassword,
         lastLogin: user.lastLogin
       }
     };
@@ -116,8 +230,8 @@ const getMe = async (req, res) => {
         role: user.role,
         shopId: user.shopId?._id || null,
         shopName: user.shopId?.shopName || null,
+        shopCode: user.shopId?.shopCode || null,
         isActive: user.isActive,
-        mustChangePassword: user.mustChangePassword,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt
       }
@@ -132,77 +246,13 @@ const getMe = async (req, res) => {
   }
 };
 
-// Change password
-const changePassword = async (req, res) => {
-  try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    // Validate input
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'All password fields are required'
-      });
-    }
-
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password and confirm password do not match'
-      });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be at least 6 characters long'
-      });
-    }
-
-    // Get current user
-    const user = await User.findById(req.user._id);
-
-    // Verify current password (skip for mandatory password change)
-    if (!user.mustChangePassword) {
-      const isCurrentPasswordValid = await user.matchPassword(currentPassword);
-      if (!isCurrentPasswordValid) {
-        return res.status(400).json({
-          success: false,
-          message: 'Current password is incorrect'
-        });
-      }
-    }
-
-    // Update password
-    user.password = newPassword;
-    user.mustChangePassword = false;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Password changed successfully'
-    });
-
-  } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error changing password'
-    });
-  }
-};
-
 // Logout (for client-side token removal)
 const logout = async (req, res) => {
   try {
-    // Since we're using JWT, logout is handled client-side
-    // This endpoint is mainly for consistency and future use
-    
     res.status(200).json({
       success: true,
       message: 'Logged out successfully'
     });
-
   } catch (error) {
     console.error('Logout error:', error);
     res.status(500).json({
@@ -234,6 +284,13 @@ const createSuperAdmin = async (req, res) => {
       });
     }
 
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+
     // Check if username already exists
     const existingUser = await User.findByUsername(username);
     if (existingUser) {
@@ -249,8 +306,7 @@ const createSuperAdmin = async (req, res) => {
       password,
       role: 'super_admin',
       shopId: null,
-      isActive: true,
-      mustChangePassword: true
+      isActive: true
     });
 
     res.status(201).json({
@@ -259,8 +315,7 @@ const createSuperAdmin = async (req, res) => {
       user: {
         _id: superAdmin._id,
         username: superAdmin.username,
-        role: superAdmin.role,
-        mustChangePassword: superAdmin.mustChangePassword
+        role: superAdmin.role
       }
     });
 
@@ -312,8 +367,9 @@ const checkSuperAdmin = async (req, res) => {
 module.exports = {
   login,
   getMe,
-  changePassword,
+  getMyProfile,        // NEW: Shop Admin can view own profile
+  changePassword,      // ENHANCED: Shop Admin can change own password
   logout,
   createSuperAdmin,
-  checkSuperAdmin
+    checkSuperAdmin
 };
