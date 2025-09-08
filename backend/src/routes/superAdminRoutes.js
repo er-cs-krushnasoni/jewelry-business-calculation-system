@@ -5,7 +5,6 @@ const {
   createShop,
   updateShop,
   updateShopAdminCredentials,
-  resetShopAdminPassword,
   deleteShop,
   getShopDetails,
   getDashboardStats
@@ -30,8 +29,7 @@ router.put('/shops/:shopId', updateShop);
 router.delete('/shops/:shopId', deleteShop);
 
 // Shop admin credential management
-router.put('/shops/:shopId/admin-credentials', updateShopAdminCredentials); // New route
-router.post('/shops/:shopId/reset-password', resetShopAdminPassword); // Deprecated
+router.put('/shops/:shopId/admin-credentials', updateShopAdminCredentials);
 
 // Test route
 router.get('/test', (req, res) => {

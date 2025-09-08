@@ -40,7 +40,8 @@ const authenticate = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Get user from database (ensure user still exists and is active)
-      const user = await User.findById(decoded.userId).populate('shopId');
+      // FIXED: Don't populate shopId here to avoid ObjectId casting issues
+      const user = await User.findById(decoded.userId);
 
       if (!user || !user.isActive) {
         return res.status(401).json({
@@ -49,15 +50,28 @@ const authenticate = async (req, res, next) => {
         });
       }
 
-      // For shop users, check if shop is active
-      if (user.shopId && !user.shopId.isActive) {
-        return res.status(401).json({
-          success: false,
-          message: 'Shop account is deactivated'
-        });
+      // For shop users, check if shop is active (but don't populate the whole shop)
+      if (user.shopId) {
+        const Shop = require('../models/Shop');
+        const shop = await Shop.findById(user.shopId);
+        
+        if (!shop || !shop.isActive) {
+          return res.status(401).json({
+            success: false,
+            message: 'Shop account is deactivated'
+          });
+        }
+        
+        // Add shop info to user object for easy access without affecting shopId
+        user.shopInfo = {
+          _id: shop._id,
+          shopName: shop.shopName,
+          shopCode: shop.shopCode,
+          isActive: shop.isActive
+        };
       }
 
-      // Attach user to request
+      // Attach user to request (shopId remains as ObjectId)
       req.user = user;
       next();
 

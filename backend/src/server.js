@@ -60,6 +60,15 @@ try {
   console.error('Error loading user management routes:', error.message);
 }
 
+// Add rate management routes
+try {
+  const rateRoutes = require('./routes/rateRoutes');
+  app.use('/api/rates', rateRoutes);
+  console.log('Rate management routes loaded successfully');
+} catch (error) {
+  console.error('Error loading rate management routes:', error.message);
+}
+
 // Test routes
 app.get('/api/super-admin/test', (req, res) => {
   res.json({ success: true, message: 'Super admin test route working' });
@@ -99,6 +108,7 @@ app.listen(PORT, () => {
   console.log(`- Authentication: http://localhost:${PORT}/api/auth/*`);
   console.log(`- Super Admin: http://localhost:${PORT}/api/super-admin/*`);
   console.log(`- User Management: http://localhost:${PORT}/api/users/*`);
+  console.log(`- Rate Management: http://localhost:${PORT}/api/rates/*`);
 });
 
 module.exports = app;

@@ -39,7 +39,7 @@ jewellery-calculation-system
 │           ├── calculatorRoutes.js
 │           ├── categoryRoutes.js
 │           ├── rateRoutes.js
-│           ├──superAdminRoutes.js
+│           ├── superAdminRoutes.js
 │           └── userRoutes.js
 │
 └── frontend
@@ -78,6 +78,11 @@ jewellery-calculation-system
         │   │   ├── Layout.jsx
         │   │   └── Sidebar.jsx
         │   │
+        │   ├── rates
+        │   │   ├── RateDisplay.jsx
+        │   │   ├── RateManager.jsx
+        │   │   └── RateSetupModal.jsx
+        │   │
         │   └── ui
         │       ├── Button.jsx
         │       ├── Input.jsx
@@ -99,12 +104,14 @@ jewellery-calculation-system
         │   ├── admin
         │   ├── auth
         │   ├── calculator
-        │   └── dashboard
-        │       ├── SuperAdminDashboard.jsx
-        │       ├── ShopAdminDashboard.jsx
-        │       ├── ManagerDashboard.jsx
-        │       ├── ProClientDashboard.jsx
-        │       └── ClientDashboard.jsx
+        │   ├── dashboard
+        │   │   ├── SuperAdminDashboard.jsx
+        │   │   ├── ShopAdminDashboard.jsx
+        │   │   ├── ManagerDashboard.jsx
+        │   │   ├── ProClientDashboard.jsx
+        │   │   └── ClientDashboard.jsx
+        │   ├── NotFound.jsx
+        │   └── Unauthorized.jsx
         │
         │
         ├── services

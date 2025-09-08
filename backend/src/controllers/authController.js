@@ -81,13 +81,26 @@ const changePassword = async (req, res) => {
 // Shop Admin Profile Management - View and Update Own Profile
 const getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('shopId');
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
+    }
+
+    // Get shop info if user has shopId
+    let shopInfo = null;
+    if (user.shopId) {
+      const shop = await Shop.findById(user.shopId);
+      if (shop) {
+        shopInfo = {
+          _id: shop._id,
+          shopName: shop.shopName,
+          shopCode: shop.shopCode
+        };
+      }
     }
 
     // Only show relevant profile info, NO passwords
@@ -97,9 +110,9 @@ const getMyProfile = async (req, res) => {
         _id: user._id,
         username: user.username,
         role: user.role,
-        shopId: user.shopId?._id || null,
-        shopName: user.shopId?.shopName || null,
-        shopCode: user.shopId?.shopCode || null,
+        shopId: user.shopId || null,
+        shopName: shopInfo?.shopName || null,
+        shopCode: shopInfo?.shopCode || null,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt,
@@ -130,7 +143,7 @@ const login = async (req, res) => {
     }
 
     // Find user by username (case-insensitive)
-    const user = await User.findByUsername(username).populate('shopId');
+    const user = await User.findByUsername(username);
 
     if (!user) {
       return res.status(401).json({
@@ -156,12 +169,21 @@ const login = async (req, res) => {
       });
     }
 
-    // For shop users, check if shop is active
-    if (user.shopId && !user.shopId.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Shop account is deactivated'
-      });
+    // For shop users, check if shop is active and get shop info
+    let shopInfo = null;
+    if (user.shopId) {
+      const shop = await Shop.findById(user.shopId);
+      if (!shop || !shop.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Shop account is deactivated'
+        });
+      }
+      shopInfo = {
+        _id: shop._id,
+        shopName: shop.shopName,
+        shopCode: shop.shopCode
+      };
     }
 
     // Update login history
@@ -191,9 +213,9 @@ const login = async (req, res) => {
         _id: user._id,
         username: user.username,
         role: user.role,
-        shopId: user.shopId?._id || null,
-        shopName: user.shopId?.shopName || null,
-        shopCode: user.shopId?.shopCode || null,
+        shopId: user.shopId || null,
+        shopName: shopInfo?.shopName || null,
+        shopCode: shopInfo?.shopCode || null,
         isActive: user.isActive,
         lastLogin: user.lastLogin
       }
@@ -213,7 +235,7 @@ const login = async (req, res) => {
 // Get current user info
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate('shopId');
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({
@@ -222,15 +244,28 @@ const getMe = async (req, res) => {
       });
     }
 
+    // Get shop info if user has shopId
+    let shopInfo = null;
+    if (user.shopId) {
+      const shop = await Shop.findById(user.shopId);
+      if (shop) {
+        shopInfo = {
+          _id: shop._id,
+          shopName: shop.shopName,
+          shopCode: shop.shopCode
+        };
+      }
+    }
+
     res.status(200).json({
       success: true,
       user: {
         _id: user._id,
         username: user.username,
         role: user.role,
-        shopId: user.shopId?._id || null,
-        shopName: user.shopId?.shopName || null,
-        shopCode: user.shopId?.shopCode || null,
+        shopId: user.shopId || null,
+        shopName: shopInfo?.shopName || null,
+        shopCode: shopInfo?.shopCode || null,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt
@@ -371,5 +406,5 @@ module.exports = {
   changePassword,      // ENHANCED: Shop Admin can change own password
   logout,
   createSuperAdmin,
-    checkSuperAdmin
+  checkSuperAdmin
 };
