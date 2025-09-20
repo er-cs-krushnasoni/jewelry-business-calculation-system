@@ -1,6 +1,7 @@
 const Rate = require('../models/Rate');
 const Shop = require('../models/Shop');
 const { validationResult } = require('express-validator');
+const { checkRateBlocking } = require('../middleware/rateBlocking');
 
 // @desc    Get current rates for a shop
 // @route   GET /api/rates/shop/:shopId
@@ -142,10 +143,18 @@ const updateRates = async (req, res) => {
     
     const updatedRates = await Rate.updateShopRates(shopId, rateData, req.user);
     
+    // After successful update, check if this unblocks the system
+    const blockingResult = await checkRateBlocking(shopId);
+    
     res.status(200).json({
       success: true,
       message: 'Rates updated successfully',
-      data: updatedRates.safeRateInfo
+      data: updatedRates.safeRateInfo,
+      systemStatus: {
+        isBlocked: blockingResult.shouldBlock,
+        unblocked: !blockingResult.shouldBlock,
+        message: blockingResult.shouldBlock ? blockingResult.message : 'Calculator is now available'
+      }
     });
     
   } catch (error) {
@@ -292,9 +301,8 @@ const getRateUpdateInfo = async (req, res) => {
       });
     }
     
-    // Get shop for timezone
-    const shop = await Shop.findById(shopId);
-    const timezone = shop ? shop.timezone : 'Asia/Kolkata';
+    // Always use IST for consistency
+    const timezone = 'Asia/Kolkata';
     
     res.status(200).json({
       success: true,
@@ -339,10 +347,8 @@ const checkDailyRateUpdate = async (req, res) => {
       });
     }
     
-    // Get shop timezone
-    const shop = await Shop.findById(shopId);
-    const timezone = shop ? shop.timezone : 'Asia/Kolkata';
-    
+    // Always use IST timezone
+    const timezone = 'Asia/Kolkata';
     const isUpdatedToday = rates.isUpdatedToday(timezone);
     
     res.status(200).json({
@@ -365,6 +371,79 @@ const checkDailyRateUpdate = async (req, res) => {
   }
 };
 
+// @desc    Get rate update info for header display
+// @route   GET /api/rates/header-info
+// @access  Private (Shop users only)
+const getHeaderRateInfo = async (req, res) => {
+  try {
+    if (req.user.role === 'super_admin') {
+      return res.status(200).json({
+        success: true,
+        data: {
+          showRateInfo: false,
+          message: 'Super admin - no shop rates'
+        }
+      });
+    }
+    
+    const shopId = req.user.shopId;
+    
+    if (!shopId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not associated with any shop'
+      });
+    }
+    
+    const rates = await Rate.getCurrentRatesForShop(shopId);
+    
+    if (!rates) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          showRateInfo: false,
+          hasRates: false,
+          message: 'No rates set'
+        }
+      });
+    }
+    
+    const timezone = 'Asia/Kolkata';
+    const updateInfo = rates.getUpdateInfo(timezone);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        showRateInfo: true,
+        hasRates: true,
+        updateInfo: {
+          updatedBy: updateInfo.updatedBy,
+          role: updateInfo.role,
+          timestamp: updateInfo.timestamp,
+          isToday: updateInfo.isToday
+        },
+        currentRates: {
+          gold: {
+            buy: rates.goldBuy,
+            sell: rates.goldSell
+          },
+          silver: {
+            buy: rates.silverBuy, 
+            sell: rates.silverSell
+          }
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching header rate info:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch header rate info'
+    });
+  }
+};
+
 module.exports = {
   getCurrentRates,
   getMyShopRates,
@@ -373,5 +452,6 @@ module.exports = {
   checkRateSetup,
   checkMyShopSetup,
   getRateUpdateInfo,
-  checkDailyRateUpdate
+  checkDailyRateUpdate,
+  getHeaderRateInfo
 };

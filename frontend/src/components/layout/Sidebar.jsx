@@ -2,7 +2,6 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ROLES } from '../../constants/roles';
 import {
   Calculator,
   Store,
@@ -18,89 +17,115 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { user, hasRole, canManageUsers, canUpdateRates } = useAuth();
+  const { user, isSuperAdmin, isShopAdmin, isManager, canManageUsers } = useAuth();
   const { t } = useLanguage();
 
-  const navigationItems = [
-    // Calculator (all shop users)
-    ...(user?.role !== ROLES.SUPER_ADMIN ? [{
+  // Safety check - don't render if user data is not available
+  if (!user || !user.role) {
+    return null;
+  }
+
+  // Safety check - ensure all required functions are available
+  if (!isSuperAdmin || !isShopAdmin || !isManager || !canManageUsers) {
+    console.error('Missing AuthContext functions in Sidebar');
+    return null;
+  }
+
+  // Safely check if user exists and has a role
+  if (!user || !user.role) {
+    return null; // Don't render sidebar if user data is not available
+  }
+
+  const navigationItems = [];
+
+  // Calculator (all shop users except super admin)
+  if (user.role !== 'super_admin') {
+    navigationItems.push({
       name: t('nav.calculator', 'Calculator'),
       href: '/calculator',
       icon: Calculator,
-      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PRO_CLIENT, ROLES.CLIENT]
-    }] : []),
+      roles: ['admin', 'manager', 'pro_client', 'client']
+    });
+  }
 
-    // Super Admin Navigation
-    ...(hasRole(ROLES.SUPER_ADMIN) ? [
+  // Super Admin Navigation
+  if (isSuperAdmin && isSuperAdmin()) {
+    navigationItems.push(
       {
         name: t('nav.shops', 'Shop Management'),
         href: '/super-admin/shops',
         icon: Store,
-        roles: [ROLES.SUPER_ADMIN]
+        roles: ['super_admin']
       },
       {
         name: t('nav.dashboard', 'Dashboard'),
         href: '/dashboard/super-admin',
         icon: BarChart3,
-        roles: [ROLES.SUPER_ADMIN]
+        roles: ['super_admin']
       }
-    ] : []),
+    );
+  }
 
-    // Shop Admin Navigation
-    ...(hasRole(ROLES.ADMIN) ? [
+  // Shop Admin Navigation
+  if (isShopAdmin && isShopAdmin()) {
+    navigationItems.push(
       {
         name: t('nav.userManagement', 'User Management'),
         href: '/admin/users',
         icon: Users,
-        roles: [ROLES.ADMIN]
+        roles: ['admin']
       },
       {
         name: t('nav.categories', 'Categories'),
         href: '/admin/categories',
         icon: Tag,
-        roles: [ROLES.ADMIN]
+        roles: ['admin']
       },
       {
         name: t('nav.rates', 'Rate Management'),
         href: '/admin/rates',
         icon: TrendingUp,
-        roles: [ROLES.ADMIN]
+        roles: ['admin']
       },
       {
         name: t('nav.reports', 'Reports'),
         href: '/admin/reports',
         icon: BarChart3,
-        roles: [ROLES.ADMIN]
+        roles: ['admin']
       }
-    ] : []),
+    );
+  }
 
-    // Manager Navigation
-    ...(hasRole(ROLES.MANAGER) ? [
+  // Manager Navigation
+  if (isManager && isManager()) {
+    navigationItems.push(
       {
         name: t('nav.rates', 'Rate Management'),
         href: '/manager/rates',
         icon: TrendingUp,
-        roles: [ROLES.MANAGER]
+        roles: ['manager']
       },
       {
         name: t('nav.reports', 'Reports'),
         href: '/manager/reports',
         icon: BarChart3,
-        roles: [ROLES.MANAGER]
+        roles: ['manager']
       }
-    ] : []),
+    );
+  }
 
-    // Settings (Super Admin and Shop Admin only)
-    ...(canManageUsers() ? [{
+  // Settings (Super Admin and Shop Admin only)
+  if (canManageUsers && canManageUsers()) {
+    navigationItems.push({
       name: t('nav.settings', 'Settings'),
-      href: hasRole(ROLES.SUPER_ADMIN) ? '/super-admin/settings' : '/admin/settings',
+      href: isSuperAdmin() ? '/super-admin/settings' : '/admin/settings',
       icon: Settings,
-      roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN]
-    }] : [])
-  ];
+      roles: ['super_admin', 'admin']
+    });
+  }
 
   const filteredNavigation = navigationItems.filter(item => 
-    item.roles.includes(user?.role)
+    item.roles.includes(user.role)
   );
 
   const NavItem = ({ item, onClick }) => (
@@ -158,9 +183,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="p-4 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              {hasRole(ROLES.SUPER_ADMIN) ? (
+              {isSuperAdmin && isSuperAdmin() ? (
                 <Crown size={20} className="text-yellow-600" />
-              ) : hasRole(ROLES.ADMIN) ? (
+              ) : isShopAdmin && isShopAdmin() ? (
                 <User size={20} className="text-red-600" />
               ) : (
                 <User size={20} className="text-gray-600" />

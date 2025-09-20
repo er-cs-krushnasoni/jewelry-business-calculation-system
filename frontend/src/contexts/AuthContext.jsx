@@ -1,98 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import authService from '../services/authService';
-import { ROLES } from '../constants/roles';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
-// Initial state
-const initialState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: true,
-  error: null,
-};
+const AuthContext = createContext({});
 
-// Action types
-const AUTH_ACTIONS = {
-  LOGIN_START: 'LOGIN_START',
-  LOGIN_SUCCESS: 'LOGIN_SUCCESS',
-  LOGIN_FAILURE: 'LOGIN_FAILURE',
-  LOGOUT: 'LOGOUT',
-  LOAD_USER: 'LOAD_USER',
-  CLEAR_ERROR: 'CLEAR_ERROR',
-  SET_LOADING: 'SET_LOADING',
-};
-
-// Auth reducer
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case AUTH_ACTIONS.LOGIN_START:
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-
-    case AUTH_ACTIONS.LOGIN_SUCCESS:
-      return {
-        ...state,
-        user: action.payload.user,
-        token: action.payload.token,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-
-    case AUTH_ACTIONS.LOGIN_FAILURE:
-      return {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: action.payload,
-      };
-
-    case AUTH_ACTIONS.LOGOUT:
-      return {
-        ...state,
-        user: null,
-        token: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
-      };
-
-    case AUTH_ACTIONS.LOAD_USER:
-      return {
-        ...state,
-        user: action.payload,
-        token: authService.getToken(),
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-
-    case AUTH_ACTIONS.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null,
-      };
-
-    case AUTH_ACTIONS.SET_LOADING:
-      return {
-        ...state,
-        isLoading: action.payload,
-      };
-
-    default:
-      return state;
-  }
-};
-
-// Create context
-const AuthContext = createContext();
-
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -101,216 +11,269 @@ export const useAuth = () => {
   return context;
 };
 
-// Auth provider component
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load user on app start
+  // Listen for auth expiration events from api interceptor
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        if (authService.isLoggedIn()) {
-          const user = authService.getStoredUser();
-          if (user) {
-            // Verify token is still valid by fetching current user
-            try {
-              const currentUser = await authService.getCurrentUser();
-              dispatch({ type: AUTH_ACTIONS.LOAD_USER, payload: currentUser });
-            } catch (error) {
-              // Token invalid, clear auth data
-              authService.clearAuthData();
-              dispatch({ type: AUTH_ACTIONS.LOGOUT });
-            }
-          } else {
-            dispatch({ type: AUTH_ACTIONS.LOGOUT });
-          }
-        } else {
-          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        authService.clearAuthData();
-        dispatch({ type: AUTH_ACTIONS.LOGOUT });
-      }
+    const handleAuthExpired = () => {
+      console.log('Auth expired event received');
+      logout();
     };
 
-    initializeAuth();
+    window.addEventListener('auth-expired', handleAuthExpired);
+    return () => {
+      window.removeEventListener('auth-expired', handleAuthExpired);
+    };
   }, []);
 
-  // Login function
-  const login = async (credentials) => {
-    try {
-      dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-      
-      const response = await authService.login(credentials);
-      
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: {
-          user: response.user,
-          token: response.token,
-        },
-      });
+  // Check if user is authenticated on app load
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-      return response;
+  const checkAuth = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+        
+        // Verify token is still valid by making a test request
+        try {
+          await api.get('/auth/me');
+        } catch (error) {
+          // Token invalid, clear auth - but don't redirect here
+          if (error.response?.status === 401) {
+            logout();
+          }
+        }
+      }
     } catch (error) {
-      dispatch({
-        type: AUTH_ACTIONS.LOGIN_FAILURE,
-        payload: error.message,
-      });
-      throw error;
+      console.error('Error checking authentication:', error);
+      logout();
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout function
-  const logout = async () => {
+  const login = async (credentials) => {
     try {
-      await authService.logout();
+      console.log('Login attempt started with:', { username: credentials.username });
+      
+      // Clear any existing errors
+      setError(null);
+      
+      // Extract username and password from credentials object
+      const { username, password } = credentials;
+      
+      // Validate inputs
+      if (!username || !password) {
+        const errorMsg = 'Username and password are required';
+        console.log('Validation error:', errorMsg);
+        setError(errorMsg);
+        return { success: false, message: errorMsg };
+      }
+
+      console.log('Making API request...');
+
+      const response = await api.post('/auth/login', {
+        username: username.toLowerCase().trim(),
+        password
+      });
+
+      console.log('API response:', response.data);
+
+      if (response.data.success) {
+        const { token, user: userData } = response.data;
+        
+        console.log('Login successful, storing data...');
+        
+        // Store token and user data
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        setUser(userData);
+        setIsAuthenticated(true);
+        setError(null); // Clear any errors on success
+        
+        return { success: true, user: userData };
+      } else {
+        const errorMsg = response.data.message || 'Login failed';
+        console.log('Login failed with message:', errorMsg);
+        setError(errorMsg);
+        return { success: false, message: errorMsg };
+      }
     } catch (error) {
-      console.warn('Logout error:', error);
-    } finally {
-      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      console.error('Login error caught:', error);
+      console.error('Error response:', error.response?.data);
+      
+      // Set error message for UI
+      let errorMessage = 'Login failed';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Invalid username or password';
+      } else if (error.response?.status === 400) {
+        errorMessage = error.response.data?.message || 'Invalid login credentials';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Server error. Please try again later.';
+      } else if (error.code === 'NETWORK_ERROR' || !navigator.onLine) {
+        errorMessage = 'No internet connection';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      console.log('Setting error message:', errorMessage);
+      setError(errorMessage);
+      
+      return { success: false, message: errorMessage };
     }
+  };
+
+  const logout = () => {
+    console.log('Logging out user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+    setError(null);
   };
 
   // Clear error function
   const clearError = () => {
-    dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
+    setError(null);
   };
 
-  // Update user function (for profile updates)
-  const updateUser = (updatedUser) => {
-    dispatch({ type: AUTH_ACTIONS.LOAD_USER, payload: updatedUser });
-  };
+  // Helper methods for role-based access control
+  const isSuperAdmin = () => user?.role === 'super_admin';
+  const isShopAdmin = () => user?.role === 'admin';
+  const isManager = () => user?.role === 'manager';
+  const isProClient = () => user?.role === 'pro_client';
+  const isClient = () => user?.role === 'client';
 
-  // Check if user has specific role
-  const hasRole = (role) => {
-    return state.user?.role === role;
-  };
-
-  // Check if user has any of the specified roles
-  const hasAnyRole = (roles) => {
-    return roles.includes(state.user?.role);
-  };
-
-  // Check if user is super admin
-  const isSuperAdmin = () => {
-    return hasRole(ROLES.SUPER_ADMIN);
-  };
-
-  // Check if user is shop admin
-  const isShopAdmin = () => {
-    return hasRole(ROLES.ADMIN);
-  };
-
-  // Check if user is manager
-  const isManager = () => {
-    return hasRole(ROLES.MANAGER);
-  };
-
-  // Check if user is pro client
-  const isProClient = () => {
-    return hasRole(ROLES.PRO_CLIENT);
-  };
-
-  // Check if user is client
-  const isClient = () => {
-    return hasRole(ROLES.CLIENT);
-  };
-
-  // Check if user can manage users
-  const canManageUsers = () => {
-    return hasAnyRole([ROLES.SUPER_ADMIN, ROLES.ADMIN]);
-  };
-
-  // Check if user can update rates
+  // Combined role checks
   const canUpdateRates = () => {
-    return hasAnyRole([ROLES.ADMIN, ROLES.MANAGER]);
+    return user && ['admin', 'manager'].includes(user.role);
   };
 
-  // Check if user can view margins
   const canViewMargins = () => {
-    return hasAnyRole([ROLES.ADMIN, ROLES.MANAGER, ROLES.PRO_CLIENT]);
+    return user && ['admin', 'manager', 'pro_client'].includes(user.role);
+  };
+
+  const canManageUsers = () => {
+    return user && user.role === 'admin';
+  };
+
+  const canManageCategories = () => {
+    return user && user.role === 'admin';
+  };
+
+  const canAccessCalculator = () => {
+    return user && user.role !== 'super_admin';
+  };
+
+  const canAccessShop = (shopId) => {
+    if (!user || !user.shopId) return false;
+    return user.shopId.toString() === shopId.toString();
+  };
+
+  // Get user's display role
+  const getUserDisplayRole = () => {
+    if (!user) return '';
+    
+    const roleMap = {
+      'super_admin': 'Super Admin',
+      'admin': 'Shop Admin',
+      'manager': 'Manager',
+      'pro_client': 'Pro Client',
+      'client': 'Client'
+    };
+    return roleMap[user.role] || user.role;
   };
 
   // Get user's shop info
   const getShopInfo = () => {
+    if (!user || user.role === 'super_admin') return null;
+    
     return {
-      shopId: state.user?.shopId,
-      shopName: state.user?.shopName,
-      shopCode: state.user?.shopCode,
+      shopId: user.shopId,
+      shopName: user.shopName,
+      shopCode: user.shopCode
     };
   };
 
-  // Get dashboard route based on user role
-  const getDashboardRoute = () => {
-    if (!state.user) return '/login';
-
-    switch (state.user.role) {
-      case ROLES.SUPER_ADMIN:
-        return '/dashboard/super-admin';
-      case ROLES.ADMIN:
-        return '/dashboard/admin';
-      case ROLES.MANAGER:
-        return '/dashboard/manager';
-      case ROLES.PRO_CLIENT:
-        return '/dashboard/pro-client';
-      case ROLES.CLIENT:
-        return '/dashboard/client';
-      default:
-        return '/login';
-    }
+  // Check if user has minimum role level
+  const hasMinimumRole = (minimumRole) => {
+    if (!user) return false;
+    
+    const roleHierarchy = {
+      'client': 1,
+      'pro_client': 2,
+      'manager': 3,
+      'admin': 4,
+      'super_admin': 5
+    };
+    
+    const userLevel = roleHierarchy[user.role] || 0;
+    const requiredLevel = roleHierarchy[minimumRole] || 0;
+    
+    return userLevel >= requiredLevel;
   };
 
-  // Get calculator route (redirect after login)
-  const getCalculatorRoute = () => {
-    if (!state.user) return '/login';
-    
-    // All roles redirect to calculator after login
-    switch (state.user.role) {
-      case ROLES.SUPER_ADMIN:
-        return '/super-admin/shops'; // Super admin goes to shop management
-      case ROLES.ADMIN:
-        return '/calculator';
-      case ROLES.MANAGER:
-        return '/calculator';
-      case ROLES.PRO_CLIENT:
-        return '/calculator';
-      case ROLES.CLIENT:
-        return '/calculator';
-      default:
-        return '/login';
-    }
+  // Update user data (useful after profile updates)
+  const updateUser = (updatedUserData) => {
+    const newUserData = { ...user, ...updatedUserData };
+    setUser(newUserData);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+  };
+
+  // Set error function (useful for other components to set errors)
+  const setAuthError = (errorMessage) => {
+    setError(errorMessage);
   };
 
   const value = {
-    // State
-    ...state,
+    // Auth state
+    user,
+    loading,
+    isAuthenticated,
+    error,
     
-    // Actions
+    // Auth methods
     login,
     logout,
-    clearError,
+    checkAuth,
     updateUser,
+    clearError,
+    setAuthError,
     
-    // Role checkers
-    hasRole,
-    hasAnyRole,
+    // Role checks
     isSuperAdmin,
     isShopAdmin,
     isManager,
     isProClient,
     isClient,
     
-    // Permission checkers
-    canManageUsers,
+    // Permission checks
     canUpdateRates,
     canViewMargins,
+    canManageUsers,
+    canManageCategories,
+    canAccessCalculator,
+    canAccessShop,
+    hasMinimumRole,
     
-    // Utilities
-    getShopInfo,
-    getDashboardRoute,
-    getCalculatorRoute,
+    // Utility methods
+    getUserDisplayRole,
+    getShopInfo
   };
 
   return (
@@ -319,5 +282,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;

@@ -14,26 +14,86 @@ const LoginForm = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [debugInfo, setDebugInfo] = useState([]);
   
-  const { login, error, clearError, isAuthenticated } = useAuth();
+  const { login, error, clearError, isAuthenticated, loading, user } = useAuth();
   const { t, currentLanguage, setLanguage, availableLanguages } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Debug function to add logs
+  const addDebugLog = (message) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugInfo(prev => [...prev.slice(-9), `${timestamp}: ${message}`]);
+    console.log(`LoginForm Debug - ${timestamp}: ${message}`);
+  };
+
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    addDebugLog(`Auth status change - isAuthenticated: ${isAuthenticated}, loading: ${loading}, user: ${user?.username || 'null'}`);
+    
+    if (isAuthenticated && !loading) {
       const from = location.state?.from?.pathname || '/';
+      addDebugLog(`Redirecting authenticated user to: ${from}`);
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate, location, loading, user]);
 
-  // Clear error when form data changes
+  // Monitor error changes
   useEffect(() => {
-    if (error) {
-      clearError();
+    addDebugLog(`Error state changed: ${error || 'null'}`);
+  }, [error]);
+
+  // Prevent default form submission and page refresh
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addDebugLog('Form submitted');
+    
+    if (!formData.username || !formData.password) {
+      addDebugLog('Validation failed - missing username or password');
+      return;
     }
-  }, [formData, clearError]);
+
+    if (isSubmitting) {
+      addDebugLog('Already submitting, ignoring duplicate submission');
+      return;
+    }
+
+    setIsSubmitting(true);
+    addDebugLog('Starting login process');
+
+    try {
+      const loginData = {
+        username: formData.username.trim(),
+        password: formData.password,
+        deviceInfo: navigator.userAgent || 'Unknown Device',
+        ipAddress: 'Client IP'
+      };
+
+      addDebugLog(`Calling login with username: ${loginData.username}`);
+      
+      const result = await login(loginData);
+      
+      addDebugLog(`Login result: ${JSON.stringify({ success: result.success, message: result.message })}`);
+
+      if (result.success) {
+        addDebugLog('Login successful, clearing form');
+        setFormData({ username: '', password: '' });
+      } else {
+        addDebugLog(`Login failed: ${result.message}`);
+        // Don't clear form on failure
+      }
+      
+    } catch (error) {
+      addDebugLog(`Login error caught: ${error.message}`);
+      console.error('Login error caught in form:', error);
+    } finally {
+      addDebugLog('Setting isSubmitting to false');
+      setIsSubmitting(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -41,36 +101,26 @@ const LoginForm = () => {
       ...prev,
       [name]: value
     }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
     
-    if (!formData.username || !formData.password) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      await login({
-        username: formData.username.trim(),
-        password: formData.password,
-        deviceInfo: navigator.userAgent || 'Unknown Device',
-        ipAddress: 'Client IP' // Will be set by backend
-      });
-
-      // Navigation will be handled by useEffect above
-    } catch (error) {
-      console.error('Login error:', error);
-    } finally {
-      setIsSubmitting(false);
+    // Clear error when user starts typing (optional)
+    if (error) {
+      addDebugLog('Clearing error due to input change');
+      clearError();
     }
   };
 
   const handleLanguageChange = (langCode) => {
     setLanguage(langCode);
   };
+
+  // Don't render anything while loading
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <LoadingSpinner size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 sm:px-6 lg:px-8">
@@ -118,7 +168,7 @@ const LoginForm = () => {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                 {t('login.username', 'Username')}
@@ -198,16 +248,6 @@ const LoginForm = () => {
             {t('app.version', 'Jewelry Manager v1.0')}
           </div>
         </div>
-
-        {/* Development Info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
-            <h4 className="font-semibold text-yellow-800 mb-2">Development Mode</h4>
-            <p className="text-yellow-700">
-              Use your backend credentials to test the multi-role authentication system.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

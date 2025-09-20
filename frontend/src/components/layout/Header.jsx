@@ -1,202 +1,268 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { ROLES, getRoleName, getRoleColor } from '../../constants/roles';
-import { ChevronDown, User, LogOut, Settings, Globe, Menu, X } from 'lucide-react';
+import Button from '../ui/Button';
+import RateDisplay from '../rates/RateDisplay';
+import { 
+  Menu, 
+  X, 
+  LogOut, 
+  Calculator, 
+  Users, 
+  Settings, 
+  BarChart3,
+  Globe
+} from 'lucide-react';
 
-const Header = ({ onMenuToggle, isSidebarOpen }) => {
-  const { user, logout } = useAuth();
-  const { currentLanguage, setLanguage, t } = useLanguage();
+const Header = () => {
   const navigate = useNavigate();
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const navigateAndClose = (path) => {
+    navigate(path);
+    closeMobileMenu();
+  };
+
+  // Navigation items based on user role
+  const getNavigationItems = () => {
+    const items = [];
+    
+    // Calculator - available to all shop users
+    if (user?.role !== 'super_admin') {
+      items.push({
+        name: t('nav.calculator', 'Calculator'),
+        path: '/calculator',
+        icon: Calculator,
+        current: location.pathname === '/calculator'
+      });
     }
+
+    // Admin-specific items
+    if (user?.role === 'admin') {
+      items.push(
+        {
+          name: t('nav.users', 'Manage Users'),
+          path: '/admin/users',
+          icon: Users,
+          current: location.pathname.startsWith('/admin/users')
+        },
+        {
+          name: t('nav.categories', 'Categories'),
+          path: '/admin/categories',
+          icon: Settings,
+          current: location.pathname.startsWith('/admin/categories')
+        },
+        {
+          name: t('nav.reports', 'Reports'),
+          path: '/admin/reports',
+          icon: BarChart3,
+          current: location.pathname.startsWith('/admin/reports')
+        }
+      );
+    }
+
+    // Super Admin items
+    if (user?.role === 'super_admin') {
+      items.push(
+        {
+          name: t('nav.shops', 'Manage Shops'),
+          path: '/super-admin/shops',
+          icon: Settings,
+          current: location.pathname.startsWith('/super-admin/shops')
+        },
+        {
+          name: t('nav.system', 'System Overview'),
+          path: '/super-admin/system',
+          icon: BarChart3,
+          current: location.pathname.startsWith('/super-admin/system')
+        }
+      );
+    }
+
+    return items;
   };
 
-  const handleLanguageChange = (langCode) => {
-    setLanguage(langCode);
-    setIsLanguageDropdownOpen(false);
-  };
+  const navigationItems = getNavigationItems();
 
-  const getRoleBadgeClasses = (role) => {
-    const color = getRoleColor(role);
-    return `px-2 py-1 text-xs font-medium rounded-full bg-${color}-100 text-${color}-800`;
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
   };
-
-  const languages = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'gu', name: 'ગુજરાતી', flag: '🇮🇳' },
-    { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
-  ];
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 md:px-6">
-      <div className="flex items-center justify-between">
-        {/* Left Section - Logo & Menu Toggle */}
-        <div className="flex items-center space-x-4">
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={onMenuToggle}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">JM</span>
+    <>
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo and Brand */}
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Calculator className="h-8 w-8 text-blue-600" />
+              </div>
+              <div className="ml-3">
+                <h1 className="text-xl font-bold text-gray-900">
+                  {t('brand.name', 'Jewelry Calculator')}
+                </h1>
+                {user?.shopName && (
+                  <p className="text-sm text-gray-600">{user.shopName}</p>
+                )}
+              </div>
             </div>
-            <span className="font-bold text-gray-900 text-lg hidden sm:block">
-              {t('app.title', 'Jewelry Manager')}
-            </span>
-          </Link>
-        </div>
 
-        {/* Center Section - Shop Info (for shop users) */}
-        {user?.shopName && (
-          <div className="hidden md:flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
-            <span className="text-sm text-gray-600">{t('header.shop')}</span>
-            <span className="font-semibold text-gray-900">{user.shopName}</span>
-            {user.shopCode && (
-              <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                {user.shopCode}
-              </span>
-            )}
+            {/* Rate Display - Desktop */}
+            <div className="hidden md:flex flex-1 justify-center px-4">
+              <RateDisplay className="max-w-4xl" />
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-4">
+              {/* Navigation Links */}
+              {navigationItems.map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => navigate(item.path)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    item.current
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4 inline mr-2" />
+                  {item.name}
+                </button>
+              ))}
+
+              {/* Language Selector */}
+              <div className="relative">
+                <select
+                  value={language}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
+                  className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="en">English</option>
+                  <option value="gu">ગુજરાતી</option>
+                  <option value="hi">हिंदी</option>
+                </select>
+                <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* User Info and Logout */}
+              <div className="flex items-center space-x-3 border-l border-gray-300 pl-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">{user?.username}</p>
+                  <p className="text-xs text-gray-600 capitalize">
+                    {user?.role?.replace('_', ' ')}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2"
+                >
+                  <LogOut size={16} />
+                  <span>{t('auth.logout', 'Logout')}</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                onClick={toggleMobileMenu}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              >
+                {mobileMenuOpen ? (
+                  <X className="block h-6 w-6" />
+                ) : (
+                  <Menu className="block h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
-        )}
 
-        {/* Right Section - Language & User Menu */}
-        <div className="flex items-center space-x-2">
-          {/* Language Selector */}
-          <div className="relative">
-            <button
-              onClick={() => setIsLanguageDropdownOpen(!isLanguageDropdownOpen)}
-              className="flex items-center space-x-1 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <Globe size={16} />
-              <span className="hidden sm:inline">
-                {languages.find(lang => lang.code === currentLanguage)?.name || 'English'}
-              </span>
-              <ChevronDown size={14} />
-            </button>
-
-            {isLanguageDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                <div className="py-1">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => handleLanguageChange(lang.code)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 flex items-center space-x-2 ${
-                        currentLanguage === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* User Profile Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User size={16} className="text-gray-600" />
-              </div>
-              <div className="hidden md:block text-left">
-                <div className="text-sm font-medium text-gray-900">
-                  {user?.username}
-                </div>
-                <div className="text-xs text-gray-500">
-                  <span className={getRoleBadgeClasses(user?.role)}>
-                    {getRoleName(user?.role)}
-                  </span>
-                </div>
-              </div>
-              <ChevronDown size={14} />
-            </button>
-
-            {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                <div className="px-4 py-3 border-b border-gray-200">
-                  <div className="text-sm font-medium text-gray-900">
-                    {user?.username}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {getRoleName(user?.role)}
-                  </div>
-                  {user?.shopName && (
-                    <div className="text-xs text-gray-400 mt-1">
-                      {user.shopName}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="py-1">
-                  {(user?.role === ROLES.SUPER_ADMIN || user?.role === ROLES.ADMIN) && (
-                    <Link
-                      to="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsProfileDropdownOpen(false)}
-                    >
-                      <Settings size={16} className="mr-3" />
-                      {t('header.profile', 'Profile Settings')}
-                    </Link>
-                  )}
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <LogOut size={16} className="mr-3" />
-                    {t('header.logout', 'Logout')}
-                  </button>
-                </div>
-              </div>
-            )}
+          {/* Rate Display - Mobile (below header) */}
+          <div className="md:hidden border-t border-gray-200 py-2">
+            <RateDisplay className="justify-center" />
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Mobile Shop Info */}
-      {user?.shopName && (
-        <div className="md:hidden mt-2 flex items-center justify-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
-          <span className="text-sm text-gray-600">{t('header.shop')}</span>
-          <span className="font-semibold text-gray-900">{user.shopName}</span>
-          {user.shopCode && (
-            <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-              {user.shopCode}
-            </span>
-          )}
+      {/* Mobile Navigation Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-gray-200 shadow-lg">
+            {/* Navigation Links */}
+            {navigationItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => navigateAndClose(item.path)}
+                className={`w-full flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                  item.current
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <item.icon className="w-5 h-5 mr-3" />
+                {item.name}
+              </button>
+            ))}
+
+            {/* Language Selector */}
+            <div className="px-3 py-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('settings.language', 'Language')}
+              </label>
+              <select
+                value={language}
+                onChange={(e) => handleLanguageChange(e.target.value)}
+                className="w-full appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="en">English</option>
+                <option value="gu">ગુજરાતી</option>
+                <option value="hi">हिंदी</option>
+              </select>
+            </div>
+
+            {/* User Info and Logout */}
+            <div className="border-t border-gray-300 pt-4 pb-3">
+              <div className="px-3 mb-3">
+                <p className="text-base font-medium text-gray-900">{user?.username}</p>
+                <p className="text-sm text-gray-600 capitalize">
+                  {user?.role?.replace('_', ' ')}
+                </p>
+                {user?.shopName && (
+                  <p className="text-sm text-blue-600 mt-1">{user.shopName}</p>
+                )}
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="w-5 h-5 mr-3" />
+                {t('auth.logout', 'Logout')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Close dropdowns when clicking outside */}
-      {(isProfileDropdownOpen || isLanguageDropdownOpen) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setIsProfileDropdownOpen(false);
-            setIsLanguageDropdownOpen(false);
-          }}
-        />
-      )}
-    </header>
+    </>
   );
 };
 

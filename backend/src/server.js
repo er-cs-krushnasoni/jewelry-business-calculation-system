@@ -69,6 +69,15 @@ try {
   console.error('Error loading rate management routes:', error.message);
 }
 
+// Add calculator routes (with rate blocking middleware)
+try {
+  const calculatorRoutes = require('./routes/calculatorRoutes');
+  app.use('/api/calculator', calculatorRoutes);
+  console.log('Calculator routes loaded successfully');
+} catch (error) {
+  console.error('Error loading calculator routes:', error.message);
+}
+
 // Test routes
 app.get('/api/super-admin/test', (req, res) => {
   res.json({ success: true, message: 'Super admin test route working' });
@@ -109,6 +118,7 @@ app.listen(PORT, () => {
   console.log(`- Super Admin: http://localhost:${PORT}/api/super-admin/*`);
   console.log(`- User Management: http://localhost:${PORT}/api/users/*`);
   console.log(`- Rate Management: http://localhost:${PORT}/api/rates/*`);
+  console.log(`- Calculator: http://localhost:${PORT}/api/calculator/*`);
 });
 
 module.exports = app;

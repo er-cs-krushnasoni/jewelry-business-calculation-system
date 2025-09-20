@@ -26,6 +26,7 @@ jewellery-calculation-system
 │       │   ├── auth.js
 │       │   ├── errorHandler.js
 │       │   ├── rateLimit.js
+│       │   ├── rateBlocking.js
 │       │   └── validation.js
 │       │
 │       ├── models
@@ -81,6 +82,7 @@ jewellery-calculation-system
         │   ├── rates
         │   │   ├── RateDisplay.jsx
         │   │   ├── RateManager.jsx
+        │   │   ├── BlockingMessage.jsx
         │   │   └── RateSetupModal.jsx
         │   │
         │   └── ui
@@ -99,6 +101,7 @@ jewellery-calculation-system
         │   └── SocketContext.jsx
         │
         ├── hooks
+        │   └── useBlockingStatus.js
         │
         ├── pages
         │   ├── admin

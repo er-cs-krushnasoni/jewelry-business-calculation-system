@@ -29,11 +29,22 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Only handle 401 for authenticated requests, not login attempts
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Check if this is a login request - don't redirect for login failures
+      const isLoginRequest = error.config?.url?.includes('/auth/login');
+      
+      if (!isLoginRequest) {
+        // Token expired or invalid for authenticated requests
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Use React Router navigation instead of window.location
+        // The AuthContext will handle the redirect properly
+        
+        // You can also dispatch a custom event that AuthContext can listen to
+        window.dispatchEvent(new CustomEvent('auth-expired'));
+      }
     }
     return Promise.reject(error);
   }

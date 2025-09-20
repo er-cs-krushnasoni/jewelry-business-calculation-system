@@ -6,11 +6,11 @@ import { ROLES } from '../../constants/roles';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, roles = [], requireShop = false, requireAuth = true }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth(); // Changed isLoading to loading
   const location = useLocation();
 
   // Show loading spinner while checking authentication
-  if (isLoading) {
+  if (loading) { // Changed isLoading to loading
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="large" />
@@ -114,9 +114,9 @@ export const CalculatorUserRoute = ({ children }) => (
 
 // Public route (redirect if authenticated) - DEPRECATED, use ProtectedRoute with requireAuth={false}
 export const PublicRoute = ({ children }) => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth(); // Changed isLoading to loading
 
-  if (isLoading) {
+  if (loading) { // Changed isLoading to loading
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="large" />

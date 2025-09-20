@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
 const { authenticate } = require('../middleware/auth');
+const { rateBlockingMiddleware, checkBlockingStatus } = require('../middleware/rateBlocking');
 const {
   getCurrentRates,
   getMyShopRates,
@@ -9,7 +10,8 @@ const {
   checkRateSetup,
   checkMyShopSetup,
   getRateUpdateInfo,
-  checkDailyRateUpdate
+  checkDailyRateUpdate,
+  getHeaderRateInfo
 } = require('../controllers/rateController');
 
 const router = express.Router();
@@ -48,6 +50,15 @@ const validateRateUpdate = [
 ];
 
 // ============================================
+// BLOCKING STATUS ROUTES
+// ============================================
+
+// @route   GET /api/rates/blocking-status
+// @desc    Check if system is blocked due to rate update requirements
+// @access  Private (Shop users only)
+router.get('/blocking-status', authenticate, checkBlockingStatus);
+
+// ============================================
 // USER'S OWN SHOP RATE ROUTES (Most Common)
 // ============================================
 
@@ -57,7 +68,7 @@ const validateRateUpdate = [
 router.get('/my-rates', authenticate, getMyShopRates);
 
 // @route   PUT /api/rates/my-rates
-// @desc    Update current user's shop rates
+// @desc    Update current user's shop rates (bypasses blocking for unblocking)
 // @access  Private (Admin/Manager only)
 router.put('/my-rates', authenticate, validateRateUpdate, updateMyShopRates);
 
@@ -80,6 +91,11 @@ router.get('/my-daily-check', authenticate, (req, res, next) => {
   checkDailyRateUpdate(req, res, next);
 });
 
+// @route   GET /api/rates/header-info
+// @desc    Get rate update info for header display
+// @access  Private (All authenticated users)
+router.get('/header-info', authenticate, getHeaderRateInfo);
+
 // ============================================
 // SPECIFIC SHOP RATE ROUTES
 // ============================================
@@ -90,7 +106,7 @@ router.get('/my-daily-check', authenticate, (req, res, next) => {
 router.get('/shop/:shopId', authenticate, getCurrentRates);
 
 // @route   PUT /api/rates/shop/:shopId
-// @desc    Update rates for a specific shop
+// @desc    Update rates for a specific shop (bypasses blocking for unblocking)
 // @access  Private (Admin/Manager only, must have access to the shop)
 router.put('/shop/:shopId', authenticate, validateRateUpdate, updateRates);
 
@@ -133,7 +149,12 @@ router.get('/validation-rules', authenticate, (req, res) => {
         validation: 'Selling rate must be higher than buying rate'
       },
       updatePermissions: ['admin', 'manager'],
-      viewPermissions: ['admin', 'manager', 'pro_client', 'client']
+      viewPermissions: ['admin', 'manager', 'pro_client', 'client'],
+      blockingInfo: {
+        dailyDeadline: '1:00 PM IST',
+        timezone: 'Asia/Kolkata',
+        blockingReason: 'Rates must be updated daily before 1:00 PM IST'
+      }
     }
   });
 });
@@ -174,6 +195,12 @@ router.get('/rate-format-info', authenticate, (req, res) => {
           selling: 'Round UP for selling rates',
           buying: 'Round DOWN for buying rates'
         }
+      },
+      blockingSystem: {
+        deadline: '1:00 PM IST daily',
+        timezone: 'Asia/Kolkata',
+        requirement: 'Rates must be updated on the same day',
+        unblockingRoles: ['admin', 'manager']
       }
     }
   });

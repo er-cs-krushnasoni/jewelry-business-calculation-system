@@ -47,8 +47,19 @@ const Button = ({
     className
   ].filter(Boolean).join(' ');
 
-  // Handle click with loading state
+  // FIXED: Handle click properly for submit buttons
   const handleClick = (e) => {
+    // For submit buttons, don't interfere with form submission
+    if (type === 'submit') {
+      // Let the form handle the submission, but still call onClick if provided
+      if (!loading && !disabled && onClick) {
+        onClick(e);
+      }
+      // Don't prevent default - let form submission proceed naturally
+      return;
+    }
+    
+    // For non-submit buttons, handle normally
     if (!loading && !disabled && onClick) {
       onClick(e);
     }

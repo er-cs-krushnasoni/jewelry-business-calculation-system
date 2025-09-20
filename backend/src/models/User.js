@@ -150,10 +150,69 @@ userSchema.methods.belongsToShop = function(shopId) {
   return this.shopId && this.shopId.toString() === shopId.toString();
 };
 
-// Instance method to check if user can access shop data
+// Enhanced instance method to check if user can access shop data
 userSchema.methods.canAccessShop = function(shopId) {
+  // Super admins can access any shop
   if (this.role === 'super_admin') return true;
+  
+  // Other users can only access their own shop
   return this.belongsToShop(shopId);
+};
+
+// Instance method to check if user can access a specific shop (alias for consistency)
+userSchema.methods.hasShopAccess = function(shopId) {
+  // Convert both to string for comparison
+  const userShopId = this.shopId ? this.shopId.toString() : null;
+  const targetShopId = shopId ? shopId.toString() : null;
+  
+  return userShopId === targetShopId;
+};
+
+// Instance method to check if user can update rates
+userSchema.methods.canUpdateRates = function() {
+  return ['admin', 'manager'].includes(this.role);
+};
+
+// Instance method to check if user can view calculations with margins
+userSchema.methods.canViewMargins = function() {
+  return ['admin', 'manager', 'pro_client'].includes(this.role);
+};
+
+// Instance method to check if user can manage other users
+userSchema.methods.canManageUsers = function() {
+  return this.role === 'admin';
+};
+
+// Instance method to check if user can view user passwords (encrypted)
+userSchema.methods.canViewUserPasswords = function() {
+  return this.role === 'admin';
+};
+
+// Instance method to check if user can perform admin operations
+userSchema.methods.isAdmin = function() {
+  return ['super_admin', 'admin'].includes(this.role);
+};
+
+// Instance method to check if user is a super admin
+userSchema.methods.isSuperAdmin = function() {
+  return this.role === 'super_admin';
+};
+
+// Instance method to check if user can perform operations on another user
+userSchema.methods.canManageUser = function(targetUser) {
+  // Super admin can manage anyone except other super admins
+  if (this.role === 'super_admin') {
+    return targetUser.role !== 'super_admin';
+  }
+  
+  // Shop admin can manage users in their shop (except super admins)
+  if (this.role === 'admin') {
+    return targetUser.role !== 'super_admin' && 
+           targetUser.role !== 'admin' &&
+           this.belongsToShop(targetUser.shopId);
+  }
+  
+  return false;
 };
 
 // Instance method to get user's role hierarchy level
@@ -166,6 +225,32 @@ userSchema.methods.getRoleLevel = function() {
     'client': 1
   };
   return roleLevels[this.role] || 0;
+};
+
+// Instance method to get user's display role
+userSchema.methods.getDisplayRole = function() {
+  const roleMap = {
+    'super_admin': 'Super Admin',
+    'admin': 'Shop Admin', 
+    'manager': 'Manager',
+    'pro_client': 'Pro Client',
+    'client': 'Client'
+  };
+  return roleMap[this.role] || this.role;
+};
+
+// Instance method to get user permissions summary
+userSchema.methods.getPermissions = function() {
+  return {
+    canUpdateRates: this.canUpdateRates(),
+    canViewMargins: this.canViewMargins(),
+    canManageUsers: this.canManageUsers(),
+    canViewUserPasswords: this.canViewUserPasswords(),
+    isAdmin: this.isAdmin(),
+    isSuperAdmin: this.isSuperAdmin(),
+    roleLevel: this.getRoleLevel(),
+    displayRole: this.getDisplayRole()
+  };
 };
 
 // Static method to find user with case-insensitive username
@@ -254,27 +339,32 @@ userSchema.statics.getRoleConstraints = function() {
     super_admin: {
       shopId: false,
       multipleAllowed: true,
-      description: 'Platform administrator with global access'
+      description: 'Platform administrator with global access',
+      permissions: ['all']
     },
     admin: {
       shopId: true,
       multipleAllowed: false,
-      description: 'Shop administrator with full shop control'
+      description: 'Shop administrator with full shop control',
+      permissions: ['manage_users', 'update_rates', 'view_margins', 'view_user_passwords']
     },
     manager: {
       shopId: true,
       multipleAllowed: false,
-      description: 'Shop manager with rate and calculation access'
+      description: 'Shop manager with rate and calculation access',
+      permissions: ['update_rates', 'view_margins']
     },
     pro_client: {
       shopId: true,
       multipleAllowed: false,
-      description: 'Professional client with margin visibility'
+      description: 'Professional client with margin visibility',
+      permissions: ['view_margins']
     },
     client: {
       shopId: true,
       multipleAllowed: false,
-      description: 'Basic client with calculation access only'
+      description: 'Basic client with calculation access only',
+      permissions: ['basic_calculations']
     }
   };
 };
@@ -285,17 +375,28 @@ userSchema.statics.setTempPlainPassword = function(password) {
   console.log('Static: Temporary plain password set for hashing');
 };
 
+// Static method to get users by shop with role filtering
+userSchema.statics.findByShopAndRole = function(shopId, roles = null) {
+  const query = { shopId, isActive: true };
+  if (roles) {
+    query.role = Array.isArray(roles) ? { $in: roles } : roles;
+  }
+  return this.find(query).select('-password -encryptedPassword');
+};
+
 // Virtual for safe user info (excluding passwords)
 userSchema.virtual('safeUserInfo').get(function() {
   return {
     _id: this._id,
     username: this.username,
     role: this.role,
+    displayRole: this.getDisplayRole(),
     shopId: this.shopId,
     isActive: this.isActive,
     lastLogin: this.lastLogin,
     createdAt: this.createdAt,
-    updatedAt: this.updatedAt
+    updatedAt: this.updatedAt,
+    permissions: this.getPermissions()
   };
 });
 

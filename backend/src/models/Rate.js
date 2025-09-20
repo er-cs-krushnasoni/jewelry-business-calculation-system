@@ -204,4 +204,18 @@ rateSchema.set('toJSON', {
   }
 });
 
+rateSchema.methods.isUpdatedTodayDebug = function(timezone = 'Asia/Kolkata') {
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
+  const updateDate = this.updatedAt.toLocaleDateString('en-CA', { timeZone: timezone });
+  
+  console.log('=== Rate Update Debug ===');
+  console.log('Today (IST):', today);
+  console.log('Update Date (IST):', updateDate);
+  console.log('Updated At (Raw):', this.updatedAt);
+  console.log('Are Equal?:', today === updateDate);
+  console.log('========================');
+  
+  return today === updateDate;
+};
+
 module.exports = mongoose.model('Rate', rateSchema);
