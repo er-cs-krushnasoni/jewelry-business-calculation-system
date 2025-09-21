@@ -108,29 +108,44 @@ rateSchema.pre('save', function(next) {
 
 // Instance method to check if rates are updated today
 rateSchema.methods.isUpdatedToday = function(timezone = 'Asia/Kolkata') {
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
-  const updateDate = this.updatedAt.toLocaleDateString('en-CA', { timeZone: timezone });
-  return today === updateDate;
+  try {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
+    const updateDate = this.updatedAt.toLocaleDateString('en-CA', { timeZone: timezone });
+    return today === updateDate;
+  } catch (error) {
+    console.error('Error checking if updated today:', error);
+    return false;
+  }
 };
 
 // Instance method to get formatted update info
 rateSchema.methods.getUpdateInfo = function(timezone = 'Asia/Kolkata') {
-  const updateTime = this.updatedAt.toLocaleString('en-IN', {
-    timeZone: timezone,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  });
-  
-  return {
-    updatedBy: this.updatedByUsername,
-    role: this.updatedByRole,
-    timestamp: updateTime,
-    isToday: this.isUpdatedToday(timezone)
-  };
+  try {
+    const updateTime = this.updatedAt.toLocaleString('en-IN', {
+      timeZone: timezone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    return {
+      updatedBy: this.updatedByUsername,
+      role: this.updatedByRole,
+      timestamp: updateTime,
+      isToday: this.isUpdatedToday(timezone)
+    };
+  } catch (error) {
+    console.error('Error getting update info:', error);
+    return {
+      updatedBy: this.updatedByUsername || 'Unknown',
+      role: this.updatedByRole || 'unknown',
+      timestamp: this.updatedAt.toISOString(),
+      isToday: false
+    };
+  }
 };
 
 // Instance method to get rate per gram for calculations
@@ -156,29 +171,45 @@ rateSchema.statics.getCurrentRatesForShop = function(shopId) {
 
 // Static method to check if shop has rates
 rateSchema.statics.shopHasRates = async function(shopId) {
-  const rates = await this.findOne({ shopId });
-  return !!rates;
+  try {
+    const rates = await this.findOne({ shopId });
+    return !!rates;
+  } catch (error) {
+    console.error('Error checking if shop has rates:', error);
+    return false;
+  }
 };
 
 // Static method to create or update rates for a shop
 rateSchema.statics.updateShopRates = async function(shopId, rateData, updatedByUser) {
-  const updateData = {
-    ...rateData,
-    shopId,
-    updatedBy: updatedByUser._id,
-    updatedByUsername: updatedByUser.username,
-    updatedByRole: updatedByUser.role
-  };
-  
-  return this.findOneAndUpdate(
-    { shopId },
-    updateData,
-    { 
-      new: true, 
-      upsert: true, // Create if doesn't exist
-      runValidators: true 
-    }
-  );
+  try {
+    const updateData = {
+      ...rateData,
+      shopId,
+      updatedBy: updatedByUser._id,
+      updatedByUsername: updatedByUser.username,
+      updatedByRole: updatedByUser.role
+    };
+    
+    console.log('Updating shop rates with data:', updateData);
+    
+    const result = await this.findOneAndUpdate(
+      { shopId },
+      updateData,
+      { 
+        new: true, 
+        upsert: true, // Create if doesn't exist
+        runValidators: true 
+      }
+    );
+    
+    console.log('Rate update successful for shop:', shopId);
+    return result;
+    
+  } catch (error) {
+    console.error('Error updating shop rates:', error);
+    throw error;
+  }
 };
 
 // Virtual for safe rate info (excluding internal IDs)
@@ -194,6 +225,51 @@ rateSchema.virtual('safeRateInfo').get(function() {
   };
 });
 
+// Debug method to check date calculations
+rateSchema.methods.isUpdatedTodayDebug = function(timezone = 'Asia/Kolkata') {
+  try {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
+    const updateDate = this.updatedAt.toLocaleDateString('en-CA', { timeZone: timezone });
+    
+    console.log('=== Rate Update Debug ===');
+    console.log('Today (IST):', today);
+    console.log('Update Date (IST):', updateDate);
+    console.log('Updated At (Raw):', this.updatedAt);
+    console.log('Are Equal?:', today === updateDate);
+    console.log('========================');
+    
+    return today === updateDate;
+  } catch (error) {
+    console.error('Error in debug check:', error);
+    return false;
+  }
+};
+
+// Static method for debugging all rates
+rateSchema.statics.debugAllRates = async function() {
+  try {
+    const allRates = await this.find({}).populate('updatedBy', 'username role');
+    console.log('=== All Rates Debug ===');
+    allRates.forEach((rate, index) => {
+      console.log(`Rate ${index + 1}:`, {
+        shopId: rate.shopId,
+        goldBuy: rate.goldBuy,
+        goldSell: rate.goldSell,
+        silverBuy: rate.silverBuy,
+        silverSell: rate.silverSell,
+        updatedBy: rate.updatedByUsername,
+        updatedAt: rate.updatedAt,
+        isToday: rate.isUpdatedToday()
+      });
+    });
+    console.log('======================');
+    return allRates;
+  } catch (error) {
+    console.error('Error debugging rates:', error);
+    return [];
+  }
+};
+
 // Ensure virtual fields are serialised
 rateSchema.set('toJSON', {
   virtuals: true,
@@ -204,18 +280,6 @@ rateSchema.set('toJSON', {
   }
 });
 
-rateSchema.methods.isUpdatedTodayDebug = function(timezone = 'Asia/Kolkata') {
-  const today = new Date().toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
-  const updateDate = this.updatedAt.toLocaleDateString('en-CA', { timeZone: timezone });
-  
-  console.log('=== Rate Update Debug ===');
-  console.log('Today (IST):', today);
-  console.log('Update Date (IST):', updateDate);
-  console.log('Updated At (Raw):', this.updatedAt);
-  console.log('Are Equal?:', today === updateDate);
-  console.log('========================');
-  
-  return today === updateDate;
-};
+console.log('Rate model loaded successfully');
 
 module.exports = mongoose.model('Rate', rateSchema);

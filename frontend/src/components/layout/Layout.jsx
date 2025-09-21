@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
@@ -23,9 +24,9 @@ const Layout = ({ children }) => {
         {/* Header */}
         <Header onMenuToggle={toggleSidebar} isSidebarOpen={isSidebarOpen} />
 
-        {/* Page Content */}
+        {/* Page Content - Now uses Outlet for nested routes */}
         <main className="flex-1 p-4 md:p-6 overflow-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

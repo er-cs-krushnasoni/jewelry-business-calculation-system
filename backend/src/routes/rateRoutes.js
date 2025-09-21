@@ -1,7 +1,63 @@
 const express = require('express');
+const router = express.Router();
 const { body } = require('express-validator');
+
+// FIXED: Import authenticate (not auth) from middleware
 const { authenticate } = require('../middleware/auth');
-const { rateBlockingMiddleware, checkBlockingStatus } = require('../middleware/rateBlocking');
+
+// Import controller with error handling
+let rateController;
+try {
+  rateController = require('../controllers/rateController');
+  console.log('Rate controller imported successfully');
+  
+  // Check if all required functions exist
+  const requiredFunctions = [
+    'getCurrentRates',
+    'getMyShopRates', 
+    'updateRates',
+    'updateMyShopRates',
+    'checkRateSetup',
+    'checkMyShopSetup',
+    'getRateUpdateInfo',
+    'checkDailyRateUpdate',
+    'getHeaderRateInfo',
+    'getBlockingStatus'
+  ];
+  
+  const missingFunctions = requiredFunctions.filter(fn => typeof rateController[fn] !== 'function');
+  if (missingFunctions.length > 0) {
+    console.error('Missing controller functions:', missingFunctions);
+    throw new Error(`Missing functions: ${missingFunctions.join(', ')}`);
+  }
+  
+  console.log('All rate controller functions verified');
+  
+} catch (error) {
+  console.error('Error importing rate controller:', error);
+  // Create fallback functions to prevent route loading failure
+  rateController = {};
+  const fallbackFunction = (req, res) => {
+    res.status(500).json({
+      success: false,
+      message: 'Rate controller not available',
+      error: 'Controller functions not loaded properly'
+    });
+  };
+  
+  rateController.getCurrentRates = fallbackFunction;
+  rateController.getMyShopRates = fallbackFunction;
+  rateController.updateRates = fallbackFunction;
+  rateController.updateMyShopRates = fallbackFunction;
+  rateController.checkRateSetup = fallbackFunction;
+  rateController.checkMyShopSetup = fallbackFunction;
+  rateController.getRateUpdateInfo = fallbackFunction;
+  rateController.checkDailyRateUpdate = fallbackFunction;
+  rateController.getHeaderRateInfo = fallbackFunction;
+  rateController.getBlockingStatus = fallbackFunction;
+}
+
+// Destructure after verification
 const {
   getCurrentRates,
   getMyShopRates,
@@ -11,13 +67,12 @@ const {
   checkMyShopSetup,
   getRateUpdateInfo,
   checkDailyRateUpdate,
-  getHeaderRateInfo
-} = require('../controllers/rateController');
+  getHeaderRateInfo,
+  getBlockingStatus
+} = rateController;
 
-const router = express.Router();
-
-// Validation middleware for rate updates
-const validateRateUpdate = [
+// Rate validation middleware
+const rateValidation = [
   body('goldBuy')
     .isInt({ min: 1 })
     .withMessage('Gold buying rate must be a positive integer'),
@@ -30,108 +85,80 @@ const validateRateUpdate = [
   body('silverSell')
     .isInt({ min: 1 })
     .withMessage('Silver selling rate must be a positive integer'),
-  
-  // Custom validation to ensure selling rates > buying rates
-  body('goldSell').custom((goldSell, { req }) => {
-    const goldBuy = parseInt(req.body.goldBuy);
-    if (parseInt(goldSell) < goldBuy) {
-      throw new Error('Gold selling rate must be higher than gold buying rate');
-    }
-    return true;
-  }),
-  
-  body('silverSell').custom((silverSell, { req }) => {
-    const silverBuy = parseInt(req.body.silverBuy);
-    if (parseInt(silverSell) < silverBuy) {
-      throw new Error('Silver selling rate must be higher than silver buying rate');
-    }
-    return true;
-  })
+  body('goldSell')
+    .custom((value, { req }) => {
+      if (parseInt(value) <= parseInt(req.body.goldBuy)) {
+        throw new Error('Gold selling rate must be higher than buying rate');
+      }
+      return true;
+    }),
+  body('silverSell')
+    .custom((value, { req }) => {
+      if (parseInt(value) <= parseInt(req.body.silverBuy)) {
+        throw new Error('Silver selling rate must be higher than buying rate');
+      }
+      return true;
+    })
 ];
 
 // ============================================
-// BLOCKING STATUS ROUTES
+// CRITICAL ROUTES (Fix the 404 errors)
 // ============================================
 
-// @route   GET /api/rates/blocking-status
-// @desc    Check if system is blocked due to rate update requirements
-// @access  Private (Shop users only)
-router.get('/blocking-status', authenticate, checkBlockingStatus);
-
-// ============================================
-// USER'S OWN SHOP RATE ROUTES (Most Common)
-// ============================================
-
-// @route   GET /api/rates/my-rates
-// @desc    Get current user's shop rates
-// @access  Private (Shop users only)
-router.get('/my-rates', authenticate, getMyShopRates);
-
-// @route   PUT /api/rates/my-rates
-// @desc    Update current user's shop rates (bypasses blocking for unblocking)
-// @access  Private (Admin/Manager only)
-router.put('/my-rates', authenticate, validateRateUpdate, updateMyShopRates);
-
-// @route   GET /api/rates/my-setup
-// @desc    Check if current user's shop needs rate setup
-// @access  Private (Shop users only)
-router.get('/my-setup', authenticate, checkMyShopSetup);
-
-// @route   GET /api/rates/my-daily-check
-// @desc    Check if today's rates are updated for current user's shop
-// @access  Private (Shop users only)
-router.get('/my-daily-check', authenticate, (req, res, next) => {
-  if (req.user.role === 'super_admin') {
-    return res.status(400).json({
-      success: false,
-      message: 'Super admin does not have shop-specific rates'
-    });
-  }
-  req.params.shopId = req.user.shopId.toString();
-  checkDailyRateUpdate(req, res, next);
+// Test route first to verify routes are working
+router.get('/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Rate routes are working perfectly!',
+    timestamp: new Date().toISOString(),
+    availableRoutes: [
+      'GET /api/rates/test',
+      'GET /api/rates/header-info',
+      'GET /api/rates/blocking-status',
+      'GET /api/rates/my-rates',
+      'PUT /api/rates/my-rates',
+      'GET /api/rates/my-setup',
+      'GET /api/rates/shop/:shopId',
+      'PUT /api/rates/shop/:shopId',
+      'GET /api/rates/check-setup/:shopId',
+      'GET /api/rates/update-info/:shopId',
+      'GET /api/rates/check-daily/:shopId',
+      'GET /api/rates/validation-rules'
+    ]
+  });
 });
 
-// @route   GET /api/rates/header-info
-// @desc    Get rate update info for header display
-// @access  Private (All authenticated users)
+// FIXED: Header display route - authenticate instead of auth
 router.get('/header-info', authenticate, getHeaderRateInfo);
 
+// FIXED: Blocking status route - authenticate instead of auth
+router.get('/blocking-status', authenticate, getBlockingStatus);
+
 // ============================================
-// SPECIFIC SHOP RATE ROUTES
+// USER'S OWN SHOP ROUTES
 // ============================================
 
-// @route   GET /api/rates/shop/:shopId
-// @desc    Get current rates for a specific shop
-// @access  Private (Shop users only, must have access to the shop)
+// User's own shop rates
+router.get('/my-rates', authenticate, getMyShopRates);
+router.put('/my-rates', authenticate, rateValidation, updateMyShopRates);
+router.get('/my-setup', authenticate, checkMyShopSetup);
+
+// ============================================
+// SHOP-SPECIFIC ROUTES
+// ============================================
+
+// Shop-specific routes (admin access required)
 router.get('/shop/:shopId', authenticate, getCurrentRates);
-
-// @route   PUT /api/rates/shop/:shopId
-// @desc    Update rates for a specific shop (bypasses blocking for unblocking)
-// @access  Private (Admin/Manager only, must have access to the shop)
-router.put('/shop/:shopId', authenticate, validateRateUpdate, updateRates);
-
-// @route   GET /api/rates/check-setup/:shopId
-// @desc    Check if shop needs rate setup
-// @access  Private (Shop users only, must have access to the shop)
+router.put('/shop/:shopId', authenticate, rateValidation, updateRates);
 router.get('/check-setup/:shopId', authenticate, checkRateSetup);
-
-// @route   GET /api/rates/update-info/:shopId
-// @desc    Get rate update info for display (who updated, when)
-// @access  Private (Shop users only, must have access to the shop)
 router.get('/update-info/:shopId', authenticate, getRateUpdateInfo);
-
-// @route   GET /api/rates/check-daily/:shopId
-// @desc    Check if today's rates are updated (for 1:00 PM blocking logic)
-// @access  Private (Shop users only, must have access to the shop)
 router.get('/check-daily/:shopId', authenticate, checkDailyRateUpdate);
 
 // ============================================
-// UTILITY ROUTES
+// UTILITY AND INFORMATION ROUTES
 // ============================================
 
-// @route   GET /api/rates/validation-rules
-// @desc    Get rate validation rules for frontend
-// @access  Private
+// Get rate validation rules for frontend
 router.get('/validation-rules', authenticate, (req, res) => {
   res.json({
     success: true,
@@ -159,9 +186,7 @@ router.get('/validation-rules', authenticate, (req, res) => {
   });
 });
 
-// @route   GET /api/rates/rate-format-info
-// @desc    Get information about rate formats and units
-// @access  Private
+// Get information about rate formats and units
 router.get('/rate-format-info', authenticate, (req, res) => {
   res.json({
     success: true,
@@ -206,6 +231,30 @@ router.get('/rate-format-info', authenticate, (req, res) => {
   });
 });
 
+// Debug route to check if all controller functions are available
+router.get('/debug/functions', (req, res) => {
+  const controllerFunctions = {
+    getCurrentRates: typeof getCurrentRates,
+    getMyShopRates: typeof getMyShopRates,
+    updateRates: typeof updateRates,
+    updateMyShopRates: typeof updateMyShopRates,
+    checkRateSetup: typeof checkRateSetup,
+    checkMyShopSetup: typeof checkMyShopSetup,
+    getRateUpdateInfo: typeof getRateUpdateInfo,
+    checkDailyRateUpdate: typeof checkDailyRateUpdate,
+    getHeaderRateInfo: typeof getHeaderRateInfo,
+    getBlockingStatus: typeof getBlockingStatus
+  };
+
+  res.json({
+    success: true,
+    message: 'Rate controller function check',
+    functions: controllerFunctions,
+    allFunctionsAvailable: Object.values(controllerFunctions).every(type => type === 'function'),
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Error handling for invalid shop ID format
 router.use('/shop/:shopId', (err, req, res, next) => {
   if (err.name === 'CastError' && err.path === 'shopId') {
@@ -216,5 +265,17 @@ router.use('/shop/:shopId', (err, req, res, next) => {
   }
   next(err);
 });
+
+// Route-specific error handler
+router.use((err, req, res, next) => {
+  console.error('Rate routes error:', err);
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Rate routes internal error',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
+console.log('Rate routes module loaded successfully');
 
 module.exports = router;

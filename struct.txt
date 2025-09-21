@@ -89,6 +89,7 @@ jewellery-calculation-system
         │       ├── Button.jsx
         │       ├── Input.jsx
         │       ├── LoadingSpinner.jsx
+        │       ├── ConnectionStatus
         │       └── Modal.jsx
         │
         ├── constants

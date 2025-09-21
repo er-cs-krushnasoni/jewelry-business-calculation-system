@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { Save, AlertCircle, CheckCircle, Clock, User } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Clock, User, Wifi, WifiOff } from 'lucide-react';
 
 const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) => {
   const { user, canUpdateRates } = useAuth();
+  const { isConnected, connectionStatus, isReady, getStatusMessage, getStatusColor } = useSocket();
   const [rates, setRates] = useState({
     goldBuy: '',
     goldSell: '',
@@ -20,6 +22,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [updateInfo, setUpdateInfo] = useState(null);
+  const [realTimeUpdate, setRealTimeUpdate] = useState(false);
 
   // Determine if we're working with user's own shop or specific shop
   const isOwnShop = !shopId;
@@ -39,6 +42,37 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
       </div>
     );
   }
+
+  // Handle real-time rate updates from Socket.IO
+  useEffect(() => {
+    const handleRateUpdate = (event) => {
+      const { rates: newRates, updateInfo: newUpdateInfo } = event.detail;
+      console.log('RateManager received real-time update:', { newRates, newUpdateInfo });
+      
+      if (newRates && targetShopId) {
+        setRealTimeUpdate(true);
+        setCurrentRates(newRates);
+        setUpdateInfo(newUpdateInfo);
+        
+        // Update form with new rates
+        setRates({
+          goldBuy: newRates.goldBuy?.toString() || '',
+          goldSell: newRates.goldSell?.toString() || '',
+          silverBuy: newRates.silverBuy?.toString() || '',
+          silverSell: newRates.silverSell?.toString() || ''
+        });
+        
+        // Show real-time update indicator for 3 seconds
+        setTimeout(() => setRealTimeUpdate(false), 3000);
+        
+        // Clear any previous errors
+        setError('');
+      }
+    };
+
+    window.addEventListener('rateUpdate', handleRateUpdate);
+    return () => window.removeEventListener('rateUpdate', handleRateUpdate);
+  }, [targetShopId]);
 
   // Fetch current rates
   const fetchCurrentRates = async () => {
@@ -87,6 +121,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
     }));
     setError('');
     setSuccess('');
+    setRealTimeUpdate(false);
   };
 
   // Validate rates
@@ -154,7 +189,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
       const response = await api.put(endpoint, rateData);
       
       if (response.data.success) {
-        setSuccess('Rates updated successfully!');
+        setSuccess('Rates updated successfully! Real-time update sent to all users.');
         setCurrentRates(response.data.data);
         setUpdateInfo(response.data.data.updateInfo);
         
@@ -188,18 +223,64 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
     <div className="bg-white rounded-lg shadow">
       {showTitle && (
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Rate Management</h2>
-          <p className="text-gray-600 mt-1">Update daily gold and silver rates</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">Rate Management</h2>
+              <p className="text-gray-600 mt-1">Update daily gold and silver rates</p>
+            </div>
+            
+            {/* Real-time Connection Status */}
+            <div className="flex items-center space-x-2">
+              {isConnected ? (
+                <div className="flex items-center space-x-2 text-green-600">
+                  <Wifi size={16} />
+                  <span className="text-sm font-medium">Real-time Active</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2 text-gray-500">
+                  <WifiOff size={16} />
+                  <span className="text-sm font-medium">Offline Mode</span>
+                </div>
+              )}
+              
+              {/* Connection Status Badge */}
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                getStatusColor() === 'green' ? 'bg-green-100 text-green-800' :
+                getStatusColor() === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                getStatusColor() === 'red' ? 'bg-red-100 text-red-800' :
+                'bg-gray-100 text-gray-800'
+              }`}>
+                {getStatusMessage()}
+              </span>
+            </div>
+          </div>
         </div>
       )}
       
       <div className="p-6">
+        {/* Real-time Update Notification */}
+        {realTimeUpdate && (
+          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-blue-800 font-medium text-sm">
+                Rates updated in real-time by another user
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Current Rate Info */}
         {currentRates && updateInfo && (
           <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-2">
               <CheckCircle className="text-blue-600" size={16} />
               <span className="font-semibold text-blue-800">Current Rates</span>
+              {realTimeUpdate && (
+                <span className="bg-blue-200 text-blue-800 text-xs px-2 py-0.5 rounded animate-pulse">
+                  Live Updated
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -243,6 +324,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                 step="1"
                 required
                 helperText="Rate at which gold is purchased"
+                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
               />
               <Input
                 label="Gold Selling Rate"
@@ -254,6 +336,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                 step="1"
                 required
                 helperText="Rate at which gold is sold"
+                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
               />
             </div>
           </div>
@@ -272,6 +355,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                 step="1"
                 required
                 helperText="Rate at which silver is purchased"
+                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
               />
               <Input
                 label="Silver Selling Rate"
@@ -283,6 +367,7 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                 step="1"
                 required
                 helperText="Rate at which silver is sold"
+                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
               />
             </div>
           </div>
@@ -331,10 +416,25 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
             <li>• Selling rates must be higher than buying rates</li>
             <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
             <li>• Only whole numbers are accepted (no decimals)</li>
-            <li>• Rates are used for all calculations in your shop</li>
-            <li>• Updated rates are immediately available to all users</li>
+            <li>• {isConnected ? 'Updates are broadcasted instantly to all users' : 'Updates will sync when connection is restored'}</li>
+            <li>• Rate changes trigger real-time notifications</li>
+            {!isConnected && (
+              <li className="text-yellow-600 font-medium">• Currently in offline mode - real-time features unavailable</li>
+            )}
           </ul>
         </div>
+
+        {/* Real-time Status Info */}
+        {isReady && (
+          <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2 text-green-800">
+              <Wifi size={16} />
+              <span className="text-sm font-medium">
+                Real-time updates are active. All rate changes will be instantly visible to all shop users.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

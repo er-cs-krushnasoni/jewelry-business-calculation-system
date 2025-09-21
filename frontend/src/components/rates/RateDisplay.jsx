@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
-import { Clock, User, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Clock, User, AlertCircle, TrendingUp, TrendingDown, Wifi, WifiOff } from 'lucide-react';
 
 const RateDisplay = ({ className = '' }) => {
   const { user } = useAuth();
+  const { isConnected, connectionStatus, lastRateUpdate, isReady } = useSocket();
   const [rateInfo, setRateInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [lastUpdateFromSocket, setLastUpdateFromSocket] = useState(null);
 
-  // Fetch rate info for header display
+  // Fetch initial rate info for header display
   const fetchRateInfo = async () => {
     try {
       setLoading(true);
@@ -28,12 +31,71 @@ const RateDisplay = ({ className = '' }) => {
     }
   };
 
+  // Handle real-time rate updates
+  useEffect(() => {
+    if (lastRateUpdate) {
+      console.log('Processing real-time rate update:', lastRateUpdate);
+      setLastUpdateFromSocket(Date.now());
+      
+      // Update rate info with new data
+      if (rateInfo && lastRateUpdate.rates) {
+        const updatedRateInfo = {
+          ...rateInfo,
+          updateInfo: lastRateUpdate.updateInfo,
+          currentRates: {
+            gold: {
+              buy: lastRateUpdate.rates.goldBuy,
+              sell: lastRateUpdate.rates.goldSell
+            },
+            silver: {
+              buy: lastRateUpdate.rates.silverBuy,
+              sell: lastRateUpdate.rates.silverSell
+            }
+          }
+        };
+        
+        setRateInfo(updatedRateInfo);
+      }
+    }
+  }, [lastRateUpdate]);
+
+  // Listen for custom rate update events (fallback method)
+  useEffect(() => {
+    const handleRateUpdate = (event) => {
+      const { rates, updateInfo } = event.detail;
+      console.log('Custom rate update event received:', { rates, updateInfo });
+      
+      if (rateInfo && rates) {
+        const updatedRateInfo = {
+          ...rateInfo,
+          updateInfo,
+          currentRates: {
+            gold: {
+              buy: rates.goldBuy,
+              sell: rates.goldSell
+            },
+            silver: {
+              buy: rates.silverBuy,
+              sell: rates.silverSell
+            }
+          }
+        };
+        
+        setRateInfo(updatedRateInfo);
+      }
+    };
+
+    window.addEventListener('rateUpdate', handleRateUpdate);
+    return () => window.removeEventListener('rateUpdate', handleRateUpdate);
+  }, [rateInfo]);
+
+  // Initial fetch and periodic refresh
   useEffect(() => {
     if (user && user.role !== 'super_admin') {
       fetchRateInfo();
       
-      // Refresh rate info every 5 minutes
-      const interval = setInterval(fetchRateInfo, 5 * 60 * 1000);
+      // Refresh rate info every 2 minutes as backup
+      const interval = setInterval(fetchRateInfo, 2 * 60 * 1000);
       return () => clearInterval(interval);
     } else {
       setLoading(false);
@@ -71,11 +133,31 @@ const RateDisplay = ({ className = '' }) => {
 
   return (
     <div className={`flex items-center space-x-4 ${className}`}>
+      {/* Connection Status Indicator */}
+      <div className="flex items-center space-x-1">
+        {isConnected ? (
+          <div className="flex items-center space-x-1 text-green-600">
+            <Wifi size={14} />
+            <span className="text-xs hidden sm:inline">Live</span>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-1 text-gray-500">
+            <WifiOff size={14} />
+            <span className="text-xs hidden sm:inline">Offline</span>
+          </div>
+        )}
+      </div>
+
       {/* Rate Update Info */}
       <div className="flex items-center space-x-2 text-gray-700">
         <User size={14} />
         <span className="text-sm">
           Rate updated by <span className="font-medium">{updateInfo.updatedBy}</span>
+          {lastUpdateFromSocket && (
+            <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded animate-pulse">
+              Live Update
+            </span>
+          )}
         </span>
       </div>
       
@@ -97,6 +179,9 @@ const RateDisplay = ({ className = '' }) => {
           <TrendingUp className="text-yellow-600" size={14} />
           <span className="text-yellow-800 font-medium">
             Gold: ₹{currentRates.gold.sell}/10g
+            {lastUpdateFromSocket && (
+              <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            )}
           </span>
         </div>
         
@@ -104,6 +189,9 @@ const RateDisplay = ({ className = '' }) => {
           <TrendingDown className="text-gray-600" size={14} />
           <span className="text-gray-800 font-medium">
             Silver: ₹{currentRates.silver.sell}/kg
+            {lastUpdateFromSocket && (
+              <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            )}
           </span>
         </div>
       </div>
@@ -112,8 +200,28 @@ const RateDisplay = ({ className = '' }) => {
       <div className="lg:hidden flex items-center space-x-2 text-sm">
         <span className="bg-blue-50 text-blue-800 px-2 py-1 rounded text-xs font-medium">
           Rates: G₹{currentRates.gold.sell} S₹{currentRates.silver.sell}
+          {lastUpdateFromSocket && (
+            <span className="ml-1 inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+          )}
         </span>
       </div>
+
+      {/* Real-time Status Tooltip */}
+      {isReady && (
+        <div className="hidden xl:flex items-center text-xs text-green-600">
+          <span className="bg-green-50 px-2 py-1 rounded">Real-time updates active</span>
+        </div>
+      )}
+
+      {/* Connection Issues Warning */}
+      {!isConnected && connectionStatus !== 'disconnected' && (
+        <div className="hidden xl:flex items-center text-xs text-yellow-600">
+          <span className="bg-yellow-50 px-2 py-1 rounded">
+            {connectionStatus === 'connecting' ? 'Connecting...' : 
+             connectionStatus === 'reconnecting' ? 'Reconnecting...' : 'Connection issues'}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

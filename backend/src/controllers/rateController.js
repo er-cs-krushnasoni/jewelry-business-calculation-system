@@ -1,13 +1,73 @@
-const Rate = require('../models/Rate');
-const Shop = require('../models/Shop');
+// Rate Controller - Safe Implementation
+console.log('Loading rate controller...');
+
 const { validationResult } = require('express-validator');
-const { checkRateBlocking } = require('../middleware/rateBlocking');
+
+// Import models safely
+let Rate, Shop;
+try {
+  Rate = require('../models/Rate');
+  Shop = require('../models/Shop');
+  console.log('Rate and Shop models imported successfully');
+} catch (error) {
+  console.error('Error importing models:', error);
+}
+
+// Import rate blocking middleware safely
+let checkRateBlocking;
+try {
+  const rateBlockingMiddleware = require('../middleware/rateBlocking');
+  checkRateBlocking = rateBlockingMiddleware.checkRateBlocking;
+  console.log('Rate blocking middleware imported successfully');
+} catch (error) {
+  console.log('Rate blocking middleware not found, using fallback');
+  // Fallback function if middleware doesn't exist
+  checkRateBlocking = async (shopId) => {
+    try {
+      const currentTime = new Date();
+      const istTime = new Date(currentTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const currentHour = istTime.getHours();
+      
+      // Check if current time is past 1:00 PM (13:00)
+      if (currentHour >= 13) {
+        // Check if rates are updated today
+        const rates = await Rate.getCurrentRatesForShop(shopId);
+        if (!rates || !rates.isUpdatedToday()) {
+          return {
+            shouldBlock: true,
+            message: 'Calculator is blocked. Rates must be updated daily before 1:00 PM IST.'
+          };
+        }
+      }
+      
+      return {
+        shouldBlock: false,
+        message: 'Calculator is available'
+      };
+    } catch (error) {
+      console.error('Error in fallback checkRateBlocking:', error);
+      return {
+        shouldBlock: false,
+        message: 'Blocking check failed, allowing access'
+      };
+    }
+  };
+}
 
 // @desc    Get current rates for a shop
 // @route   GET /api/rates/shop/:shopId
 // @access  Private (Shop users only)
 const getCurrentRates = async (req, res) => {
   try {
+    console.log('getCurrentRates called for shopId:', req.params.shopId);
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+
     const { shopId } = req.params;
     
     // Verify user can access this shop's rates
@@ -25,16 +85,23 @@ const getCurrentRates = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'No rates found for this shop',
-        requireSetup: true // Flag to indicate rate setup is needed
+        requireSetup: true
       });
     }
     
     res.status(200).json({
       success: true,
-      data: rates.safeRateInfo
+      data: rates.safeRateInfo || {
+        shopId: rates.shopId,
+        goldBuy: rates.goldBuy,
+        goldSell: rates.goldSell,
+        silverBuy: rates.silverBuy,
+        silverSell: rates.silverSell,
+        lastUpdated: rates.updatedAt
+      }
     });
   } catch (error) {
-    console.error('Error fetching current rates:', error);
+    console.error('Error in getCurrentRates:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch rates'
@@ -47,6 +114,15 @@ const getCurrentRates = async (req, res) => {
 // @access  Private (Shop users only)
 const getMyShopRates = async (req, res) => {
   try {
+    console.log('getMyShopRates called for user:', req.user.username);
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+    
     if (req.user.role === 'super_admin') {
       return res.status(400).json({
         success: false,
@@ -66,10 +142,17 @@ const getMyShopRates = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      data: rates.safeRateInfo
+      data: rates.safeRateInfo || {
+        shopId: rates.shopId,
+        goldBuy: rates.goldBuy,
+        goldSell: rates.goldSell,
+        silverBuy: rates.silverBuy,
+        silverSell: rates.silverSell,
+        lastUpdated: rates.updatedAt
+      }
     });
   } catch (error) {
-    console.error('Error fetching user shop rates:', error);
+    console.error('Error in getMyShopRates:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch your shop rates'
@@ -82,6 +165,15 @@ const getMyShopRates = async (req, res) => {
 // @access  Private (Admin/Manager only)
 const updateRates = async (req, res) => {
   try {
+    console.log('updateRates called for shopId:', req.params.shopId);
+    
+    if (!Rate || !Shop) {
+      return res.status(500).json({
+        success: false,
+        message: 'Required models not available'
+      });
+    }
+    
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -144,21 +236,60 @@ const updateRates = async (req, res) => {
     const updatedRates = await Rate.updateShopRates(shopId, rateData, req.user);
     
     // After successful update, check if this unblocks the system
-    const blockingResult = await checkRateBlocking(shopId);
+    let blockingResult = { shouldBlock: false, message: 'Calculator is available' };
+    if (checkRateBlocking) {
+      try {
+        blockingResult = await checkRateBlocking(shopId);
+      } catch (error) {
+        console.error('Error checking blocking status:', error);
+      }
+    }
     
-    res.status(200).json({
+    // Prepare response data
+    const responseData = {
       success: true,
       message: 'Rates updated successfully',
-      data: updatedRates.safeRateInfo,
+      data: updatedRates.safeRateInfo || {
+        shopId: updatedRates.shopId,
+        goldBuy: updatedRates.goldBuy,
+        goldSell: updatedRates.goldSell,
+        silverBuy: updatedRates.silverBuy,
+        silverSell: updatedRates.silverSell,
+        lastUpdated: updatedRates.updatedAt
+      },
       systemStatus: {
         isBlocked: blockingResult.shouldBlock,
         unblocked: !blockingResult.shouldBlock,
         message: blockingResult.shouldBlock ? blockingResult.message : 'Calculator is now available'
       }
-    });
+    };
+    
+    // Broadcast real-time update to all users in the shop
+    if (global.broadcastRateUpdate && typeof global.broadcastRateUpdate === 'function') {
+      try {
+        const updateInfo = updatedRates.getUpdateInfo ? updatedRates.getUpdateInfo() : {
+          updatedBy: req.user.username,
+          role: req.user.role,
+          timestamp: new Date().toISOString(),
+          isToday: true
+        };
+        global.broadcastRateUpdate(shopId, responseData.data, updateInfo);
+        
+        // Also broadcast system blocking status change
+        if (global.broadcastSystemBlocking && typeof global.broadcastSystemBlocking === 'function') {
+          global.broadcastSystemBlocking(shopId, blockingResult);
+        }
+        
+        console.log(`Real-time rate update broadcasted for shop ${shopId} by ${req.user.username}`);
+      } catch (error) {
+        console.error('Error broadcasting update:', error);
+      }
+    }
+    
+    res.status(200).json(responseData);
     
   } catch (error) {
-    console.error('Error updating rates:', error);
+    console.error('Error in updateRates:', error);
     
     if (error.code === 'RATE_VALIDATION_ERROR') {
       return res.status(400).json({
@@ -188,6 +319,8 @@ const updateRates = async (req, res) => {
 // @access  Private (Admin/Manager only)
 const updateMyShopRates = async (req, res) => {
   try {
+    console.log('updateMyShopRates called for user:', req.user.username);
+    
     if (req.user.role === 'super_admin') {
       return res.status(400).json({
         success: false,
@@ -207,7 +340,7 @@ const updateMyShopRates = async (req, res) => {
     await updateRates(req, res);
     
   } catch (error) {
-    console.error('Error updating user shop rates:', error);
+    console.error('Error in updateMyShopRates:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update your shop rates'
@@ -220,6 +353,15 @@ const updateMyShopRates = async (req, res) => {
 // @access  Private (Shop users only)
 const checkRateSetup = async (req, res) => {
   try {
+    console.log('checkRateSetup called for shopId:', req.params.shopId);
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+    
     const { shopId } = req.params;
     
     // Verify user can access this shop
@@ -238,13 +380,20 @@ const checkRateSetup = async (req, res) => {
       data: {
         hasRates,
         requireSetup: !hasRates,
-        rates: rates ? rates.safeRateInfo : null,
+        rates: rates ? (rates.safeRateInfo || {
+          shopId: rates.shopId,
+          goldBuy: rates.goldBuy,
+          goldSell: rates.goldSell,
+          silverBuy: rates.silverBuy,
+          silverSell: rates.silverSell,
+          lastUpdated: rates.updatedAt
+        }) : null,
         canUpdateRates: ['admin', 'manager'].includes(req.user.role)
       }
     });
     
   } catch (error) {
-    console.error('Error checking rate setup:', error);
+    console.error('Error in checkRateSetup:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to check rate setup'
@@ -257,6 +406,8 @@ const checkRateSetup = async (req, res) => {
 // @access  Private (Shop users only)
 const checkMyShopSetup = async (req, res) => {
   try {
+    console.log('checkMyShopSetup called for user:', req.user.username);
+    
     if (req.user.role === 'super_admin') {
       return res.status(400).json({
         success: false,
@@ -268,7 +419,7 @@ const checkMyShopSetup = async (req, res) => {
     await checkRateSetup(req, res);
     
   } catch (error) {
-    console.error('Error checking user shop setup:', error);
+    console.error('Error in checkMyShopSetup:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to check your shop rate setup'
@@ -281,6 +432,15 @@ const checkMyShopSetup = async (req, res) => {
 // @access  Private (Shop users only)
 const getRateUpdateInfo = async (req, res) => {
   try {
+    console.log('getRateUpdateInfo called for shopId:', req.params.shopId);
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+    
     const { shopId } = req.params;
     
     // Verify user can access this shop
@@ -303,14 +463,26 @@ const getRateUpdateInfo = async (req, res) => {
     
     // Always use IST for consistency
     const timezone = 'Asia/Kolkata';
+    let updateInfo;
+    
+    if (rates.getUpdateInfo && typeof rates.getUpdateInfo === 'function') {
+      updateInfo = rates.getUpdateInfo(timezone);
+    } else {
+      updateInfo = {
+        updatedBy: rates.updatedByUsername || 'Unknown',
+        role: rates.updatedByRole || 'unknown',
+        timestamp: rates.updatedAt ? rates.updatedAt.toISOString() : new Date().toISOString(),
+        isToday: true
+      };
+    }
     
     res.status(200).json({
       success: true,
-      data: rates.getUpdateInfo(timezone)
+      data: updateInfo
     });
     
   } catch (error) {
-    console.error('Error fetching rate update info:', error);
+    console.error('Error in getRateUpdateInfo:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch rate update info'
@@ -323,6 +495,15 @@ const getRateUpdateInfo = async (req, res) => {
 // @access  Private (Shop users only)
 const checkDailyRateUpdate = async (req, res) => {
   try {
+    console.log('checkDailyRateUpdate called for shopId:', req.params.shopId);
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+    
     const { shopId } = req.params;
     
     // Verify user can access this shop
@@ -349,7 +530,23 @@ const checkDailyRateUpdate = async (req, res) => {
     
     // Always use IST timezone
     const timezone = 'Asia/Kolkata';
-    const isUpdatedToday = rates.isUpdatedToday(timezone);
+    let isUpdatedToday = false;
+    
+    if (rates.isUpdatedToday && typeof rates.isUpdatedToday === 'function') {
+      isUpdatedToday = rates.isUpdatedToday(timezone);
+    }
+    
+    let updateInfo;
+    if (rates.getUpdateInfo && typeof rates.getUpdateInfo === 'function') {
+      updateInfo = rates.getUpdateInfo(timezone);
+    } else {
+      updateInfo = {
+        updatedBy: rates.updatedByUsername || 'Unknown',
+        role: rates.updatedByRole || 'unknown',
+        timestamp: rates.updatedAt ? rates.updatedAt.toISOString() : new Date().toISOString(),
+        isToday: isUpdatedToday
+      };
+    }
     
     res.status(200).json({
       success: true,
@@ -358,12 +555,12 @@ const checkDailyRateUpdate = async (req, res) => {
         isUpdatedToday,
         requireUpdate: !isUpdatedToday,
         canUpdate: ['admin', 'manager'].includes(req.user.role),
-        updateInfo: rates.getUpdateInfo(timezone)
+        updateInfo: updateInfo
       }
     });
     
   } catch (error) {
-    console.error('Error checking daily rate update:', error);
+    console.error('Error in checkDailyRateUpdate:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to check daily rate update'
@@ -376,6 +573,15 @@ const checkDailyRateUpdate = async (req, res) => {
 // @access  Private (Shop users only)
 const getHeaderRateInfo = async (req, res) => {
   try {
+    console.log('getHeaderRateInfo called for user:', req.user ? req.user.username : 'unknown');
+    
+    if (!Rate) {
+      return res.status(500).json({
+        success: false,
+        message: 'Rate model not available'
+      });
+    }
+    
     if (req.user.role === 'super_admin') {
       return res.status(200).json({
         success: true,
@@ -409,7 +615,26 @@ const getHeaderRateInfo = async (req, res) => {
     }
     
     const timezone = 'Asia/Kolkata';
-    const updateInfo = rates.getUpdateInfo(timezone);
+    let updateInfo;
+    
+    if (rates.getUpdateInfo && typeof rates.getUpdateInfo === 'function') {
+      updateInfo = rates.getUpdateInfo(timezone);
+    } else {
+      updateInfo = {
+        updatedBy: rates.updatedByUsername || 'Unknown',
+        role: rates.updatedByRole || 'unknown',
+        timestamp: rates.updatedAt ? rates.updatedAt.toLocaleString('en-IN', {
+          timeZone: timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true
+        }) : 'Unknown',
+        isToday: true
+      };
+    }
     
     res.status(200).json({
       success: true,
@@ -436,7 +661,7 @@ const getHeaderRateInfo = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error fetching header rate info:', error);
+    console.error('Error in getHeaderRateInfo:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to fetch header rate info'
@@ -444,6 +669,104 @@ const getHeaderRateInfo = async (req, res) => {
   }
 };
 
+// @desc    Get blocking status for current user's shop
+// @route   GET /api/rates/blocking-status
+// @access  Private (Shop users only)
+const getBlockingStatus = async (req, res) => {
+  try {
+    console.log('getBlockingStatus called for user:', req.user ? req.user.username : 'unknown');
+    
+    if (req.user.role === 'super_admin') {
+      return res.status(200).json({
+        success: true,
+        data: {
+          isBlocked: false,
+          message: 'Super admin is never blocked',
+          systemStatus: {
+            dailyDeadline: '1:00 PM IST',
+            currentTimeIST: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+          }
+        }
+      });
+    }
+
+    const shopId = req.user.shopId;
+    if (!shopId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not associated with any shop'
+      });
+    }
+
+    // Use the blocking check function
+    let blockingResult = { shouldBlock: false, message: 'Calculator is available' };
+    if (checkRateBlocking) {
+      try {
+        blockingResult = await checkRateBlocking(shopId);
+      } catch (error) {
+        console.error('Error checking blocking status:', error);
+      }
+    }
+
+    // Get rate info if available
+    let rateInfo = null;
+    if (Rate) {
+      try {
+        const rates = await Rate.getCurrentRatesForShop(shopId);
+        if (rates) {
+          const timezone = 'Asia/Kolkata';
+          if (rates.getUpdateInfo && typeof rates.getUpdateInfo === 'function') {
+            rateInfo = rates.getUpdateInfo(timezone);
+          } else {
+            rateInfo = {
+              updatedBy: rates.updatedByUsername || 'Unknown',
+              role: rates.updatedByRole || 'unknown',
+              timestamp: rates.updatedAt ? rates.updatedAt.toISOString() : new Date().toISOString(),
+              isToday: true
+            };
+          }
+        }
+      } catch (error) {
+        console.log('No rates found for blocking status check');
+      }
+    }
+
+    const currentTime = new Date();
+    const istTime = new Date(currentTime.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        isBlocked: blockingResult.shouldBlock,
+        message: blockingResult.message,
+        rateInfo: rateInfo,
+        systemStatus: {
+          dailyDeadline: '1:00 PM IST',
+          currentTimeIST: istTime.toLocaleString('en-IN', { 
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          })
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Error in getBlockingStatus:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to get blocking status'
+    });
+  }
+};
+
+console.log('Rate controller functions defined successfully');
+
+// Export all functions
 module.exports = {
   getCurrentRates,
   getMyShopRates,
@@ -453,5 +776,8 @@ module.exports = {
   checkMyShopSetup,
   getRateUpdateInfo,
   checkDailyRateUpdate,
-  getHeaderRateInfo
+  getHeaderRateInfo,
+  getBlockingStatus
 };
+
+console.log('Rate controller module exported successfully');
