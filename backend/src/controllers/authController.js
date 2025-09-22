@@ -232,15 +232,16 @@ const login = async (req, res) => {
   }
 };
 
-// Get current user info
+// Get current user info - ENHANCED with fresh database lookup
 const getMe = async (req, res) => {
   try {
+    // Always fetch fresh user data from database (not from JWT claims)
     const user = await User.findById(req.user._id);
 
-    if (!user) {
-      return res.status(404).json({
+    if (!user || !user.isActive) {
+      return res.status(401).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found or inactive'
       });
     }
 
@@ -248,12 +249,18 @@ const getMe = async (req, res) => {
     let shopInfo = null;
     if (user.shopId) {
       const shop = await Shop.findById(user.shopId);
-      if (shop) {
+      if (shop && shop.isActive) {
         shopInfo = {
           _id: shop._id,
           shopName: shop.shopName,
           shopCode: shop.shopCode
         };
+      } else if (user.role !== 'super_admin') {
+        // Shop is inactive but user requires shop
+        return res.status(401).json({
+          success: false,
+          message: 'Associated shop is inactive'
+        });
       }
     }
 
@@ -262,7 +269,7 @@ const getMe = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        role: user.role,
+        role: user.role, // Fresh role from database
         shopId: user.shopId || null,
         shopName: shopInfo?.shopName || null,
         shopCode: shopInfo?.shopCode || null,
@@ -277,6 +284,127 @@ const getMe = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error getting user info'
+    });
+  }
+};
+
+// NEW: Verify token and role access for specific route
+const verifyAccess = async (req, res) => {
+  try {
+    const { requiredRoles, requireShop } = req.body;
+
+    // Get fresh user data from database
+    const user = await User.findById(req.user._id);
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found or inactive',
+        shouldLogout: true
+      });
+    }
+
+    // Check role requirements
+    if (requiredRoles && requiredRoles.length > 0) {
+      if (!requiredRoles.includes(user.role)) {
+        return res.status(403).json({
+          success: false,
+          message: `Access denied. Required roles: ${requiredRoles.join(', ')}. Your role: ${user.role}`,
+          hasAccess: false
+        });
+      }
+    }
+
+    // Check shop requirements
+    if (requireShop && user.role !== 'super_admin') {
+      if (!user.shopId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Shop association required.',
+          hasAccess: false
+        });
+      }
+
+      // Verify shop is still active
+      const shop = await Shop.findById(user.shopId);
+      if (!shop || !shop.isActive) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied. Associated shop is inactive.',
+          hasAccess: false
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      hasAccess: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        shopId: user.shopId || null,
+        isActive: user.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('Verify access error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error verifying access'
+    });
+  }
+};
+
+// NEW: Token validation endpoint 
+const validateToken = async (req, res) => {
+  try {
+    // The authenticate middleware already validated the token
+    // and attached the user to req.user
+    
+    // Get fresh user data from database
+    const user = await User.findById(req.user._id);
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token is invalid - user not found or inactive',
+        valid: false
+      });
+    }
+
+    // Check if shop is still active (for shop users)
+    if (user.shopId) {
+      const shop = await Shop.findById(user.shopId);
+      if (!shop || !shop.isActive) {
+        return res.status(401).json({
+          success: false,
+          message: 'Token is invalid - associated shop is inactive',
+          valid: false
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      valid: true,
+      message: 'Token is valid',
+      user: {
+        _id: user._id,
+        username: user.username,
+        role: user.role,
+        shopId: user.shopId || null,
+        isActive: user.isActive
+      }
+    });
+
+  } catch (error) {
+    console.error('Token validation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error validating token',
+      valid: false
     });
   }
 };
@@ -402,9 +530,11 @@ const checkSuperAdmin = async (req, res) => {
 module.exports = {
   login,
   getMe,
-  getMyProfile,        // NEW: Shop Admin can view own profile
-  changePassword,      // ENHANCED: Shop Admin can change own password
+  getMyProfile,        
+  changePassword,      
   logout,
   createSuperAdmin,
-  checkSuperAdmin
+  checkSuperAdmin,
+  verifyAccess,        // NEW: Verify role-based access
+  validateToken        // NEW: Token validation
 };

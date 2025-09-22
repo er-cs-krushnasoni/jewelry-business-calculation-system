@@ -47,7 +47,13 @@ export const AuthProvider = ({ children }) => {
         
         // Verify token is still valid by making a test request
         try {
-          await api.get('/auth/me');
+          const response = await api.get('/auth/me');
+          if (response.data.success) {
+            // Use fresh server data
+            const serverUser = response.data.user;
+            setUser(serverUser);
+            localStorage.setItem('user', JSON.stringify(serverUser));
+          }
         } catch (error) {
           // Token invalid, clear auth - but don't redirect here
           if (error.response?.status === 401) {

@@ -40,13 +40,39 @@ export const SocketProvider = ({ children }) => {
   const [systemBlocking, setSystemBlocking] = useState(null);
 
   const socketRef = useRef(null);
-  const reconnectTimeoutRef = useRef(null);
-  const pingIntervalRef = useRef(null);
   const isConnectingRef = useRef(false);
+  const hasInitializedRef = useRef(false);
+  const userHashRef = useRef(null);
+
+  // Create a stable hash of user properties to detect changes
+  const createUserHash = useCallback((user) => {
+    if (!user) return null;
+    const userId = user.id || user._id;
+    return `${userId}-${user.shopId}-${user.role}-${user.username}`;
+  }, []);
+
+  // Disconnect socket
+  const disconnectSocket = useCallback(() => {
+    if (socketRef.current) {
+      console.log('SocketContext: Disconnecting socket');
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
+    setSocket(null);
+    setIsConnected(false);
+    setConnectionStatus('disconnected');
+    setError(null);
+    isConnectingRef.current = false;
+    hasInitializedRef.current = false;
+  }, []);
 
   // Connect socket with enhanced validation
   const connectSocket = useCallback(() => {
+    // Prevent multiple simultaneous connection attempts
     if (isConnectingRef.current || socketRef.current?.connected) {
+      console.log('SocketContext: Already connecting or connected, skipping');
       return;
     }
 
@@ -77,8 +103,16 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    // Clean up existing socket
+    // Check if we're trying to connect with the same user (prevent unnecessary reconnections)
+    const currentUserHash = createUserHash(user);
+    if (currentUserHash === userHashRef.current && socketRef.current?.connected) {
+      console.log('SocketContext: Already connected with same user, skipping');
+      return;
+    }
+
+    // Clean up existing socket before creating new one
     if (socketRef.current) {
+      socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
       socketRef.current = null;
     }
@@ -95,6 +129,7 @@ export const SocketProvider = ({ children }) => {
     console.log('SocketContext: Connecting to server:', SERVER_URL);
     
     isConnectingRef.current = true;
+    userHashRef.current = currentUserHash;
     setConnectionStatus('connecting');
     setError(null);
 
@@ -103,11 +138,10 @@ export const SocketProvider = ({ children }) => {
       timeout: 20000,
       forceNew: true,
       autoConnect: true,
-      // Add these options for better reliability
       reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      maxReconnectionAttempts: 5
+      reconnectionDelay: 2000,
+      reconnectionDelayMax: 10000,
+      maxReconnectionAttempts: 3
     });
 
     socketRef.current = newSocket;
@@ -135,6 +169,7 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('joined-shop', (data) => {
       console.log('SocketContext: Successfully joined shop room:', data);
       setConnectionStatus('joined');
+      hasInitializedRef.current = true;
     });
 
     newSocket.on('join-error', (data) => {
@@ -189,13 +224,9 @@ export const SocketProvider = ({ children }) => {
       setIsConnected(false);
       setConnectionStatus('disconnected');
       
-      // Only auto-reconnect for certain reasons
-      if (reason === 'io server disconnect' || reason === 'transport close') {
-        setTimeout(() => {
-          if (user && user.shopId && user.role !== 'super_admin') {
-            connectSocket();
-          }
-        }, 2000);
+      // Don't auto-reconnect if this was a manual disconnect
+      if (reason !== 'io client disconnect') {
+        console.log('SocketContext: Will attempt to reconnect automatically');
       }
     });
 
@@ -214,37 +245,18 @@ export const SocketProvider = ({ children }) => {
       setError(null);
     });
 
+    newSocket.on('reconnect_failed', () => {
+      console.log('SocketContext: Reconnection failed');
+      isConnectingRef.current = false;
+      setConnectionStatus('error');
+      setError('Reconnection failed');
+    });
+
     newSocket.on('pong', (data) => {
       console.log('SocketContext: Pong received:', data);
     });
 
-  }, [user, isAuthenticated]);
-
-  // Disconnect socket
-  const disconnectSocket = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-
-    if (pingIntervalRef.current) {
-      clearInterval(pingIntervalRef.current);
-      pingIntervalRef.current = null;
-    }
-
-    if (socketRef.current) {
-      console.log('SocketContext: Manually disconnecting socket');
-      socketRef.current.emit('leave-shop');
-      socketRef.current.disconnect();
-      socketRef.current = null;
-    }
-
-    setSocket(null);
-    setIsConnected(false);
-    setConnectionStatus('disconnected');
-    setError(null);
-    isConnectingRef.current = false;
-  }, []);
+  }, [user?.id, user?._id, user?.shopId, user?.role, user?.username, isAuthenticated, createUserHash]);
 
   const pingSocket = useCallback(() => {
     if (socketRef.current?.connected) {
@@ -258,22 +270,48 @@ export const SocketProvider = ({ children }) => {
     }
   }, [user?.shopId]);
 
-  // Connect when user is ready
+  // Main effect to manage socket connection
   useEffect(() => {
-    if (isAuthenticated && user && user.role !== 'super_admin' && user.shopId) {
-      connectSocket();
-    } else {
+    const currentUserHash = createUserHash(user);
+    
+    // Should connect?
+    const shouldConnect = isAuthenticated && 
+                         user && 
+                         user.role !== 'super_admin' && 
+                         user.shopId &&
+                         (user.id || user._id);
+
+    // Should disconnect?
+    const shouldDisconnect = !shouldConnect || 
+                           (currentUserHash !== userHashRef.current && hasInitializedRef.current);
+
+    console.log('SocketContext: Effect triggered', {
+      shouldConnect,
+      shouldDisconnect,
+      currentUserHash,
+      previousHash: userHashRef.current,
+      hasInitialized: hasInitializedRef.current,
+      isAuthenticated,
+      userRole: user?.role,
+      shopId: user?.shopId
+    });
+
+    if (shouldDisconnect) {
+      console.log('SocketContext: Disconnecting due to auth/user changes');
       disconnectSocket();
     }
 
-    return () => {
-      disconnectSocket();
-    };
-  }, [isAuthenticated, user?.id, user?.shopId, user?.role, connectSocket, disconnectSocket]);
+    if (shouldConnect && !socketRef.current?.connected && !isConnectingRef.current) {
+      console.log('SocketContext: Connecting socket');
+      connectSocket();
+    }
+
+  }, [isAuthenticated, user?.id, user?._id, user?.shopId, user?.role, connectSocket, disconnectSocket, createUserHash]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      console.log('SocketContext: Component unmounting, cleaning up');
       disconnectSocket();
     };
   }, [disconnectSocket]);
