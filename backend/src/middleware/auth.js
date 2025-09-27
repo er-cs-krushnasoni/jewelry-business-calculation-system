@@ -196,9 +196,13 @@ const authorizePasswordManagement = (req, res, next) => {
   next();
 };
 
+// Alias for backward compatibility
+const protect = authenticate;
+
 module.exports = {
   generateToken,
   authenticate,
+  protect, // Add this alias
   authorize,
   authorizeShopAccess,
   authorizeSuperAdmin,

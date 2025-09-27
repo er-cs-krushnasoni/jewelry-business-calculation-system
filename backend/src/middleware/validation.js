@@ -18,6 +18,9 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// Alias for backward compatibility with category routes
+const validateRequest = handleValidationErrors;
+
 // Validation rules for user creation
 const validateUserCreation = [
   body('username')
@@ -260,6 +263,7 @@ const validateRateLimit = (req, res, next) => {
 
 module.exports = {
   handleValidationErrors,
+  validateRequest, // Add this export
   validateUserCreation,
   validatePasswordReset,
   validatePasswordChange,

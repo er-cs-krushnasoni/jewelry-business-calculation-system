@@ -203,6 +203,15 @@ try {
   console.error('✗ Error loading calculator routes:', error.message);
 }
 
+// Category management routes
+try {
+  const categoryRoutes = require('./routes/categoryRoutes');
+  app.use('/api/categories', categoryRoutes);
+  console.log('✓ Category management routes loaded successfully');
+} catch (error) {
+  console.error('✗ Error loading category management routes:', error.message);
+}
+
 // Test routes
 app.get('/api/test/server', (req, res) => {
   res.json({ 
@@ -264,6 +273,7 @@ app.use((req, res) => {
       'GET /api/users/*',
       'GET /api/rates/*',
       'GET /api/calculator/*',
+      'GET /api/categories/*', // Add this line
       'GET /api/debug/routes'
     ]
   });
@@ -294,6 +304,7 @@ server.listen(PORT, () => {
   console.log(`   - User Management: /api/users/*`);
   console.log(`   - Rate Management: /api/rates/*`);
   console.log(`   - Calculator: /api/calculator/*`);
+  console.log(`   - Category Management: /api/categories/*`);
   console.log('=================================');
   console.log('✅ Socket.IO server ready for connections');
   console.log('=================================');

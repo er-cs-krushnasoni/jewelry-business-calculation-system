@@ -85,6 +85,9 @@ jewellery-calculation-system
         │   │   ├── BlockingMessage.jsx
         │   │   └── RateSetupModal.jsx
         │   │
+        │   ├── categories
+        │   │   ├── NewJewelryForm.jsx
+        │   │
         │   └── ui
         │       ├── Button.jsx
         │       ├── Input.jsx
@@ -106,6 +109,7 @@ jewellery-calculation-system
         │
         ├── pages
         │   ├── admin
+        │   │   ├── CategoryManagement.jsx   
         │   ├── auth
         │   ├── calculator
         │   ├── dashboard

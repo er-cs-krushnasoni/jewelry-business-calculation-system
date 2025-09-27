@@ -10,6 +10,8 @@ import { SocketProvider } from './contexts/SocketContext';
 // Components
 import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+const CategoryManagement = React.lazy(() => import('./pages/admin/CategoryManagement'));
+
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -226,6 +228,16 @@ function App() {
                       element={
                         <ProtectedRoute roles={["admin"]} requireShop={true}>
                           <RateManager showTitle={true} />
+                        </ProtectedRoute>
+                      } 
+                    />
+
+                    {/* Admin Category Management Route */}
+                    <Route 
+                      path="admin/categories" 
+                      element={
+                        <ProtectedRoute roles={["admin"]} requireShop={true}>
+                          <CategoryManagement />
                         </ProtectedRoute>
                       } 
                     />
