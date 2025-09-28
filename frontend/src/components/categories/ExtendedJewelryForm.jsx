@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import { Info, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const ExtendedJewelryForm = ({ 
@@ -13,6 +14,7 @@ const ExtendedJewelryForm = ({
   const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showDescriptionHelp, setShowDescriptionHelp] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -35,7 +37,7 @@ const ExtendedJewelryForm = ({
     polishRepairResalePercentage: initialData?.polishRepairResalePercentage || '',
     polishRepairCostPercentage: initialData?.polishRepairCostPercentage || '',
     
-    // Descriptions
+    // Descriptions - handle both old and new format
     descriptions: {
       universal: initialData?.descriptions?.universal || '',
       admin: initialData?.descriptions?.admin || '',
@@ -424,7 +426,7 @@ const ExtendedJewelryForm = ({
             name="code"
             value={formData.code}
             onChange={(e) => handleInputChange('code', e.target.value)}
-            placeholder="e.g., ABC123"
+            placeholder="e.g., ABC123, વિશિષ્ટ123, विशेष123"
             error={errors.code}
             required
             maxLength={20}
@@ -440,7 +442,7 @@ const ExtendedJewelryForm = ({
               name="itemCategory"
               value={formData.itemCategory}
               onChange={(e) => handleInputChange('itemCategory', e.target.value)}
-              placeholder="e.g., Chain, Bracelet, Ring"
+              placeholder="e.g., Chain, Bracelet, Ring, હાર, કડું, चेन"
               error={errors.itemCategory}
               required
               maxLength={50}
@@ -623,23 +625,50 @@ const ExtendedJewelryForm = ({
         )}
       </div>
 
-      {/* Descriptions */}
+      {/* Multi-Level Descriptions */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Descriptions</h3>
-        <p className="text-sm text-gray-600">
-          Add descriptions for different user roles. Users will see their role-specific description, or the universal description if no role-specific one is available.
-        </p>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-900">Multi-Level Descriptions</h3>
+          <button
+            type="button"
+            onClick={() => setShowDescriptionHelp(!showDescriptionHelp)}
+            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+          >
+            {showDescriptionHelp ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showDescriptionHelp ? 'Hide Help' : 'Show Help'}
+          </button>
+        </div>
+
+        {showDescriptionHelp && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2 text-sm text-blue-800">
+                <h4 className="font-medium">Description Priority System:</h4>
+                <ul className="space-y-1">
+                  <li><strong>1. Universal Description:</strong> Shown to all users if no role-specific description exists</li>
+                  <li><strong>2. Role-Based Descriptions:</strong> Override universal description for specific roles</li>
+                  <li><strong>3. Multi-Language Support:</strong> All descriptions support Gujarati, Hindi, English, and symbols</li>
+                </ul>
+                <p className="mt-2 text-xs text-blue-600">
+                  <strong>Display Logic:</strong> If universal description exists → show it. If role-specific description also exists → show role-specific instead. If neither exists → show nothing.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           {/* Universal Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Universal Description
+              <span className="text-xs text-gray-500 ml-2">(Fallback for all roles)</span>
             </label>
             <textarea
               value={formData.descriptions.universal}
               onChange={(e) => handleDescriptionChange('universal', e.target.value)}
-              placeholder="Description visible to all users"
+              placeholder="Universal description visible to all users when no role-specific description is available. Supports all languages: આ વર્ણન બધા વપરાશકર્તાઓને દેખાય છે | यह विवरण सभी उपयोगकर्ताओं को दिखता है"
               rows={3}
               maxLength={500}
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
@@ -661,12 +690,13 @@ const ExtendedJewelryForm = ({
             {/* Admin Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Admin Description
+                Admin Only Description
+                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
               </label>
               <textarea
                 value={formData.descriptions.admin}
                 onChange={(e) => handleDescriptionChange('admin', e.target.value)}
-                placeholder="Description visible to Admin only"
+                placeholder="Admin-specific description. Supports all languages and symbols: એડમિન માટે વિશેષ વર્ણન | एडमिन के लिए विशेष विवरण"
                 rows={3}
                 maxLength={500}
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
@@ -686,12 +716,13 @@ const ExtendedJewelryForm = ({
             {/* Manager Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Manager Description
+                Manager Only Description
+                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
               </label>
               <textarea
                 value={formData.descriptions.manager}
                 onChange={(e) => handleDescriptionChange('manager', e.target.value)}
-                placeholder="Description visible to Manager only"
+                placeholder="Manager-specific description. Supports all languages and symbols: મેનેજર માટે વિશેષ વર્ણન | मैनेजर के लिए विशेष विवरण"
                 rows={3}
                 maxLength={500}
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
@@ -711,12 +742,13 @@ const ExtendedJewelryForm = ({
             {/* Pro Client Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pro Client Description
+                Pro Client Only Description
+                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
               </label>
               <textarea
                 value={formData.descriptions.proClient}
                 onChange={(e) => handleDescriptionChange('proClient', e.target.value)}
-                placeholder="Description visible to Pro Client only"
+                placeholder="Pro Client-specific description. Supports all languages and symbols: પ્રો ક્લાયંટ માટે વિશેષ વર્ણન | प्रो क्लाइंट के लिए विशेष विवरण"
                 rows={3}
                 maxLength={500}
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
@@ -736,12 +768,13 @@ const ExtendedJewelryForm = ({
             {/* Client Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Client Description
+                Client Only Description
+                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
               </label>
               <textarea
                 value={formData.descriptions.client}
                 onChange={(e) => handleDescriptionChange('client', e.target.value)}
-                placeholder="Description visible to Client only"
+                placeholder="Client-specific description. Supports all languages and symbols: ક્લાયંટ માટે વિશેષ વર્ણન | क्लाइंट के लिए विशेष विवरण"
                 rows={3}
                 maxLength={500}
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${

@@ -102,32 +102,37 @@ const categorySchema = new mongoose.Schema({
     maxlength: [20, 'Code cannot exceed 20 characters']
   },
   
-  // Descriptions system
+  // Multi-level descriptions system - FIXED PRIORITY: Universal → Role-based → None
   descriptions: {
     universal: {
       type: String,
       trim: true,
-      maxlength: [500, 'Universal description cannot exceed 500 characters']
+      maxlength: [500, 'Universal description cannot exceed 500 characters'],
+      default: ''
     },
     admin: {
       type: String,
       trim: true,
-      maxlength: [500, 'Admin description cannot exceed 500 characters']
+      maxlength: [500, 'Admin description cannot exceed 500 characters'],
+      default: ''
     },
     manager: {
       type: String,
       trim: true,
-      maxlength: [500, 'Manager description cannot exceed 500 characters']
+      maxlength: [500, 'Manager description cannot exceed 500 characters'],
+      default: ''
     },
     proClient: {
       type: String,
       trim: true,
-      maxlength: [500, 'Pro Client description cannot exceed 500 characters']
+      maxlength: [500, 'Pro Client description cannot exceed 500 characters'],
+      default: ''
     },
     client: {
       type: String,
       trim: true,
-      maxlength: [500, 'Client description cannot exceed 500 characters']
+      maxlength: [500, 'Client description cannot exceed 500 characters'],
+      default: ''
     }
   },
   
@@ -208,6 +213,15 @@ categorySchema.pre('save', function(next) {
       this.code = this.code.trim();
     }
     
+    // Clean up descriptions - trim whitespace but preserve all characters/symbols
+    if (this.descriptions) {
+      Object.keys(this.descriptions).forEach(role => {
+        if (this.descriptions[role]) {
+          this.descriptions[role] = this.descriptions[role].trim();
+        }
+      });
+    }
+    
     // Type-specific validations and cleanup
     if (this.type === 'NEW') {
       // Ensure itemCategory is provided for NEW jewelry
@@ -245,9 +259,15 @@ categorySchema.pre('save', function(next) {
   }
 });
 
-// Instance method to get appropriate description for user role
+// FIXED: Instance method to get appropriate description for user role
+// Priority: Universal → Role-based → None
 categorySchema.methods.getDescriptionForRole = function(userRole) {
-  // First check for role-specific description
+  // First check for universal description
+  if (this.descriptions.universal && this.descriptions.universal.trim()) {
+    return this.descriptions.universal.trim();
+  }
+  
+  // Then check for role-specific description
   const roleMap = {
     'admin': this.descriptions.admin,
     'manager': this.descriptions.manager,
@@ -260,13 +280,31 @@ categorySchema.methods.getDescriptionForRole = function(userRole) {
     return roleDescription.trim();
   }
   
-  // Fallback to universal description
-  if (this.descriptions.universal && this.descriptions.universal.trim()) {
-    return this.descriptions.universal.trim();
-  }
-  
   // No description available
   return '';
+};
+
+// Method to get all descriptions for admin management
+categorySchema.methods.getAllDescriptions = function() {
+  return {
+    universal: this.descriptions.universal || '',
+    admin: this.descriptions.admin || '',
+    manager: this.descriptions.manager || '',
+    proClient: this.descriptions.proClient || '',
+    client: this.descriptions.client || ''
+  };
+};
+
+// Method to set descriptions (for easy bulk updates)
+categorySchema.methods.setDescriptions = function(descriptionsObj) {
+  if (!descriptionsObj) return;
+  
+  // Update each description type if provided
+  Object.keys(descriptionsObj).forEach(role => {
+    if (this.descriptions.hasOwnProperty(role)) {
+      this.descriptions[role] = descriptionsObj[role] || '';
+    }
+  });
 };
 
 // Static method to find categories by shop and type
