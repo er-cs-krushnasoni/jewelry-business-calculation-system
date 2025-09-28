@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Filter, Search, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Filter, Search, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import Modal from '../../components/ui/Modal';
-import NewJewelryForm from '../../components/categories/NewJewelryForm';
+import ExtendedJewelryForm from '../../components/categories/ExtendedJewelryForm';
 import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -21,19 +21,19 @@ const CategoryManagement = () => {
   
   // Filter states
   const [filters, setFilters] = useState({
-    type: 'NEW', // Default to NEW jewelry
+    type: '', // Show all types by default
     metal: '',
     itemCategory: '',
     search: ''
   });
   
-  // Unique item categories for filter dropdown
+  // Unique item categories for filter dropdown (NEW jewelry only)
   const [itemCategories, setItemCategories] = useState([]);
 
   // Load categories on component mount and when filters change
   useEffect(() => {
     loadCategories();
-    if (filters.type === 'NEW') {
+    if (filters.type === 'NEW' || !filters.type) {
       loadItemCategories();
     }
   }, [filters.type, filters.metal]);
@@ -46,7 +46,7 @@ const CategoryManagement = () => {
       const queryParams = new URLSearchParams();
       if (filters.type) queryParams.append('type', filters.type);
       if (filters.metal) queryParams.append('metal', filters.metal);
-      if (filters.itemCategory && filters.type === 'NEW') {
+      if (filters.itemCategory && (filters.type === 'NEW' || !filters.type)) {
         queryParams.append('itemCategory', filters.itemCategory);
       }
       
@@ -90,7 +90,7 @@ const CategoryManagement = () => {
         toast.success('Category created successfully');
         setShowCreateModal(false);
         loadCategories();
-        if (categoryData.type === 'NEW') {
+        if (categoryData.type === 'NEW' || !filters.type) {
           loadItemCategories();
         }
       } else {
@@ -113,7 +113,7 @@ const CategoryManagement = () => {
         setShowEditModal(false);
         setEditingCategory(null);
         loadCategories();
-        if (categoryData.type === 'NEW') {
+        if (categoryData.type === 'NEW' || !filters.type) {
           loadItemCategories();
         }
       } else {
@@ -167,7 +167,7 @@ const CategoryManagement = () => {
 
   const resetFilters = () => {
     setFilters({
-      type: 'NEW',
+      type: '',
       metal: '',
       itemCategory: '',
       search: ''
@@ -185,6 +185,16 @@ const CategoryManagement = () => {
       category.description?.toLowerCase().includes(searchTerm)
     );
   });
+
+  // Helper function to get effective purity for display
+  const getEffectivePurity = (category) => {
+    if (category.type === 'NEW') {
+      return category.purityPercentage;
+    } else if (category.type === 'OLD') {
+      return category.truePurityPercentage;
+    }
+    return null;
+  };
 
   if (loading && categories.length === 0) {
     return (
@@ -206,7 +216,7 @@ const CategoryManagement = () => {
             Category Management
           </h1>
           <p className="text-gray-600 mt-1">
-            Manage NEW and OLD jewelry categories
+            Manage NEW and OLD jewelry categories with descriptions and settings
           </p>
         </div>
         <Button
@@ -268,7 +278,7 @@ const CategoryManagement = () => {
           </div>
 
           {/* Item Category Filter (NEW jewelry only) */}
-          {filters.type === 'NEW' && (
+          {(filters.type === 'NEW' || !filters.type) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Item Category
@@ -362,13 +372,10 @@ const CategoryManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Code
+                    Code & Details
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Metal
+                    Type & Metal
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Category
@@ -377,7 +384,10 @@ const CategoryManagement = () => {
                     Purity %
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Selling %
+                    Key %
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Settings
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -398,31 +408,66 @@ const CategoryManagement = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        category.type === 'NEW' 
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {category.type}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          category.type === 'NEW' 
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {category.type}
+                        </span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          category.metal === 'GOLD' 
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {category.metal}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {category.itemCategory || 
+                        (category.type === 'OLD' ? 'OLD Jewelry' : '-')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {getEffectivePurity(category) ? `${getEffectivePurity(category)}%` : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {category.type === 'NEW' && category.sellingPercentage && (
+                        <span className="text-green-600 font-medium">
+                          Sell: {category.sellingPercentage}%
+                        </span>
+                      )}
+                      {category.type === 'OLD' && (
+                        <div className="space-y-1">
+                          <div className="text-xs text-gray-500">
+                            Own: {category.scrapBuyOwnPercentage}%
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Other: {category.scrapBuyOtherPercentage}%
+                          </div>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        category.metal === 'GOLD' 
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {category.metal}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {category.itemCategory || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {category.purityPercentage ? `${category.purityPercentage}%` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {category.sellingPercentage ? `${category.sellingPercentage}%` : '-'}
+                      {category.type === 'OLD' && (
+                        <div className="flex items-center gap-2">
+                          {category.resaleEnabled ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <Eye size={12} className="mr-1" />
+                              Resale ON
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              <EyeOff size={12} className="mr-1" />
+                              Resale OFF
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {category.type === 'NEW' && (
+                        <span className="text-xs text-gray-500">Standard</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
@@ -432,12 +477,14 @@ const CategoryManagement = () => {
                             setShowEditModal(true);
                           }}
                           className="text-blue-600 hover:text-blue-700 p-1 rounded"
+                          title="Edit Category"
                         >
                           <Edit size={16} />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(category._id, category.code)}
                           className="text-red-600 hover:text-red-700 p-1 rounded"
+                          title="Delete Category"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -458,7 +505,7 @@ const CategoryManagement = () => {
         title="Create New Category"
         size="large"
       >
-        <NewJewelryForm
+        <ExtendedJewelryForm
           onSubmit={handleCreateCategory}
           onCancel={() => setShowCreateModal(false)}
         />
@@ -475,7 +522,7 @@ const CategoryManagement = () => {
         size="large"
       >
         {editingCategory && (
-          <NewJewelryForm
+          <ExtendedJewelryForm
             initialData={editingCategory}
             onSubmit={handleEditCategory}
             onCancel={() => {

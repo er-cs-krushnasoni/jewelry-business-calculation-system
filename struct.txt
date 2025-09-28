@@ -86,7 +86,7 @@ jewellery-calculation-system
         │   │   └── RateSetupModal.jsx
         │   │
         │   ├── categories
-        │   │   ├── NewJewelryForm.jsx
+        │   │   ├── ExtendedJewelryForm.jsx
         │   │
         │   └── ui
         │       ├── Button.jsx

@@ -4,7 +4,7 @@ import Input from '../ui/Input';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { useLanguage } from '../../contexts/LanguageContext';
 
-const NewJewelryForm = ({ 
+const ExtendedJewelryForm = ({ 
   initialData = null, 
   onSubmit, 
   onCancel, 
@@ -18,11 +18,24 @@ const NewJewelryForm = ({
   const [formData, setFormData] = useState({
     type: initialData?.type || 'NEW',
     metal: initialData?.metal || '',
+    code: initialData?.code || '',
+    
+    // NEW jewelry fields
     itemCategory: initialData?.itemCategory || '',
     purityPercentage: initialData?.purityPercentage || '',
     buyingFromWholesalerPercentage: initialData?.buyingFromWholesalerPercentage || '',
     sellingPercentage: initialData?.sellingPercentage || '',
-    code: initialData?.code || '',
+    
+    // OLD jewelry fields
+    truePurityPercentage: initialData?.truePurityPercentage || '',
+    scrapBuyOwnPercentage: initialData?.scrapBuyOwnPercentage || '',
+    scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage || '',
+    resaleEnabled: initialData?.resaleEnabled || false,
+    directResalePercentage: initialData?.directResalePercentage || '',
+    polishRepairResalePercentage: initialData?.polishRepairResalePercentage || '',
+    polishRepairCostPercentage: initialData?.polishRepairCostPercentage || '',
+    
+    // Descriptions
     descriptions: {
       universal: initialData?.descriptions?.universal || '',
       admin: initialData?.descriptions?.admin || '',
@@ -65,10 +78,61 @@ const NewJewelryForm = ({
     }
   };
 
+  const handleTypeChange = (newType) => {
+    // When changing type, reset type-specific fields to avoid confusion
+    setFormData(prev => ({
+      ...prev,
+      type: newType,
+      // Reset NEW jewelry fields
+      itemCategory: '',
+      purityPercentage: '',
+      sellingPercentage: '',
+      // Reset OLD jewelry fields
+      truePurityPercentage: '',
+      scrapBuyOwnPercentage: '',
+      scrapBuyOtherPercentage: '',
+      resaleEnabled: false,
+      directResalePercentage: '',
+      polishRepairResalePercentage: '',
+      polishRepairCostPercentage: '',
+      // Keep buyingFromWholesalerPercentage as it's used in both types conditionally
+      buyingFromWholesalerPercentage: ''
+    }));
+    
+    // Clear all errors when type changes
+    setErrors({});
+  };
+
+  const handleResaleToggle = (enabled) => {
+    setFormData(prev => ({
+      ...prev,
+      resaleEnabled: enabled,
+      // Clear resale-specific fields if disabled
+      ...(enabled ? {} : {
+        directResalePercentage: '',
+        polishRepairResalePercentage: '',
+        polishRepairCostPercentage: '',
+        buyingFromWholesalerPercentage: ''
+      })
+    }));
+
+    // Clear resale-related errors
+    if (!enabled) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.directResalePercentage;
+        delete newErrors.polishRepairResalePercentage;
+        delete newErrors.polishRepairCostPercentage;
+        delete newErrors.buyingFromWholesalerPercentage;
+        return newErrors;
+      });
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
-    // Required field validations
+    // Basic required fields
     if (!formData.type) {
       newErrors.type = 'Type is required';
     }
@@ -83,7 +147,7 @@ const NewJewelryForm = ({
       newErrors.code = 'Code cannot exceed 20 characters';
     }
 
-    // NEW jewelry specific validations
+    // NEW jewelry validations
     if (formData.type === 'NEW') {
       if (!formData.itemCategory.trim()) {
         newErrors.itemCategory = 'Item category is required for NEW jewelry';
@@ -104,8 +168,8 @@ const NewJewelryForm = ({
         newErrors.buyingFromWholesalerPercentage = 'Buying percentage is required for NEW jewelry';
       } else {
         const buying = parseFloat(formData.buyingFromWholesalerPercentage);
-        if (isNaN(buying) || buying < 1 || buying > 200) {
-          newErrors.buyingFromWholesalerPercentage = 'Buying percentage must be between 1 and 200';
+        if (isNaN(buying) || buying < 1) {
+          newErrors.buyingFromWholesalerPercentage = 'Buying percentage must be at least 1';
         }
       }
 
@@ -113,8 +177,77 @@ const NewJewelryForm = ({
         newErrors.sellingPercentage = 'Selling percentage is required for NEW jewelry';
       } else {
         const selling = parseFloat(formData.sellingPercentage);
-        if (isNaN(selling) || selling < 1 || selling > 200) {
-          newErrors.sellingPercentage = 'Selling percentage must be between 1 and 200';
+        if (isNaN(selling) || selling < 1) {
+          newErrors.sellingPercentage = 'Selling percentage must be at least 1';
+        }
+      }
+    }
+
+    // OLD jewelry validations
+    if (formData.type === 'OLD') {
+      if (!formData.truePurityPercentage) {
+        newErrors.truePurityPercentage = 'True purity percentage is required for OLD jewelry';
+      } else {
+        const purity = parseFloat(formData.truePurityPercentage);
+        if (isNaN(purity) || purity < 1 || purity > 100) {
+          newErrors.truePurityPercentage = 'True purity percentage must be between 1 and 100';
+        }
+      }
+
+      if (!formData.scrapBuyOwnPercentage) {
+        newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage is required for OLD jewelry';
+      } else {
+        const scrapOwn = parseFloat(formData.scrapBuyOwnPercentage);
+        if (isNaN(scrapOwn) || scrapOwn < 1) {
+          newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage must be at least 1';
+        }
+      }
+
+      if (!formData.scrapBuyOtherPercentage) {
+        newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage is required for OLD jewelry';
+      } else {
+        const scrapOther = parseFloat(formData.scrapBuyOtherPercentage);
+        if (isNaN(scrapOther) || scrapOther < 1) {
+          newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage must be at least 1';
+        }
+      }
+
+      // Resale validations when enabled
+      if (formData.resaleEnabled) {
+        if (!formData.directResalePercentage) {
+          newErrors.directResalePercentage = 'Direct resale percentage is required when resale is enabled';
+        } else {
+          const directResale = parseFloat(formData.directResalePercentage);
+          if (isNaN(directResale) || directResale < 1) {
+            newErrors.directResalePercentage = 'Direct resale percentage must be at least 1';
+          }
+        }
+
+        if (!formData.polishRepairResalePercentage) {
+          newErrors.polishRepairResalePercentage = 'Polish/repair resale percentage is required when resale is enabled';
+        } else {
+          const polishRepair = parseFloat(formData.polishRepairResalePercentage);
+          if (isNaN(polishRepair) || polishRepair < 1) {
+            newErrors.polishRepairResalePercentage = 'Polish/repair resale percentage must be at least 1';
+          }
+        }
+
+        if (formData.polishRepairCostPercentage === '') {
+          newErrors.polishRepairCostPercentage = 'Polish/repair cost percentage is required when resale is enabled';
+        } else {
+          const polishCost = parseFloat(formData.polishRepairCostPercentage);
+          if (isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
+            newErrors.polishRepairCostPercentage = 'Polish/repair cost percentage must be between 0 and 50';
+          }
+        }
+
+        if (!formData.buyingFromWholesalerPercentage) {
+          newErrors.buyingFromWholesalerPercentage = 'Buying from wholesaler percentage is required when resale is enabled';
+        } else {
+          const buying = parseFloat(formData.buyingFromWholesalerPercentage);
+          if (isNaN(buying) || buying < 1) {
+            newErrors.buyingFromWholesalerPercentage = 'Buying from wholesaler percentage must be at least 1';
+          }
         }
       }
     }
@@ -144,19 +277,44 @@ const NewJewelryForm = ({
       // Prepare submit data
       const submitData = {
         ...formData,
-        code: formData.code.trim(),
-        itemCategory: formData.itemCategory.trim()
+        code: formData.code.trim()
       };
 
-      // Convert percentage strings to numbers
-      if (formData.purityPercentage) {
+      // Clean up type-specific fields
+      if (formData.type === 'NEW') {
+        submitData.itemCategory = formData.itemCategory.trim();
         submitData.purityPercentage = parseFloat(formData.purityPercentage);
-      }
-      if (formData.buyingFromWholesalerPercentage) {
         submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
-      }
-      if (formData.sellingPercentage) {
         submitData.sellingPercentage = parseFloat(formData.sellingPercentage);
+        
+        // Remove OLD jewelry fields
+        delete submitData.truePurityPercentage;
+        delete submitData.scrapBuyOwnPercentage;
+        delete submitData.scrapBuyOtherPercentage;
+        delete submitData.resaleEnabled;
+        delete submitData.directResalePercentage;
+        delete submitData.polishRepairResalePercentage;
+        delete submitData.polishRepairCostPercentage;
+      } else if (formData.type === 'OLD') {
+        submitData.truePurityPercentage = parseFloat(formData.truePurityPercentage);
+        submitData.scrapBuyOwnPercentage = parseFloat(formData.scrapBuyOwnPercentage);
+        submitData.scrapBuyOtherPercentage = parseFloat(formData.scrapBuyOtherPercentage);
+        submitData.resaleEnabled = Boolean(formData.resaleEnabled);
+        
+        if (formData.resaleEnabled) {
+          submitData.directResalePercentage = parseFloat(formData.directResalePercentage);
+          submitData.polishRepairResalePercentage = parseFloat(formData.polishRepairResalePercentage);
+          submitData.polishRepairCostPercentage = parseFloat(formData.polishRepairCostPercentage);
+          submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
+        }
+        
+        // Remove NEW jewelry fields
+        delete submitData.itemCategory;
+        delete submitData.purityPercentage;
+        delete submitData.sellingPercentage;
+        if (!formData.resaleEnabled) {
+          delete submitData.buyingFromWholesalerPercentage;
+        }
       }
 
       await onSubmit(submitData);
@@ -174,10 +332,22 @@ const NewJewelryForm = ({
             serverErrors.itemCategory = errorMsg;
           } else if (errorMsg.includes('Purity')) {
             serverErrors.purityPercentage = errorMsg;
+          } else if (errorMsg.includes('True purity')) {
+            serverErrors.truePurityPercentage = errorMsg;
           } else if (errorMsg.includes('Buying')) {
             serverErrors.buyingFromWholesalerPercentage = errorMsg;
           } else if (errorMsg.includes('Selling')) {
             serverErrors.sellingPercentage = errorMsg;
+          } else if (errorMsg.includes('Scrap buy own')) {
+            serverErrors.scrapBuyOwnPercentage = errorMsg;
+          } else if (errorMsg.includes('Scrap buy other')) {
+            serverErrors.scrapBuyOtherPercentage = errorMsg;
+          } else if (errorMsg.includes('Direct resale')) {
+            serverErrors.directResalePercentage = errorMsg;
+          } else if (errorMsg.includes('Polish/repair resale')) {
+            serverErrors.polishRepairResalePercentage = errorMsg;
+          } else if (errorMsg.includes('Polish/repair cost')) {
+            serverErrors.polishRepairCostPercentage = errorMsg;
           } else {
             serverErrors.general = errorMsg;
           }
@@ -204,7 +374,7 @@ const NewJewelryForm = ({
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -212,7 +382,7 @@ const NewJewelryForm = ({
             </label>
             <select
               value={formData.type}
-              onChange={(e) => handleInputChange('type', e.target.value)}
+              onChange={(e) => handleTypeChange(e.target.value)}
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.type ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -247,37 +417,36 @@ const NewJewelryForm = ({
               <p className="text-red-500 text-sm mt-1">{errors.metal}</p>
             )}
           </div>
+
+          {/* Code */}
+          <Input
+            label="Code/Stamp"
+            name="code"
+            value={formData.code}
+            onChange={(e) => handleInputChange('code', e.target.value)}
+            placeholder="e.g., ABC123"
+            error={errors.code}
+            required
+            maxLength={20}
+          />
         </div>
 
         {/* NEW Jewelry Specific Fields */}
         {formData.type === 'NEW' && (
           <>
-            {/* Item Category and Code */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Item Category"
-                name="itemCategory"
-                value={formData.itemCategory}
-                onChange={(e) => handleInputChange('itemCategory', e.target.value)}
-                placeholder="e.g., Chain, Bracelet, Ring"
-                error={errors.itemCategory}
-                required
-                maxLength={50}
-              />
+            {/* Item Category */}
+            <Input
+              label="Item Category"
+              name="itemCategory"
+              value={formData.itemCategory}
+              onChange={(e) => handleInputChange('itemCategory', e.target.value)}
+              placeholder="e.g., Chain, Bracelet, Ring"
+              error={errors.itemCategory}
+              required
+              maxLength={50}
+            />
 
-              <Input
-                label="Code/Stamp"
-                name="code"
-                value={formData.code}
-                onChange={(e) => handleInputChange('code', e.target.value)}
-                placeholder="e.g., ABC123"
-                error={errors.code}
-                required
-                maxLength={20}
-              />
-            </div>
-
-            {/* Percentages */}
+            {/* NEW Jewelry Percentages */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 label="Purity Percentage"
@@ -303,7 +472,6 @@ const NewJewelryForm = ({
                 error={errors.buyingFromWholesalerPercentage}
                 required
                 min="1"
-                max="200"
                 step="0.01"
               />
 
@@ -317,25 +485,141 @@ const NewJewelryForm = ({
                 error={errors.sellingPercentage}
                 required
                 min="1"
-                max="200"
                 step="0.01"
               />
             </div>
           </>
         )}
 
-        {/* Code for non-NEW jewelry */}
-        {formData.type !== 'NEW' && (
-          <Input
-            label="Code/Stamp"
-            name="code"
-            value={formData.code}
-            onChange={(e) => handleInputChange('code', e.target.value)}
-            placeholder="e.g., ABC123"
-            error={errors.code}
-            required
-            maxLength={20}
-          />
+        {/* OLD Jewelry Specific Fields */}
+        {formData.type === 'OLD' && (
+          <>
+            {/* OLD Jewelry Basic Percentages */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="True Purity Percentage"
+                name="truePurityPercentage"
+                type="number"
+                value={formData.truePurityPercentage}
+                onChange={(e) => handleInputChange('truePurityPercentage', e.target.value)}
+                placeholder="91.6"
+                error={errors.truePurityPercentage}
+                required
+                min="1"
+                max="100"
+                step="0.01"
+              />
+
+              <Input
+                label="Scrap Buy Own %"
+                name="scrapBuyOwnPercentage"
+                type="number"
+                value={formData.scrapBuyOwnPercentage}
+                onChange={(e) => handleInputChange('scrapBuyOwnPercentage', e.target.value)}
+                placeholder="85.0"
+                error={errors.scrapBuyOwnPercentage}
+                required
+                min="1"
+                step="0.01"
+              />
+
+              <Input
+                label="Scrap Buy Other %"
+                name="scrapBuyOtherPercentage"
+                type="number"
+                value={formData.scrapBuyOtherPercentage}
+                onChange={(e) => handleInputChange('scrapBuyOtherPercentage', e.target.value)}
+                placeholder="80.0"
+                error={errors.scrapBuyOtherPercentage}
+                required
+                min="1"
+                step="0.01"
+              />
+            </div>
+
+            {/* Resale System Toggle */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  id="resaleEnabled"
+                  checked={formData.resaleEnabled}
+                  onChange={(e) => handleResaleToggle(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="resaleEnabled" className="text-sm font-medium text-gray-700">
+                  Enable Resale Options
+                </label>
+              </div>
+              <p className="text-sm text-gray-500">
+                When enabled, this category will support direct resale and polish/repair resale calculations in addition to scrap value.
+              </p>
+            </div>
+
+            {/* Resale Fields (shown only when resale is enabled) */}
+            {formData.resaleEnabled && (
+              <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-900">Resale Configuration</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Direct Resale %"
+                    name="directResalePercentage"
+                    type="number"
+                    value={formData.directResalePercentage}
+                    onChange={(e) => handleInputChange('directResalePercentage', e.target.value)}
+                    placeholder="92.0"
+                    error={errors.directResalePercentage}
+                    required
+                    min="1"
+                    step="0.01"
+                  />
+
+                  <Input
+                    label="Polish/Repair Resale %"
+                    name="polishRepairResalePercentage"
+                    type="number"
+                    value={formData.polishRepairResalePercentage}
+                    onChange={(e) => handleInputChange('polishRepairResalePercentage', e.target.value)}
+                    placeholder="90.0"
+                    error={errors.polishRepairResalePercentage}
+                    required
+                    min="1"
+                    step="0.01"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Polish/Repair Cost %"
+                    name="polishRepairCostPercentage"
+                    type="number"
+                    value={formData.polishRepairCostPercentage}
+                    onChange={(e) => handleInputChange('polishRepairCostPercentage', e.target.value)}
+                    placeholder="5.0"
+                    error={errors.polishRepairCostPercentage}
+                    required
+                    min="0"
+                    max="50"
+                    step="0.01"
+                  />
+
+                  <Input
+                    label="Buying from Wholesaler %"
+                    name="buyingFromWholesalerPercentage"
+                    type="number"
+                    value={formData.buyingFromWholesalerPercentage}
+                    onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
+                    placeholder="85.5"
+                    error={errors.buyingFromWholesalerPercentage}
+                    required
+                    min="1"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -503,4 +787,4 @@ const NewJewelryForm = ({
   );
 };
 
-export default NewJewelryForm;
+export default ExtendedJewelryForm;

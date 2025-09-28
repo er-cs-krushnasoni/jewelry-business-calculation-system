@@ -234,28 +234,40 @@ app.get('/api/test/socket', (req, res) => {
 app.get('/api/debug/routes', (req, res) => {
   const routes = [];
   
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) { // routes registered directly on the app
-      routes.push({
-        path: middleware.route.path,
-        method: Object.keys(middleware.route.methods)[0].toUpperCase()
-      });
-    } else if (middleware.name === 'router') { // router middleware 
-      middleware.handle.stack.forEach((handler) => {
-        if (handler.route) {
-          routes.push({
-            path: handler.route.path,
-            method: Object.keys(handler.route.methods)[0].toUpperCase(),
-            baseUrl: middleware.regexp.source.replace('\\/?(?=\\/|$)', '').replace('^', '').replace('\\', '')
-          });
-        }
-      });
-    }
-  });
+  try {
+    app._router.stack.forEach((middleware) => {
+      if (middleware.route) { 
+        // routes registered directly on the app
+        routes.push({
+          path: middleware.route.path,
+          method: Object.keys(middleware.route.methods)[0].toUpperCase()
+        });
+      } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) { 
+        // router middleware with proper error checking
+        const baseUrl = middleware.regexp.source
+          .replace('\\/?(?=\\/|$)', '')
+          .replace('^', '')
+          .replace('\\', '');
+        
+        middleware.handle.stack.forEach((handler) => {
+          if (handler.route) {
+            routes.push({
+              path: baseUrl + handler.route.path,
+              method: Object.keys(handler.route.methods)[0].toUpperCase(),
+              baseUrl: baseUrl
+            });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error collecting routes:', error);
+  }
   
   res.json({
     success: true,
     registeredRoutes: routes,
+    totalRoutes: routes.length,
     timestamp: new Date().toISOString()
   });
 });

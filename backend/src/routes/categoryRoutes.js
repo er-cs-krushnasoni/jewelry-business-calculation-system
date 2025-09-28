@@ -37,33 +37,165 @@ const createCategoryValidation = [
 
   // NEW jewelry specific validations
   body('itemCategory')
-    .if(body('type').equals('NEW'))
-    .notEmpty()
-    .withMessage('Item category is required for NEW jewelry')
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Item category must be between 1 and 50 characters')
-    .trim(),
+    .custom((value, { req }) => {
+      if (req.body.type === 'NEW') {
+        if (!value || value.trim() === '') {
+          throw new Error('Item category is required for NEW jewelry');
+        }
+        if (value.trim().length < 1 || value.trim().length > 50) {
+          throw new Error('Item category must be between 1 and 50 characters');
+        }
+      }
+      return true;
+    }),
     
   body('purityPercentage')
-    .if(body('type').equals('NEW'))
-    .notEmpty()
-    .withMessage('Purity percentage is required for NEW jewelry')
-    .isFloat({ min: 1, max: 100 })
-    .withMessage('Purity percentage must be between 1 and 100'),
+    .custom((value, { req }) => {
+      if (req.body.type === 'NEW') {
+        if (!value) {
+          throw new Error('Purity percentage is required for NEW jewelry');
+        }
+        const numValue = parseFloat(value);
+        if (numValue < 1 || numValue > 100) {
+          throw new Error('Purity percentage must be between 1 and 100');
+        }
+      }
+      return true;
+    }),
     
   body('buyingFromWholesalerPercentage')
-    .if(body('type').equals('NEW'))
-    .notEmpty()
-    .withMessage('Buying percentage is required for NEW jewelry')
-    .isFloat({ min: 1, max: 200 })
-    .withMessage('Buying percentage must be between 1 and 200'),
+    .custom((value, { req }) => {
+      if (req.body.type === 'NEW') {
+        if (!value) {
+          throw new Error('Buying percentage is required for NEW jewelry');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Buying percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
     
   body('sellingPercentage')
-    .if(body('type').equals('NEW'))
-    .notEmpty()
-    .withMessage('Selling percentage is required for NEW jewelry')
-    .isFloat({ min: 1, max: 200 })
-    .withMessage('Selling percentage must be between 1 and 200'),
+    .custom((value, { req }) => {
+      if (req.body.type === 'NEW') {
+        if (!value) {
+          throw new Error('Selling percentage is required for NEW jewelry');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Selling percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
+
+  // OLD jewelry specific validations
+  body('truePurityPercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD') {
+        if (!value) {
+          throw new Error('True purity percentage is required for OLD jewelry');
+        }
+        const numValue = parseFloat(value);
+        if (numValue < 1 || numValue > 100) {
+          throw new Error('True purity percentage must be between 1 and 100');
+        }
+      }
+      return true;
+    }),
+    
+  body('scrapBuyOwnPercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD') {
+        if (!value) {
+          throw new Error('Scrap buy own percentage is required for OLD jewelry');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Scrap buy own percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
+    
+  body('scrapBuyOtherPercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD') {
+        if (!value) {
+          throw new Error('Scrap buy other percentage is required for OLD jewelry');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Scrap buy other percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
+    
+  body('resaleEnabled')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD') {
+        if (value === undefined || value === null) {
+          throw new Error('Resale enabled status is required for OLD jewelry');
+        }
+        if (typeof value !== 'boolean') {
+          throw new Error('Resale enabled must be a boolean value');
+        }
+      }
+      return true;
+    }),
+
+  // OLD jewelry resale fields (required when resaleEnabled is true)
+  body('directResalePercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
+        if (!value) {
+          throw new Error('Direct resale percentage is required when resale is enabled');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Direct resale percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
+    
+  body('polishRepairResalePercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
+        if (!value) {
+          throw new Error('Polish/repair resale percentage is required when resale is enabled');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Polish/repair resale percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
+    
+  body('polishRepairCostPercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
+        if (value === undefined || value === null || value === '') {
+          throw new Error('Polish/repair cost percentage is required when resale is enabled');
+        }
+        const numValue = parseFloat(value);
+        if (numValue < 0 || numValue > 50) {
+          throw new Error('Polish/repair cost percentage must be between 0 and 50');
+        }
+      }
+      return true;
+    }),
+
+  body('buyingFromWholesalerPercentage')
+    .custom((value, { req }) => {
+      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
+        if (!value) {
+          throw new Error('Buying from wholesaler percentage is required when resale is enabled');
+        }
+        if (parseFloat(value) < 1) {
+          throw new Error('Buying from wholesaler percentage must be at least 1');
+        }
+      }
+      return true;
+    }),
 
   // Description validations (optional)
   body('descriptions.universal')
@@ -113,6 +245,7 @@ const updateCategoryValidation = [
     .withMessage('Code must be between 1 and 20 characters')
     .trim(),
 
+  // NEW jewelry fields
   body('itemCategory')
     .optional()
     .isLength({ min: 1, max: 50 })
@@ -126,13 +259,49 @@ const updateCategoryValidation = [
     
   body('buyingFromWholesalerPercentage')
     .optional()
-    .isFloat({ min: 1, max: 200 })
-    .withMessage('Buying percentage must be between 1 and 200'),
+    .isFloat({ min: 1 })
+    .withMessage('Buying percentage must be at least 1'),
     
   body('sellingPercentage')
     .optional()
-    .isFloat({ min: 1, max: 200 })
-    .withMessage('Selling percentage must be between 1 and 200'),
+    .isFloat({ min: 1 })
+    .withMessage('Selling percentage must be at least 1'),
+
+  // OLD jewelry fields
+  body('truePurityPercentage')
+    .optional()
+    .isFloat({ min: 1, max: 100 })
+    .withMessage('True purity percentage must be between 1 and 100'),
+    
+  body('scrapBuyOwnPercentage')
+    .optional()
+    .isFloat({ min: 1 })
+    .withMessage('Scrap buy own percentage must be at least 1'),
+    
+  body('scrapBuyOtherPercentage')
+    .optional()
+    .isFloat({ min: 1 })
+    .withMessage('Scrap buy other percentage must be at least 1'),
+    
+  body('resaleEnabled')
+    .optional()
+    .isBoolean()
+    .withMessage('Resale enabled must be a boolean value'),
+
+  body('directResalePercentage')
+    .optional()
+    .isFloat({ min: 1 })
+    .withMessage('Direct resale percentage must be at least 1'),
+    
+  body('polishRepairResalePercentage')
+    .optional()
+    .isFloat({ min: 1 })
+    .withMessage('Polish/repair resale percentage must be at least 1'),
+    
+  body('polishRepairCostPercentage')
+    .optional()
+    .isFloat({ min: 0, max: 50 })
+    .withMessage('Polish/repair cost percentage must be between 0 and 50'),
 
   // Description validations (optional)
   body('descriptions.universal')
@@ -216,7 +385,7 @@ const requireShopAdmin = (req, res, next) => {
   next();
 };
 
-// Routes
+// Routes - ORDER MATTERS! Specific routes must come before parameterized routes
 
 // @route   GET /api/categories
 // @desc    Get all categories for shop with optional filters
@@ -233,6 +402,7 @@ router.get(
 // @route   GET /api/categories/item-categories
 // @desc    Get unique item categories for NEW jewelry
 // @access  Private (Shop Admin only)
+// NOTE: This MUST come BEFORE the /:id route!
 router.get(
   '/item-categories',
   protect,
@@ -255,7 +425,7 @@ router.get(
 );
 
 // @route   POST /api/categories
-// @desc    Create new category
+// @desc    Create new category (NEW or OLD jewelry)
 // @access  Private (Shop Admin only)
 router.post(
   '/',
