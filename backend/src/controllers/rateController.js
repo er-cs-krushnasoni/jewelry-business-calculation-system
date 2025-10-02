@@ -573,7 +573,7 @@ const checkDailyRateUpdate = async (req, res) => {
 // @access  Private (Shop users only)
 const getHeaderRateInfo = async (req, res) => {
   try {
-    console.log('getHeaderRateInfo called for user:', req.user ? req.user.username : 'unknown');
+    // console.log('getHeaderRateInfo called for user:', req.user ? req.user.username : 'unknown');
     
     if (!Rate) {
       return res.status(500).json({

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { Info, Eye, EyeOff } from 'lucide-react';
+import { Info, Eye, EyeOff, ChevronDown, Plus, Check } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import api from '../../services/api';
 
 const ExtendedJewelryForm = ({ 
   initialData = null, 
@@ -15,6 +16,13 @@ const ExtendedJewelryForm = ({
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showDescriptionHelp, setShowDescriptionHelp] = useState(false);
+
+  // Category dropdown states
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [categorySearchTerm, setCategorySearchTerm] = useState('');
+  const categoryDropdownRef = useRef(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -37,7 +45,7 @@ const ExtendedJewelryForm = ({
     polishRepairResalePercentage: initialData?.polishRepairResalePercentage || '',
     polishRepairCostPercentage: initialData?.polishRepairCostPercentage || '',
     
-    // Descriptions - handle both old and new format
+    // Descriptions
     descriptions: {
       universal: initialData?.descriptions?.universal || '',
       admin: initialData?.descriptions?.admin || '',
@@ -47,19 +55,104 @@ const ExtendedJewelryForm = ({
     }
   });
 
+  // Load available categories when metal changes
+  useEffect(() => {
+    if (formData.metal) {
+      loadAvailableCategories();
+    }
+  }, [formData.metal]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const loadAvailableCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const queryParams = new URLSearchParams();
+      if (formData.metal) queryParams.append('metal', formData.metal);
+      
+      const response = await api.get(`/categories/item-categories?${queryParams.toString()}`);
+      
+      if (response.data.success) {
+        setAvailableCategories(response.data.data || []);
+      }
+    } catch (error) {
+      console.error('Load categories error:', error);
+      setAvailableCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   const handleInputChange = (name, value) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
 
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: null
       }));
     }
+  };
+
+  const handleCategorySelect = (category) => {
+    setFormData(prev => ({
+      ...prev,
+      itemCategory: category
+    }));
+    setCategorySearchTerm('');
+    setShowCategoryDropdown(false);
+    
+    if (errors.itemCategory) {
+      setErrors(prev => ({
+        ...prev,
+        itemCategory: null
+      }));
+    }
+  };
+
+  const handleCategoryInputChange = (value) => {
+    setFormData(prev => ({
+      ...prev,
+      itemCategory: value
+    }));
+    setCategorySearchTerm(value);
+    setShowCategoryDropdown(true);
+
+    if (errors.itemCategory) {
+      setErrors(prev => ({
+        ...prev,
+        itemCategory: null
+      }));
+    }
+  };
+
+  const getFilteredCategories = () => {
+    if (!categorySearchTerm) return availableCategories;
+    
+    const searchLower = categorySearchTerm.toLowerCase();
+    return availableCategories.filter(cat => 
+      cat.toLowerCase().includes(searchLower)
+    );
+  };
+
+  const isCreatingNewCategory = () => {
+    if (!formData.itemCategory.trim()) return false;
+    return !availableCategories.some(
+      cat => cat.toLowerCase() === formData.itemCategory.toLowerCase()
+    );
   };
 
   const handleDescriptionChange = (role, value) => {
@@ -71,7 +164,6 @@ const ExtendedJewelryForm = ({
       }
     }));
 
-    // Clear error for descriptions
     if (errors[`descriptions.${role}`]) {
       setErrors(prev => ({
         ...prev,
@@ -81,15 +173,12 @@ const ExtendedJewelryForm = ({
   };
 
   const handleTypeChange = (newType) => {
-    // When changing type, reset type-specific fields to avoid confusion
     setFormData(prev => ({
       ...prev,
       type: newType,
-      // Reset NEW jewelry fields
       itemCategory: '',
       purityPercentage: '',
       sellingPercentage: '',
-      // Reset OLD jewelry fields
       truePurityPercentage: '',
       scrapBuyOwnPercentage: '',
       scrapBuyOtherPercentage: '',
@@ -97,11 +186,9 @@ const ExtendedJewelryForm = ({
       directResalePercentage: '',
       polishRepairResalePercentage: '',
       polishRepairCostPercentage: '',
-      // Keep buyingFromWholesalerPercentage as it's used in both types conditionally
       buyingFromWholesalerPercentage: ''
     }));
     
-    // Clear all errors when type changes
     setErrors({});
   };
 
@@ -109,7 +196,6 @@ const ExtendedJewelryForm = ({
     setFormData(prev => ({
       ...prev,
       resaleEnabled: enabled,
-      // Clear resale-specific fields if disabled
       ...(enabled ? {} : {
         directResalePercentage: '',
         polishRepairResalePercentage: '',
@@ -118,7 +204,6 @@ const ExtendedJewelryForm = ({
       })
     }));
 
-    // Clear resale-related errors
     if (!enabled) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -134,7 +219,6 @@ const ExtendedJewelryForm = ({
   const validateForm = () => {
     const newErrors = {};
 
-    // Basic required fields
     if (!formData.type) {
       newErrors.type = 'Type is required';
     }
@@ -149,14 +233,15 @@ const ExtendedJewelryForm = ({
       newErrors.code = 'Code cannot exceed 20 characters';
     }
 
+    // Item category validation for both NEW and OLD
+    if (!formData.itemCategory.trim()) {
+      newErrors.itemCategory = 'Item category is required';
+    } else if (formData.itemCategory.length > 50) {
+      newErrors.itemCategory = 'Item category cannot exceed 50 characters';
+    }
+
     // NEW jewelry validations
     if (formData.type === 'NEW') {
-      if (!formData.itemCategory.trim()) {
-        newErrors.itemCategory = 'Item category is required for NEW jewelry';
-      } else if (formData.itemCategory.length > 50) {
-        newErrors.itemCategory = 'Item category cannot exceed 50 characters';
-      }
-
       if (!formData.purityPercentage) {
         newErrors.purityPercentage = 'Purity percentage is required for NEW jewelry';
       } else {
@@ -214,7 +299,6 @@ const ExtendedJewelryForm = ({
         }
       }
 
-      // Resale validations when enabled
       if (formData.resaleEnabled) {
         if (!formData.directResalePercentage) {
           newErrors.directResalePercentage = 'Direct resale percentage is required when resale is enabled';
@@ -254,7 +338,6 @@ const ExtendedJewelryForm = ({
       }
     }
 
-    // Description length validations
     Object.keys(formData.descriptions).forEach(role => {
       const description = formData.descriptions[role];
       if (description && description.length > 500) {
@@ -276,20 +359,17 @@ const ExtendedJewelryForm = ({
     try {
       setLoading(true);
       
-      // Prepare submit data
       const submitData = {
         ...formData,
-        code: formData.code.trim()
+        code: formData.code.trim(),
+        itemCategory: formData.itemCategory.trim()
       };
 
-      // Clean up type-specific fields
       if (formData.type === 'NEW') {
-        submitData.itemCategory = formData.itemCategory.trim();
         submitData.purityPercentage = parseFloat(formData.purityPercentage);
         submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
         submitData.sellingPercentage = parseFloat(formData.sellingPercentage);
         
-        // Remove OLD jewelry fields
         delete submitData.truePurityPercentage;
         delete submitData.scrapBuyOwnPercentage;
         delete submitData.scrapBuyOtherPercentage;
@@ -310,8 +390,6 @@ const ExtendedJewelryForm = ({
           submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
         }
         
-        // Remove NEW jewelry fields
-        delete submitData.itemCategory;
         delete submitData.purityPercentage;
         delete submitData.sellingPercentage;
         if (!formData.resaleEnabled) {
@@ -323,11 +401,9 @@ const ExtendedJewelryForm = ({
     } catch (error) {
       console.error('Form submission error:', error);
       
-      // Handle validation errors from server
       if (error.response?.data?.errors) {
         const serverErrors = {};
         error.response.data.errors.forEach(errorMsg => {
-          // Try to map error messages to form fields
           if (errorMsg.includes('Code')) {
             serverErrors.code = errorMsg;
           } else if (errorMsg.includes('Item category')) {
@@ -363,21 +439,21 @@ const ExtendedJewelryForm = ({
     }
   };
 
+  const filteredCategories = getFilteredCategories();
+  const showCreateNewOption = formData.itemCategory.trim() && isCreatingNewCategory();
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* General Error */}
       {errors.general && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700 text-sm">{errors.general}</p>
         </div>
       )}
 
-      {/* Basic Information */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Type <span className="text-red-500">*</span>
@@ -388,7 +464,7 @@ const ExtendedJewelryForm = ({
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.type ? 'border-red-500' : 'border-gray-300'
               }`}
-              disabled={isEditing} // Don't allow changing type when editing
+              disabled={isEditing}
             >
               <option value="">Select Type</option>
               <option value="NEW">NEW</option>
@@ -399,7 +475,6 @@ const ExtendedJewelryForm = ({
             )}
           </div>
 
-          {/* Metal */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Metal <span className="text-red-500">*</span>
@@ -420,83 +495,161 @@ const ExtendedJewelryForm = ({
             )}
           </div>
 
-          {/* Code */}
           <Input
             label="Code/Stamp"
             name="code"
             value={formData.code}
             onChange={(e) => handleInputChange('code', e.target.value)}
-            placeholder="e.g., ABC123, વિશિષ્ટ123, विशेष123"
+            placeholder="e.g., ABC123, વિશિષ્ટ123"
             error={errors.code}
             required
             maxLength={20}
           />
         </div>
 
-        {/* NEW Jewelry Specific Fields */}
-        {formData.type === 'NEW' && (
-          <>
-            {/* Item Category */}
-            <Input
-              label="Item Category"
-              name="itemCategory"
-              value={formData.itemCategory}
-              onChange={(e) => handleInputChange('itemCategory', e.target.value)}
-              placeholder="e.g., Chain, Bracelet, Ring, હાર, કડું, चेन"
-              error={errors.itemCategory}
-              required
-              maxLength={50}
-            />
-
-            {/* NEW Jewelry Percentages */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                label="Purity Percentage"
-                name="purityPercentage"
-                type="number"
-                value={formData.purityPercentage}
-                onChange={(e) => handleInputChange('purityPercentage', e.target.value)}
-                placeholder="91.6"
-                error={errors.purityPercentage}
-                required
-                min="1"
-                max="100"
-                step="0.01"
+        {/* Item Category Dropdown (for both NEW and OLD) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Item Category <span className="text-red-500">*</span>
+          </label>
+          <div className="relative" ref={categoryDropdownRef}>
+            <div className="relative">
+              <input
+                type="text"
+                value={formData.itemCategory}
+                onChange={(e) => handleCategoryInputChange(e.target.value)}
+                onFocus={() => setShowCategoryDropdown(true)}
+                placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
+                className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.itemCategory ? 'border-red-500' : 'border-gray-300'
+                }`}
+                disabled={!formData.metal}
+                maxLength={50}
               />
-
-              <Input
-                label="Buying from Wholesaler %"
-                name="buyingFromWholesalerPercentage"
-                type="number"
-                value={formData.buyingFromWholesalerPercentage}
-                onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
-                placeholder="85.5"
-                error={errors.buyingFromWholesalerPercentage}
-                required
-                min="1"
-                step="0.01"
-              />
-
-              <Input
-                label="Selling Percentage"
-                name="sellingPercentage"
-                type="number"
-                value={formData.sellingPercentage}
-                onChange={(e) => handleInputChange('sellingPercentage', e.target.value)}
-                placeholder="95.0"
-                error={errors.sellingPercentage}
-                required
-                min="1"
-                step="0.01"
+              <ChevronDown 
+                size={20} 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
               />
             </div>
-          </>
+
+            {showCategoryDropdown && formData.metal && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                {loadingCategories ? (
+                  <div className="p-4 text-center">
+                    <LoadingSpinner size="sm" />
+                    <p className="text-sm text-gray-500 mt-2">Loading categories...</p>
+                  </div>
+                ) : (
+                  <>
+                    {showCreateNewOption && (
+                      <button
+                        type="button"
+                        onClick={() => handleCategorySelect(formData.itemCategory)}
+                        className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-2 border-b border-gray-200 bg-blue-50"
+                      >
+                        <Plus size={16} className="text-blue-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-blue-700">
+                            Create new category
+                          </div>
+                          <div className="text-xs text-blue-600 truncate">
+                            "{formData.itemCategory}"
+                          </div>
+                        </div>
+                      </button>
+                    )}
+
+                    {filteredCategories.length > 0 ? (
+                      filteredCategories.map((category, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => handleCategorySelect(category)}
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between group"
+                        >
+                          <span className="text-sm text-gray-900">{category}</span>
+                          {formData.itemCategory === category && (
+                            <Check size={16} className="text-green-600" />
+                          )}
+                        </button>
+                      ))
+                    ) : !showCreateNewOption ? (
+                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                        {categorySearchTerm 
+                          ? 'No matching categories found. Type to create new.'
+                          : 'No categories available. Type to create new.'}
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </div>
+            )}
+
+            {!formData.metal && (
+              <p className="text-sm text-gray-500 mt-1">
+                Please select a metal first
+              </p>
+            )}
+          </div>
+          {errors.itemCategory && (
+            <p className="text-red-500 text-sm mt-1">{errors.itemCategory}</p>
+          )}
+          {showCreateNewOption && !errors.itemCategory && (
+            <p className="text-blue-600 text-sm mt-1 flex items-center gap-1">
+              <Plus size={14} />
+              Creating new category: "{formData.itemCategory}"
+            </p>
+          )}
+        </div>
+
+        {/* NEW Jewelry Specific Fields */}
+        {formData.type === 'NEW' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Input
+              label="Purity Percentage"
+              name="purityPercentage"
+              type="number"
+              value={formData.purityPercentage}
+              onChange={(e) => handleInputChange('purityPercentage', e.target.value)}
+              placeholder="91.6"
+              error={errors.purityPercentage}
+              required
+              min="1"
+              max="100"
+              step="0.01"
+            />
+
+            <Input
+              label="Buying from Wholesaler %"
+              name="buyingFromWholesalerPercentage"
+              type="number"
+              value={formData.buyingFromWholesalerPercentage}
+              onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
+              placeholder="85.5"
+              error={errors.buyingFromWholesalerPercentage}
+              required
+              min="1"
+              step="0.01"
+            />
+
+            <Input
+              label="Selling Percentage"
+              name="sellingPercentage"
+              type="number"
+              value={formData.sellingPercentage}
+              onChange={(e) => handleInputChange('sellingPercentage', e.target.value)}
+              placeholder="95.0"
+              error={errors.sellingPercentage}
+              required
+              min="1"
+              step="0.01"
+            />
+          </div>
         )}
 
         {/* OLD Jewelry Specific Fields */}
         {formData.type === 'OLD' && (
           <>
-            {/* OLD Jewelry Basic Percentages */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 label="True Purity Percentage"
@@ -539,7 +692,6 @@ const ExtendedJewelryForm = ({
               />
             </div>
 
-            {/* Resale System Toggle */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <input
@@ -554,11 +706,10 @@ const ExtendedJewelryForm = ({
                 </label>
               </div>
               <p className="text-sm text-gray-500">
-                When enabled, this category will support direct resale and polish/repair resale calculations in addition to scrap value.
+                When enabled, this category will support direct resale and polish/repair resale calculations.
               </p>
             </div>
 
-            {/* Resale Fields (shown only when resale is enabled) */}
             {formData.resaleEnabled && (
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h4 className="font-medium text-blue-900">Resale Configuration</h4>

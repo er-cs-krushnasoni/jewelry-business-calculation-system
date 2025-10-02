@@ -4,151 +4,8 @@ import { useSocket } from '../../contexts/SocketContext';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import BlockingMessage from '../../components/rates/BlockingMessage';
-import { Calculator, AlertTriangle } from 'lucide-react';
-
-// Simple unified jewelry calculator placeholder component
-const JewelryCalculator = ({ rates }) => {
-  const [metal, setMetal] = useState('gold');
-  const [weight, setWeight] = useState('');
-  const [result, setResult] = useState(null);
-
-  const handleCalculate = () => {
-    if (!weight || !rates) return;
-
-    const weightNum = parseFloat(weight);
-    if (isNaN(weightNum) || weightNum <= 0) return;
-
-    let buyRate, sellRate, unit;
-    
-    if (metal === 'gold') {
-      buyRate = rates.goldBuy;
-      sellRate = rates.goldSell;
-      unit = '10g';
-      // Convert weight to 10g units for gold
-      const buyPrice = (weightNum / 10) * buyRate;
-      const sellPrice = (weightNum / 10) * sellRate;
-      
-      setResult({
-        metal: 'Gold',
-        weight: weightNum,
-        unit: 'grams',
-        buyPrice: Math.floor(buyPrice),
-        sellPrice: Math.ceil(sellPrice),
-        buyRate,
-        sellRate,
-        rateUnit: unit
-      });
-    } else {
-      buyRate = rates.silverBuy;
-      sellRate = rates.silverSell;
-      unit = 'kg';
-      // Convert weight to kg units for silver
-      const buyPrice = (weightNum / 1000) * buyRate;
-      const sellPrice = (weightNum / 1000) * sellRate;
-      
-      setResult({
-        metal: 'Silver',
-        weight: weightNum,
-        unit: 'grams',
-        buyPrice: Math.floor(buyPrice),
-        sellPrice: Math.ceil(sellPrice),
-        buyRate,
-        sellRate,
-        rateUnit: unit
-      });
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Metal Selection */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Metal
-        </label>
-        <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={() => setMetal('gold')}
-            className={`px-4 py-2 rounded-lg border ${
-              metal === 'gold'
-                ? 'bg-yellow-100 border-yellow-300 text-yellow-800'
-                : 'bg-white border-gray-300 text-gray-700'
-            }`}
-          >
-            Gold
-          </button>
-          <button
-            type="button"
-            onClick={() => setMetal('silver')}
-            className={`px-4 py-2 rounded-lg border ${
-              metal === 'silver'
-                ? 'bg-gray-100 border-gray-300 text-gray-800'
-                : 'bg-white border-gray-300 text-gray-700'
-            }`}
-          >
-            Silver
-          </button>
-        </div>
-      </div>
-
-      {/* Weight Input */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Weight (grams)
-        </label>
-        <input
-          type="number"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter weight in grams"
-          min="0"
-          step="0.01"
-        />
-      </div>
-
-      {/* Calculate Button */}
-      <button
-        onClick={handleCalculate}
-        disabled={!weight || !rates}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-      >
-        Calculate
-      </button>
-
-      {/* Results */}
-      {result && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-800 mb-3">Calculation Result</h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Metal:</span>
-              <span className="font-medium">{result.metal}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Weight:</span>
-              <span className="font-medium">{result.weight} {result.unit}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Rate ({result.rateUnit}):</span>
-              <span className="font-medium">₹{result.buyRate} / ₹{result.sellRate}</span>
-            </div>
-            <hr className="my-2" />
-            <div className="flex justify-between text-green-700">
-              <span>Buying Price:</span>
-              <span className="font-bold">₹{result.buyPrice}</span>
-            </div>
-            <div className="flex justify-between text-red-700">
-              <span>Selling Price:</span>
-              <span className="font-bold">₹{result.sellPrice}</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import NewJewelryCalculator from '../../components/calculator/NewJewelryCalculator';
+import { Calculator, AlertTriangle, Sparkles } from 'lucide-react';
 
 const CalculatorPage = () => {
   const { user } = useAuth();
@@ -159,6 +16,7 @@ const CalculatorPage = () => {
   const [blockingMessage, setBlockingMessage] = useState('');
   const [rates, setRates] = useState(null);
   const [error, setError] = useState('');
+  const [calculatorType, setCalculatorType] = useState('new'); // 'new' or 'old'
 
   // Check initial blocking status and fetch rates
   const checkSystemStatus = async () => {
@@ -182,7 +40,6 @@ const CalculatorPage = () => {
             }
           } catch (rateError) {
             console.error('Error fetching rates:', rateError);
-            // If we can't get rates, the system should be blocked
             setIsBlocked(true);
             setBlockingMessage('Unable to fetch current rates. Please try again.');
           }
@@ -191,7 +48,6 @@ const CalculatorPage = () => {
     } catch (err) {
       console.error('Error checking system status:', err);
       setError('Failed to check system status. Please refresh the page.');
-      // Default to blocked state on error
       setIsBlocked(true);
       setBlockingMessage('System error. Please contact support.');
     } finally {
@@ -286,7 +142,7 @@ const CalculatorPage = () => {
 
   // Show calculator if system is not blocked
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Calculator Header */}
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -298,6 +154,14 @@ const CalculatorPage = () => {
         <p className="text-gray-600">
           Calculate accurate prices based on current gold and silver rates
         </p>
+        
+        {/* Phase Badge */}
+        <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-300 rounded-full px-4 py-2">
+          <Sparkles className="text-blue-600" size={16} />
+          <span className="text-sm font-medium text-blue-900">
+            Phase 4A: NEW Jewelry Calculator (Basic Calculations)
+          </span>
+        </div>
         
         {/* Connection Status Indicator */}
         {!isConnected && (
@@ -315,7 +179,10 @@ const CalculatorPage = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Current Rates</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <h3 className="font-medium text-yellow-600">Gold (per 10g)</h3>
+              <h3 className="font-medium text-yellow-600 flex items-center gap-2">
+                <Sparkles size={16} />
+                Gold (per 10g)
+              </h3>
               <div className="flex justify-between">
                 <span className="text-gray-600">Buying:</span>
                 <span className="font-semibold">₹{rates.goldBuy}</span>
@@ -326,7 +193,10 @@ const CalculatorPage = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <h3 className="font-medium text-gray-400">Silver (per kg)</h3>
+              <h3 className="font-medium text-gray-400 flex items-center gap-2">
+                <Sparkles size={16} />
+                Silver (per kg)
+              </h3>
               <div className="flex justify-between">
                 <span className="text-gray-600">Buying:</span>
                 <span className="font-semibold">₹{rates.silverBuy}</span>
@@ -353,21 +223,93 @@ const CalculatorPage = () => {
         </div>
       )}
 
-      {/* Unified Calculator */}
+      {/* Calculator Type Selector */}
+      <div className="mb-6 bg-white rounded-lg shadow p-4">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          Select Jewelry Type
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            type="button"
+            onClick={() => setCalculatorType('new')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              calculatorType === 'new'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-200 bg-white hover:border-green-200'
+            }`}
+          >
+            <div className="text-center">
+              <div className={`text-lg font-semibold ${
+                calculatorType === 'new' ? 'text-green-700' : 'text-gray-700'
+              }`}>
+                NEW Jewelry
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Fresh stock calculations
+              </div>
+              {calculatorType === 'new' && (
+                <div className="mt-2 text-xs text-green-600 font-medium">
+                  ✓ Active
+                </div>
+              )}
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCalculatorType('old')}
+            disabled
+            className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+          >
+            <div className="text-center">
+              <div className="text-lg font-semibold text-gray-500">
+                OLD Jewelry
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                Scrap & resale calculations
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                Coming in Phase 4B/4C
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Calculator Component */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Price Calculator</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            {calculatorType === 'new' ? 'NEW Jewelry Calculator' : 'OLD Jewelry Calculator'}
+          </h2>
           <p className="text-gray-600 text-sm mt-1">
-            Calculate buying and selling prices for gold and silver
+            {calculatorType === 'new' 
+              ? 'Calculate buying and selling prices for new jewelry with category-based percentages'
+              : 'Calculate scrap values and resale prices for old jewelry (Coming soon)'
+            }
           </p>
         </div>
         <div className="p-6">
-          {rates ? (
-            <JewelryCalculator rates={rates} />
+          {calculatorType === 'new' ? (
+            rates ? (
+              <NewJewelryCalculator rates={rates} />
+            ) : (
+              <div className="text-center py-8">
+                <LoadingSpinner size="medium" />
+                <p className="mt-2 text-gray-600">Loading rates...</p>
+              </div>
+            )
           ) : (
-            <div className="text-center py-8">
-              <LoadingSpinner size="medium" />
-              <p className="mt-2 text-gray-600">Loading rates...</p>
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Calculator size={64} className="mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                OLD Jewelry Calculator
+              </h3>
+              <p className="text-gray-600">
+                This calculator will be available in Phase 4B/4C
+              </p>
             </div>
           )}
         </div>
@@ -379,11 +321,42 @@ const CalculatorPage = () => {
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-800 font-medium text-sm">
-              Real-time updates active - Rates will update automatically when changed
+              Real-time updates active - Rates and calculations will update automatically
             </span>
           </div>
         </div>
       )}
+
+      {/* Help Section */}
+      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 className="font-semibold text-blue-900 mb-3">Calculator Features</h3>
+        <ul className="space-y-2 text-sm text-blue-800">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Metal-based filtering: Select gold or silver to see relevant categories</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Category filtering: Filter by item category for easier selection (Admin/Manager/Pro Client)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Multi-language support: Categories and descriptions support Gujarati, Hindi, and English</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Role-based visibility: Different calculation details based on your access level</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Real-time rate updates: Calculations automatically use the latest rates</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">✓</span>
+            <span>Phase 4A: Basic calculations without rounding (formula testing phase)</span>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

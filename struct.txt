@@ -73,6 +73,7 @@ jewellery-calculation-system
         │   │   └── ProtectedRoute.jsx
         │   │
         │   ├── calculator
+        │   │   ├── NewJewelryCalculator.jsx
         │   │
         │   ├── layout
         │   │   ├── Header.jsx
@@ -87,6 +88,7 @@ jewellery-calculation-system
         │   │
         │   ├── categories
         │   │   ├── ExtendedJewelryForm.jsx
+        │   │   ├── DescriptionManager.jsx
         │   │
         │   └── ui
         │       ├── Button.jsx
@@ -113,6 +115,8 @@ jewellery-calculation-system
         │   │   ├── DescriptionManager.jsx
         │   ├── auth
         │   ├── calculator
+        │   │   ├── calculator.jsx
+        │   │   ├── CalculatorWrapper.jsx
         │   ├── dashboard
         │   │   ├── SuperAdminDashboard.jsx
         │   │   ├── ShopAdminDashboard.jsx

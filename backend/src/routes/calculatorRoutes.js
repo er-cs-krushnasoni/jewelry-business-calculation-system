@@ -3,18 +3,18 @@ const { authenticate } = require('../middleware/auth');
 const { rateBlockingMiddleware } = require('../middleware/rateBlocking');
 const {
   testCalculator,
-  getNewJewelryOptions,
-  getOldJewelryOptions,
+  getNewJewelryCategories,
+  getNewJewelryItemCategories,
   calculateNewJewelryPrice,
+  getOldJewelryOptions,
   calculateOldJewelryPrice
 } = require('../controllers/calculatorController');
 
 const router = express.Router();
 
 // All calculator routes require authentication and rate blocking check
-// Apply middleware to all routes in this router
 router.use(authenticate);
-router.use(rateBlockingMiddleware); // This will block calculator access at 1:00 PM
+router.use(rateBlockingMiddleware);
 
 // ============================================
 // CALCULATOR TEST ROUTES
@@ -36,36 +36,41 @@ router.get('/status', (req, res) => {
       message: 'Calculator is ready for use',
       userRole: req.user.role,
       canCalculate: ['admin', 'manager', 'pro_client', 'client'].includes(req.user.role),
-      rateInfo: req.rateInfo // Added by rate blocking middleware
+      rateInfo: req.rateInfo
     }
   });
 });
 
 // ============================================
-// NEW JEWELRY CALCULATION ROUTES
+// NEW JEWELRY CALCULATION ROUTES - PHASE 4A
 // ============================================
 
-// @route   GET /api/calculator/new-jewelry/options
-// @desc    Get available categories and codes for new jewelry
+// @route   GET /api/calculator/new-jewelry/categories
+// @desc    Get available categories for NEW jewelry (with metal filter)
 // @access  Private (Shop users only, blocked if rates not updated)
-router.get('/new-jewelry/options', getNewJewelryOptions);
+router.get('/new-jewelry/categories', getNewJewelryCategories);
+
+// @route   GET /api/calculator/new-jewelry/item-categories
+// @desc    Get unique item categories for filtering
+// @access  Private (Shop users only, blocked if rates not updated)
+router.get('/new-jewelry/item-categories', getNewJewelryItemCategories);
 
 // @route   POST /api/calculator/new-jewelry/calculate
-// @desc    Calculate new jewelry prices
+// @desc    Calculate NEW jewelry prices (basic calculation, no rounding - Phase 4A)
 // @access  Private (Shop users only, blocked if rates not updated)
 router.post('/new-jewelry/calculate', calculateNewJewelryPrice);
 
 // ============================================
-// OLD JEWELRY CALCULATION ROUTES
+// OLD JEWELRY CALCULATION ROUTES - PLACEHOLDER
 // ============================================
 
 // @route   GET /api/calculator/old-jewelry/options
-// @desc    Get available codes for old jewelry
+// @desc    Get available codes for old jewelry (Placeholder for Phase 4B/4C)
 // @access  Private (Shop users only, blocked if rates not updated)
 router.get('/old-jewelry/options', getOldJewelryOptions);
 
 // @route   POST /api/calculator/old-jewelry/calculate
-// @desc    Calculate old jewelry prices (scrap/resale)
+// @desc    Calculate old jewelry prices (Placeholder for Phase 4B/4C)
 // @access  Private (Shop users only, blocked if rates not updated)
 router.post('/old-jewelry/calculate', calculateOldJewelryPrice);
 
@@ -86,7 +91,8 @@ router.get('/user-permissions', (req, res) => {
       canViewWholesaleRates: true,
       canAccessResale: true,
       canSeeAllDetails: true,
-      calculationLevel: 'full'
+      calculationLevel: 'full',
+      canAccessAllCategories: true
     },
     manager: {
       canViewMargins: true,
@@ -94,7 +100,8 @@ router.get('/user-permissions', (req, res) => {
       canViewWholesaleRates: true,
       canAccessResale: true,
       canSeeAllDetails: true,
-      calculationLevel: 'full'
+      calculationLevel: 'full',
+      canAccessAllCategories: true
     },
     pro_client: {
       canViewMargins: true,
@@ -102,7 +109,8 @@ router.get('/user-permissions', (req, res) => {
       canViewWholesaleRates: false,
       canAccessResale: true,
       canSeeAllDetails: false,
-      calculationLevel: 'margin'
+      calculationLevel: 'margin',
+      canAccessAllCategories: true
     },
     client: {
       canViewMargins: false,
@@ -110,7 +118,8 @@ router.get('/user-permissions', (req, res) => {
       canViewWholesaleRates: false,
       canAccessResale: false,
       canSeeAllDetails: false,
-      calculationLevel: 'basic'
+      calculationLevel: 'basic',
+      canAccessAllCategories: false
     }
   };
   
