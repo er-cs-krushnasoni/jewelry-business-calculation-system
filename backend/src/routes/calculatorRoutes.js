@@ -6,7 +6,7 @@ const {
   getNewJewelryCategories,
   getNewJewelryItemCategories,
   calculateNewJewelryPrice,
-  getOldJewelryOptions,
+  getOldJewelryCategories,
   calculateOldJewelryPrice
 } = require('../controllers/calculatorController');
 
@@ -42,7 +42,7 @@ router.get('/status', (req, res) => {
 });
 
 // ============================================
-// NEW JEWELRY CALCULATION ROUTES - PHASE 4A
+// NEW JEWELRY CALCULATION ROUTES
 // ============================================
 
 // @route   GET /api/calculator/new-jewelry/categories
@@ -56,21 +56,21 @@ router.get('/new-jewelry/categories', getNewJewelryCategories);
 router.get('/new-jewelry/item-categories', getNewJewelryItemCategories);
 
 // @route   POST /api/calculator/new-jewelry/calculate
-// @desc    Calculate NEW jewelry prices (basic calculation, no rounding - Phase 4A)
+// @desc    Calculate NEW jewelry prices with rounding
 // @access  Private (Shop users only, blocked if rates not updated)
 router.post('/new-jewelry/calculate', calculateNewJewelryPrice);
 
 // ============================================
-// OLD JEWELRY CALCULATION ROUTES - PLACEHOLDER
+// OLD JEWELRY CALCULATION ROUTES - PHASE 5A
 // ============================================
 
-// @route   GET /api/calculator/old-jewelry/options
-// @desc    Get available codes for old jewelry (Placeholder for Phase 4B/4C)
+// @route   GET /api/calculator/old-jewelry/categories
+// @desc    Get available codes for OLD jewelry (with metal filter)
 // @access  Private (Shop users only, blocked if rates not updated)
-router.get('/old-jewelry/options', getOldJewelryOptions);
+router.get('/old-jewelry/categories', getOldJewelryCategories);
 
 // @route   POST /api/calculator/old-jewelry/calculate
-// @desc    Calculate old jewelry prices (Placeholder for Phase 4B/4C)
+// @desc    Calculate OLD jewelry scrap prices with Own/Other selection
 // @access  Private (Shop users only, blocked if rates not updated)
 router.post('/old-jewelry/calculate', calculateOldJewelryPrice);
 
@@ -83,7 +83,7 @@ router.post('/old-jewelry/calculate', calculateOldJewelryPrice);
 // @access  Private (Shop users only)
 router.get('/user-permissions', (req, res) => {
   const role = req.user.role;
-  
+
   const permissions = {
     admin: {
       canViewMargins: true,
@@ -122,7 +122,7 @@ router.get('/user-permissions', (req, res) => {
       canAccessAllCategories: false
     }
   };
-  
+
   res.status(200).json({
     success: true,
     data: {

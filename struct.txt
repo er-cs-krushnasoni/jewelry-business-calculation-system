@@ -74,6 +74,7 @@ jewellery-calculation-system
         │   │
         │   ├── calculator
         │   │   ├── NewJewelryCalculator.jsx
+        │   │   ├── OldJewelryCalculator.jsx
         │   │
         │   ├── layout
         │   │   ├── Header.jsx

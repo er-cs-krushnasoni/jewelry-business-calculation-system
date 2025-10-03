@@ -5,6 +5,7 @@ import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import BlockingMessage from '../../components/rates/BlockingMessage';
 import NewJewelryCalculator from '../../components/calculator/NewJewelryCalculator';
+import OldJewelryCalculator from '../../components/calculator/OldJewelryCalculator';
 import { Calculator, AlertTriangle, Sparkles } from 'lucide-react';
 
 const CalculatorPage = () => {
@@ -16,22 +17,19 @@ const CalculatorPage = () => {
   const [blockingMessage, setBlockingMessage] = useState('');
   const [rates, setRates] = useState(null);
   const [error, setError] = useState('');
-  const [calculatorType, setCalculatorType] = useState('new'); // 'new' or 'old'
+  const [calculatorType, setCalculatorType] = useState('new');
 
-  // Check initial blocking status and fetch rates
   const checkSystemStatus = async () => {
     try {
       setLoading(true);
       setError('');
 
-      // Check blocking status
       const blockingResponse = await api.get('/rates/blocking-status');
       if (blockingResponse.data.success) {
         const blockingData = blockingResponse.data.data;
         setIsBlocked(blockingData.isBlocked);
         setBlockingMessage(blockingData.message);
         
-        // If not blocked, fetch current rates
         if (!blockingData.isBlocked) {
           try {
             const ratesResponse = await api.get('/rates/my-rates');
@@ -55,21 +53,18 @@ const CalculatorPage = () => {
     }
   };
 
-  // Handle real-time blocking status updates
   useEffect(() => {
     if (systemBlocking) {
       console.log('Calculator: Real-time blocking update:', systemBlocking);
       setIsBlocked(systemBlocking.isBlocked);
       setBlockingMessage(systemBlocking.message);
       
-      // If unblocked, fetch rates
       if (!systemBlocking.isBlocked) {
         fetchRatesQuietly();
       }
     }
   }, [systemBlocking]);
 
-  // Quietly fetch rates without loading state
   const fetchRatesQuietly = async () => {
     try {
       const response = await api.get('/rates/my-rates');
@@ -81,21 +76,18 @@ const CalculatorPage = () => {
     }
   };
 
-  // Handle unblock callback
   const handleUnblock = () => {
     setIsBlocked(false);
     setBlockingMessage('');
     fetchRatesQuietly();
   };
 
-  // Initial load
   useEffect(() => {
     if (user && user.shopId) {
       checkSystemStatus();
     }
   }, [user]);
 
-  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -107,7 +99,6 @@ const CalculatorPage = () => {
     );
   }
 
-  // Show error state
   if (error && !isBlocked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -128,7 +119,6 @@ const CalculatorPage = () => {
     );
   }
 
-  // Show blocking message if system is blocked
   if (isBlocked) {
     return (
       <BlockingMessage
@@ -140,10 +130,8 @@ const CalculatorPage = () => {
     );
   }
 
-  // Show calculator if system is not blocked
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Calculator Header */}
       <div className="mb-8 text-center">
         <div className="flex items-center justify-center space-x-3 mb-4">
           <Calculator className="h-8 w-8 text-blue-600" />
@@ -155,7 +143,6 @@ const CalculatorPage = () => {
           Calculate accurate prices based on current gold and silver rates
         </p>
         
-        {/* Connection Status Indicator */}
         {!isConnected && (
           <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-yellow-800 text-sm">
@@ -165,7 +152,6 @@ const CalculatorPage = () => {
         )}
       </div>
 
-      {/* Current Rates Display */}
       {rates && (
         <div className="mb-8 bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Current Rates</h2>
@@ -215,7 +201,6 @@ const CalculatorPage = () => {
         </div>
       )}
 
-      {/* Calculator Type Selector */}
       <div className="mb-6 bg-white rounded-lg shadow p-4">
         <label className="block text-sm font-medium text-gray-700 mb-3">
           Select Jewelry Type
@@ -250,25 +235,31 @@ const CalculatorPage = () => {
           <button
             type="button"
             onClick={() => setCalculatorType('old')}
-            disabled
-            className="p-4 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed"
+            className={`p-4 rounded-lg border-2 transition-all ${
+              calculatorType === 'old'
+                ? 'border-orange-500 bg-orange-50'
+                : 'border-gray-200 bg-white hover:border-orange-200'
+            }`}
           >
             <div className="text-center">
-              <div className="text-lg font-semibold text-gray-500">
+              <div className={`text-lg font-semibold ${
+                calculatorType === 'old' ? 'text-orange-700' : 'text-gray-700'
+              }`}>
                 OLD Jewelry
               </div>
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-gray-600 mt-1">
                 Scrap & resale calculations
               </div>
-              <div className="mt-2 text-xs text-gray-500">
-                Coming Soon
-              </div>
+              {calculatorType === 'old' && (
+                <div className="mt-2 text-xs text-orange-600 font-medium">
+                  ✓ Active
+                </div>
+              )}
             </div>
           </button>
         </div>
       </div>
 
-      {/* Calculator Component */}
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">
@@ -277,37 +268,26 @@ const CalculatorPage = () => {
           <p className="text-gray-600 text-sm mt-1">
             {calculatorType === 'new' 
               ? 'Calculate buying and selling prices for new jewelry with category-based percentages'
-              : 'Calculate scrap values and resale prices for old jewelry (Coming soon)'
+              : 'Calculate scrap values for old jewelry with Own/Other selection'
             }
           </p>
         </div>
         <div className="p-6">
-          {calculatorType === 'new' ? (
-            rates ? (
+          {rates ? (
+            calculatorType === 'new' ? (
               <NewJewelryCalculator rates={rates} />
             ) : (
-              <div className="text-center py-8">
-                <LoadingSpinner size="medium" />
-                <p className="mt-2 text-gray-600">Loading rates...</p>
-              </div>
+              <OldJewelryCalculator rates={rates} />
             )
           ) : (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Calculator size={64} className="mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">
-                OLD Jewelry Calculator
-              </h3>
-              <p className="text-gray-600">
-                This calculator will be available soon
-              </p>
+            <div className="text-center py-8">
+              <LoadingSpinner size="medium" />
+              <p className="mt-2 text-gray-600">Loading rates...</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Real-time Updates Info */}
       {isConnected && (
         <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-4">
           <div className="flex items-center space-x-2">
@@ -319,21 +299,20 @@ const CalculatorPage = () => {
         </div>
       )}
 
-      {/* Help Section */}
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="font-semibold text-blue-900 mb-3">Calculator Features</h3>
         <ul className="space-y-2 text-sm text-blue-800">
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Metal-based filtering: Select gold or silver to see relevant categories</span>
+            <span>NEW Jewelry: Metal filtering, category selection, and smart rounding</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Category filtering: Filter by item category for easier selection</span>
+            <span>OLD Jewelry: Scrap calculations with Own/Other source selection</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Multi-language support: Categories and descriptions support Gujarati, Hindi, and English</span>
+            <span>Multi-language support: Categories and descriptions in Gujarati, Hindi, and English</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
@@ -345,7 +324,7 @@ const CalculatorPage = () => {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Smart rounding: Final amounts rounded for easier transactions</span>
+            <span>Smart rounding: NEW jewelry rounds up, OLD jewelry rounds down to nearest 50</span>
           </li>
         </ul>
       </div>
