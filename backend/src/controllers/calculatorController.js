@@ -1,6 +1,29 @@
 const Rate = require('../models/Rate');
 const Category = require('../models/Category');
 
+// NEW Jewelry Rounding Logic (Phase 4B)
+// Ceiling-based rounding: 01-49 → 50, 51-99 → +100, 00/50 → no change
+const applyNewJewelryRounding = (amount) => {
+  const lastTwoDigits = Math.floor(amount) % 100;
+  
+  // If last two digits are 00 or 50, no change
+  if (lastTwoDigits === 0 || lastTwoDigits === 50) {
+    return Math.floor(amount);
+  }
+  
+  // If last two digits are 01-49, change to 50
+  if (lastTwoDigits >= 1 && lastTwoDigits <= 49) {
+    return Math.floor(amount / 100) * 100 + 50;
+  }
+  
+  // If last two digits are 51-99, add 100 to total
+  if (lastTwoDigits >= 51 && lastTwoDigits <= 99) {
+    return Math.floor(amount / 100) * 100 + 100;
+  }
+  
+  return Math.floor(amount);
+};
+
 // @desc    Test calculator access (this route is protected by rate blocking middleware)
 // @route   GET /api/calculator/test
 // @access  Private (Shop users only, blocked if rates not updated)
@@ -151,7 +174,7 @@ const getNewJewelryItemCategories = async (req, res) => {
   }
 };
 
-// @desc    Calculate NEW jewelry price (WITHOUT rounding - Phase 4A)
+// @desc    Calculate NEW jewelry price (WITH rounding - Phase 4B)
 // @route   POST /api/calculator/new-jewelry/calculate
 // @access  Private (Shop users only, blocked if rates not updated)
 const calculateNewJewelryPrice = async (req, res) => {
@@ -207,7 +230,7 @@ const calculateNewJewelryPrice = async (req, res) => {
       ? dailySellingRate / 10  // Gold rate is per 10 grams
       : dailySellingRate / 1000; // Silver rate is per kg (1000 grams)
 
-    // PHASE 4A: Enhanced calculations for new requirements
+    // PHASE 4B: Enhanced calculations with rounding
     
     // Basic rate calculations
     const actualRatePerGram = ratePerGram * (category.purityPercentage / 100);
@@ -217,12 +240,15 @@ const calculateNewJewelryPrice = async (req, res) => {
     // Making charges per gram
     const makingChargesPerGram = sellingRatePerGram - actualRatePerGram;
     
-    // Total amounts
-    const finalSellingAmount = sellingRatePerGram * weightNum;
+    // Total amounts (before rounding)
+    const finalSellingAmountBeforeRounding = sellingRatePerGram * weightNum;
     const actualValueByPurity = actualRatePerGram * weightNum;
     const purchaseFromWholesaler = buyingRatePerGram * weightNum;
     
-    // Margins
+    // APPLY ROUNDING to final selling amount only
+    const finalSellingAmount = applyNewJewelryRounding(finalSellingAmountBeforeRounding);
+    
+    // Margins (calculated after rounding)
     const wholesalerMargin = purchaseFromWholesaler - actualValueByPurity;
     const ourMargin = finalSellingAmount - purchaseFromWholesaler;
 
@@ -270,12 +296,18 @@ const calculateNewJewelryPrice = async (req, res) => {
         wholesalerMargin: wholesalerMargin
       },
 
+      // Rounding information
+      roundingInfo: {
+        beforeRounding: finalSellingAmountBeforeRounding,
+        afterRounding: finalSellingAmount,
+        roundingApplied: finalSellingAmountBeforeRounding !== finalSellingAmount
+      },
+
       // Calculation metadata
       metadata: {
         userRole,
         calculatedAt: new Date().toISOString(),
-        roundingApplied: false,
-        phase: '4A'
+        roundingApplied: true
       }
     };
 
@@ -299,10 +331,10 @@ const calculateNewJewelryPrice = async (req, res) => {
 // @access  Private (Shop users only, blocked if rates not updated)
 const getOldJewelryOptions = async (req, res) => {
   try {
-    // Placeholder for Phase 4B/4C
+    // Placeholder for Phase 4C
     res.status(200).json({
       success: true,
-      message: 'Old jewelry options (placeholder - will be implemented in Phase 4B/4C)',
+      message: 'Old jewelry options (placeholder - will be implemented in Phase 4C)',
       data: {
         metals: ['gold', 'silver'],
         sources: ['own', 'other'],
@@ -324,10 +356,10 @@ const getOldJewelryOptions = async (req, res) => {
 // @access  Private (Shop users only, blocked if rates not updated)
 const calculateOldJewelryPrice = async (req, res) => {
   try {
-    // Placeholder for Phase 4B/4C
+    // Placeholder for Phase 4C
     res.status(200).json({
       success: true,
-      message: 'Old jewelry calculation (placeholder - will be implemented in Phase 4B/4C)',
+      message: 'Old jewelry calculation (placeholder - will be implemented in Phase 4C)',
       data: {
         placeholder: true,
         note: 'OLD jewelry calculator will be implemented in future phases'

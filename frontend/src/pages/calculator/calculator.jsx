@@ -155,14 +155,6 @@ const CalculatorPage = () => {
           Calculate accurate prices based on current gold and silver rates
         </p>
         
-        {/* Phase Badge */}
-        <div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-300 rounded-full px-4 py-2">
-          <Sparkles className="text-blue-600" size={16} />
-          <span className="text-sm font-medium text-blue-900">
-            Phase 4A: NEW Jewelry Calculator (Basic Calculations)
-          </span>
-        </div>
-        
         {/* Connection Status Indicator */}
         {!isConnected && (
           <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
@@ -269,7 +261,7 @@ const CalculatorPage = () => {
                 Scrap & resale calculations
               </div>
               <div className="mt-2 text-xs text-gray-500">
-                Coming in Phase 4B/4C
+                Coming Soon
               </div>
             </div>
           </button>
@@ -308,7 +300,7 @@ const CalculatorPage = () => {
                 OLD Jewelry Calculator
               </h3>
               <p className="text-gray-600">
-                This calculator will be available in Phase 4B/4C
+                This calculator will be available soon
               </p>
             </div>
           )}
@@ -337,7 +329,7 @@ const CalculatorPage = () => {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Category filtering: Filter by item category for easier selection (Admin/Manager/Pro Client)</span>
+            <span>Category filtering: Filter by item category for easier selection</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
@@ -353,7 +345,7 @@ const CalculatorPage = () => {
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Phase 4A: Basic calculations without rounding (formula testing phase)</span>
+            <span>Smart rounding: Final amounts rounded for easier transactions</span>
           </li>
         </ul>
       </div>
