@@ -21,7 +21,7 @@ const applyNewJewelryRounding = (amount) => {
   return Math.floor(amount);
 };
 
-// OLD Jewelry Rounding Logic (Phase 5A)
+// OLD Jewelry Rounding Logic (Phase 5A & 5B)
 // Floor-based rounding to nearest 50
 const applyOldJewelryRounding = (amount) => {
   return Math.floor(amount / 50) * 50;
@@ -85,7 +85,7 @@ const getNewJewelryCategories = async (req, res) => {
 
     const categories = await Category.findWithFilters(filters);
 
-    // PHASE 5A UPDATE: Get BOTH universal AND role-based descriptions
+    // Get BOTH universal AND role-based descriptions
     const transformedCategories = categories.map(category => {
       const descriptions = [];
       
@@ -264,7 +264,7 @@ const calculateNewJewelryPrice = async (req, res) => {
     const wholesalerMargin = purchaseFromWholesaler - actualValueByPurity;
     const ourMargin = finalSellingAmount - purchaseFromWholesaler;
 
-    // PHASE 5A UPDATE: Get BOTH descriptions
+    // Get BOTH descriptions
     const descriptions = [];
     if (category.descriptions.universal && category.descriptions.universal.trim()) {
       descriptions.push({
@@ -353,7 +353,7 @@ const calculateNewJewelryPrice = async (req, res) => {
   }
 };
 
-// @desc    Get available codes for old jewelry calculation (PHASE 5A)
+// @desc    Get available codes for old jewelry calculation with resale categories
 // @route   GET /api/calculator/old-jewelry/categories
 // @access  Private (Shop users only, blocked if rates not updated)
 const getOldJewelryCategories = async (req, res) => {
@@ -411,7 +411,18 @@ const getOldJewelryCategories = async (req, res) => {
         truePurityPercentage: category.truePurityPercentage,
         scrapBuyOwnPercentage: category.scrapBuyOwnPercentage,
         scrapBuyOtherPercentage: category.scrapBuyOtherPercentage,
-        resaleEnabled: category.resaleEnabled
+        resaleEnabled: category.resaleEnabled,
+        // Include resale categories for selection (only if user can see resale)
+        resaleCategories: category.resaleEnabled && ['admin', 'manager', 'pro_client'].includes(userRole)
+          ? category.resaleCategories.map(rc => ({
+              _id: rc._id,
+              itemCategory: rc.itemCategory,
+              directResalePercentage: rc.directResalePercentage,
+              polishRepairResalePercentage: rc.polishRepairResalePercentage,
+              polishRepairCostPercentage: rc.polishRepairCostPercentage,
+              buyingFromWholesalerPercentage: rc.buyingFromWholesalerPercentage
+            }))
+          : []
       };
     });
 
@@ -439,12 +450,12 @@ const getOldJewelryCategories = async (req, res) => {
   }
 };
 
-// @desc    Calculate old jewelry price (scrap/resale) - PHASE 5A
+// @desc    Calculate old jewelry price (scrap/resale) with resale category support
 // @route   POST /api/calculator/old-jewelry/calculate
 // @access  Private (Shop users only, blocked if rates not updated)
 const calculateOldJewelryPrice = async (req, res) => {
   try {
-    const { categoryId, weight, source } = req.body;
+    const { categoryId, weight, source, resaleCategoryId } = req.body;
     const shopId = req.user.shopId;
     const userRole = req.user.role;
 
@@ -486,6 +497,19 @@ const calculateOldJewelryPrice = async (req, res) => {
       });
     }
 
+    // Validate resale category selection if resale enabled
+    let selectedResaleCategory = null;
+    if (category.resaleEnabled && resaleCategoryId) {
+      selectedResaleCategory = category.resaleCategories.id(resaleCategoryId);
+      
+      if (!selectedResaleCategory) {
+        return res.status(400).json({
+          success: false,
+          message: 'Selected resale category not found'
+        });
+      }
+    }
+
     // Fetch current rates
     const rates = await Rate.getCurrentRatesForShop(shopId);
     if (!rates) {
@@ -495,26 +519,31 @@ const calculateOldJewelryPrice = async (req, res) => {
       });
     }
 
-    // Get rate per gram based on metal type
+    // Get rates per gram based on metal type
     const isGold = category.metal === 'GOLD';
     const dailyBuyingRate = isGold ? rates.goldBuy : rates.silverBuy;
-    const ratePerGram = isGold 
+    const dailySellingRate = isGold ? rates.goldSell : rates.silverSell;
+    const buyingRatePerGram = isGold 
       ? dailyBuyingRate / 10
       : dailyBuyingRate / 1000;
+    const sellingRatePerGram = isGold
+      ? dailySellingRate / 10
+      : dailySellingRate / 1000;
 
     // Get scrap buy percentage based on source
     const scrapBuyPercentage = source.toLowerCase() === 'own' 
       ? category.scrapBuyOwnPercentage 
       : category.scrapBuyOtherPercentage;
 
-    // SCRAP VALUE CALCULATION
-    const scrapValuePerGram = ratePerGram * (scrapBuyPercentage / 100);
+    // ========================================
+    // SCRAP VALUE CALCULATION (using BUYING rate)
+    // ========================================
+    const scrapValuePerGram = buyingRatePerGram * (scrapBuyPercentage / 100);
     const totalScrapValueBeforeRounding = scrapValuePerGram * weightNum;
     const totalScrapValue = applyOldJewelryRounding(totalScrapValueBeforeRounding);
 
-    // SCRAP MARGIN CALCULATION
-    // Formula: (Daily Buying Rate × True Purity % × Weight) - (Daily Buying Rate × Scrap Buy % × Weight)
-    const actualValueByPurity = ratePerGram * (category.truePurityPercentage / 100) * weightNum;
+    // SCRAP MARGIN CALCULATION (for Admin/Manager only)
+    const actualValueByPurity = buyingRatePerGram * (category.truePurityPercentage / 100) * weightNum;
     const scrapMargin = actualValueByPurity - totalScrapValue;
 
     // Get BOTH descriptions
@@ -541,7 +570,7 @@ const calculateOldJewelryPrice = async (req, res) => {
       });
     }
 
-    // Prepare calculation result
+    // Base calculation result
     const calculationResult = {
       // Input data
       input: {
@@ -550,13 +579,22 @@ const calculateOldJewelryPrice = async (req, res) => {
         metal: category.metal,
         weight: weightNum,
         source: source.toLowerCase(),
-        descriptions: descriptions
+        descriptions: descriptions,
+        // Include selected resale category info if applicable
+        ...(selectedResaleCategory && {
+          selectedResaleCategory: {
+            id: selectedResaleCategory._id,
+            itemCategory: selectedResaleCategory.itemCategory
+          }
+        })
       },
 
       // Rate information
       rates: {
         dailyBuyingRate: dailyBuyingRate,
-        ratePerGram: ratePerGram,
+        dailySellingRate: dailySellingRate,
+        buyingRatePerGram: buyingRatePerGram,
+        sellingRatePerGram: sellingRatePerGram,
         unit: isGold ? 'per 10g' : 'per kg'
       },
 
@@ -567,7 +605,7 @@ const calculateOldJewelryPrice = async (req, res) => {
         source: source.toLowerCase()
       },
 
-      // Main calculation results
+      // Main scrap calculation results
       totalScrapValue: totalScrapValue,
       
       // Scrap breakdown
@@ -576,7 +614,7 @@ const calculateOldJewelryPrice = async (req, res) => {
         totalWeight: weightNum
       },
 
-      // Margin breakdown (for authorized users)
+      // Margin breakdown
       marginBreakdown: {
         scrapMargin: scrapMargin,
         actualValueByPurity: actualValueByPurity,
@@ -590,13 +628,9 @@ const calculateOldJewelryPrice = async (req, res) => {
         roundingApplied: totalScrapValueBeforeRounding !== totalScrapValue
       },
 
-      // Resale availability (for future phase)
-      resaleInfo: {
-        resaleEnabled: category.resaleEnabled,
-        message: category.resaleEnabled 
-          ? 'Resale options will be available in the next phase' 
-          : 'Resale not enabled for this category'
-      },
+      // Resale info
+      resaleEnabled: category.resaleEnabled,
+      hasMultipleResaleCategories: category.resaleEnabled && category.resaleCategories.length > 1,
 
       // Calculation metadata
       metadata: {
@@ -607,9 +641,88 @@ const calculateOldJewelryPrice = async (req, res) => {
       }
     };
 
+    // ========================================
+    // RESALE CALCULATIONS (if enabled, category selected, and user has permission)
+    // ========================================
+    if (category.resaleEnabled && selectedResaleCategory) {
+      const canSeeResale = ['admin', 'manager', 'pro_client'].includes(userRole);
+      
+      if (canSeeResale) {
+        // ========================================
+        // DIRECT RESALE CALCULATION (using SELLING rate)
+        // ========================================
+        const directResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.directResalePercentage / 100);
+        const totalDirectResaleBeforeRounding = directResaleValuePerGram * weightNum;
+        const totalDirectResaleValue = applyOldJewelryRounding(totalDirectResaleBeforeRounding);
+
+        // DIRECT RESALE MARGIN CALCULATION
+        const directResaleWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
+        const directResaleMargin = directResaleWholesalerCost - totalDirectResaleValue;
+
+        // ========================================
+        // POLISH/REPAIR RESALE CALCULATION (using SELLING rate with weight reduction)
+        // ========================================
+        const polishRepairCostWeight = weightNum * (selectedResaleCategory.polishRepairCostPercentage / 100);
+        const effectiveWeightAfterPolish = weightNum - polishRepairCostWeight;
+        
+        const polishRepairResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.polishRepairResalePercentage / 100);
+        const totalPolishRepairResaleBeforeRounding = polishRepairResaleValuePerGram * effectiveWeightAfterPolish;
+        const totalPolishRepairResaleValue = applyOldJewelryRounding(totalPolishRepairResaleBeforeRounding);
+
+        // POLISH/REPAIR RESALE MARGIN CALCULATION
+        const polishRepairWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
+        const polishRepairResaleMargin = polishRepairWholesalerCost - totalPolishRepairResaleValue;
+
+        // Add resale data to calculation result
+        calculationResult.resaleCalculations = {
+          // Direct Resale
+          directResale: {
+            totalAmount: totalDirectResaleValue,
+            margin: directResaleMargin,
+            breakdown: {
+              beforeRounding: totalDirectResaleBeforeRounding,
+              afterRounding: totalDirectResaleValue,
+              roundingApplied: totalDirectResaleBeforeRounding !== totalDirectResaleValue,
+              wholesalerCost: directResaleWholesalerCost
+            }
+          },
+
+          // Polish/Repair Resale
+          polishRepairResale: {
+            totalAmount: totalPolishRepairResaleValue,
+            margin: polishRepairResaleMargin,
+            weightInfo: {
+              originalWeight: weightNum,
+              polishRepairCostPercentage: selectedResaleCategory.polishRepairCostPercentage,
+              weightLoss: polishRepairCostWeight,
+              effectiveWeight: effectiveWeightAfterPolish
+            },
+            breakdown: {
+              beforeRounding: totalPolishRepairResaleBeforeRounding,
+              afterRounding: totalPolishRepairResaleValue,
+              roundingApplied: totalPolishRepairResaleBeforeRounding !== totalPolishRepairResaleValue,
+              wholesalerCost: polishRepairWholesalerCost
+            }
+          },
+
+          // Resale percentages
+          percentages: {
+            directResale: selectedResaleCategory.directResalePercentage,
+            polishRepairResale: selectedResaleCategory.polishRepairResalePercentage,
+            polishRepairCost: selectedResaleCategory.polishRepairCostPercentage,
+            buyingFromWholesaler: selectedResaleCategory.buyingFromWholesalerPercentage
+          }
+        };
+
+        calculationResult.metadata.calculationType = 'scrap_and_resale';
+      }
+    }
+
     res.status(200).json({
       success: true,
-      message: 'OLD jewelry scrap calculation completed',
+      message: category.resaleEnabled && selectedResaleCategory && ['admin', 'manager', 'pro_client'].includes(userRole)
+        ? 'OLD jewelry calculation completed with resale options'
+        : 'OLD jewelry scrap calculation completed',
       data: calculationResult
     });
 

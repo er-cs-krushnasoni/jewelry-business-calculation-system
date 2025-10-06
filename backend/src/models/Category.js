@@ -1,5 +1,36 @@
 const mongoose = require('mongoose');
 
+// Sub-schema for resale categories (for OLD jewelry with resale enabled)
+const resaleCategorySchema = new mongoose.Schema({
+  itemCategory: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [50, 'Item category cannot exceed 50 characters']
+  },
+  directResalePercentage: {
+    type: Number,
+    required: true,
+    min: [1, 'Direct resale percentage must be at least 1%']
+  },
+  polishRepairResalePercentage: {
+    type: Number,
+    required: true,
+    min: [1, 'Polish/Repair resale percentage must be at least 1%']
+  },
+  polishRepairCostPercentage: {
+    type: Number,
+    required: true,
+    min: [0, 'Polish/Repair cost percentage must be at least 0%'],
+    max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
+  },
+  buyingFromWholesalerPercentage: {
+    type: Number,
+    required: true,
+    min: [1, 'Buying from wholesaler percentage must be at least 1%']
+  }
+}, { _id: true }); // Enable _id for each sub-category
+
 const categorySchema = new mongoose.Schema({
   // Basic category info
   type: {
@@ -16,10 +47,12 @@ const categorySchema = new mongoose.Schema({
     uppercase: true
   },
   
-  // NEW jewelry specific fields
+  // Item category - Required for NEW jewelry ONLY
   itemCategory: {
     type: String,
-    required: function() { return this.type === 'NEW'; },
+    required: function() {
+      return this.type === 'NEW';
+    },
     trim: true,
     maxlength: [50, 'Item category cannot exceed 50 characters']
   },
@@ -35,10 +68,7 @@ const categorySchema = new mongoose.Schema({
   // NEW jewelry - buying and selling percentages
   buyingFromWholesalerPercentage: {
     type: Number,
-    required: function() { 
-      // Required for NEW jewelry OR for OLD jewelry when resale is enabled
-      return this.type === 'NEW' || (this.type === 'OLD' && this.resaleEnabled); 
-    },
+    required: function() { return this.type === 'NEW'; },
     min: [1, 'Buying percentage must be at least 1%']
   },
   
@@ -75,23 +105,24 @@ const categorySchema = new mongoose.Schema({
     required: function() { return this.type === 'OLD'; }
   },
   
-  directResalePercentage: {
-    type: Number,
-    required: function() { return this.type === 'OLD' && this.resaleEnabled; },
-    min: [1, 'Direct resale percentage must be at least 1%']
-  },
-  
-  polishRepairResalePercentage: {
-    type: Number,
-    required: function() { return this.type === 'OLD' && this.resaleEnabled; },
-    min: [1, 'Polish/Repair resale percentage must be at least 1%']
-  },
-  
-  polishRepairCostPercentage: {
-    type: Number,
-    required: function() { return this.type === 'OLD' && this.resaleEnabled; },
-    min: [0, 'Polish/Repair cost percentage must be at least 0%'],
-    max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
+  // OLD jewelry - Array of resale categories (when resale enabled)
+  resaleCategories: {
+    type: [resaleCategorySchema],
+    default: [],
+    validate: {
+      validator: function(categories) {
+        // If resale enabled, must have at least one category
+        if (this.type === 'OLD' && this.resaleEnabled) {
+          return categories && categories.length > 0;
+        }
+        // If resale disabled, array must be empty
+        if (this.type === 'OLD' && !this.resaleEnabled) {
+          return !categories || categories.length === 0;
+        }
+        return true;
+      },
+      message: 'At least one resale category is required when resale is enabled'
+    }
   },
   
   // Code/Stamp - unique within shop+type+metal+(itemCategory for NEW only)
@@ -102,7 +133,7 @@ const categorySchema = new mongoose.Schema({
     maxlength: [20, 'Code cannot exceed 20 characters']
   },
   
-  // Multi-level descriptions system - FIXED PRIORITY: Universal → Role-based → None
+  // Multi-level descriptions system
   descriptions: {
     universal: {
       type: String,
@@ -179,7 +210,7 @@ categorySchema.index({
   }
 });
 
-// OLD jewelry: shopId + type + metal + code (no itemCategory)
+// OLD jewelry: shopId + type + metal + code (no itemCategory in index)
 categorySchema.index({ 
   shopId: 1, 
   type: 1, 
@@ -213,7 +244,7 @@ categorySchema.pre('save', function(next) {
       this.code = this.code.trim();
     }
     
-    // Clean up descriptions - trim whitespace but preserve all characters/symbols
+    // Clean up descriptions
     if (this.descriptions) {
       Object.keys(this.descriptions).forEach(role => {
         if (this.descriptions[role]) {
@@ -234,22 +265,37 @@ categorySchema.pre('save', function(next) {
       this.scrapBuyOwnPercentage = undefined;
       this.scrapBuyOtherPercentage = undefined;
       this.resaleEnabled = undefined;
-      this.directResalePercentage = undefined;
-      this.polishRepairResalePercentage = undefined;
-      this.polishRepairCostPercentage = undefined;
+      this.resaleCategories = [];
       
     } else if (this.type === 'OLD') {
       // Clear NEW jewelry specific fields
       this.itemCategory = undefined;
       this.purityPercentage = undefined;
       this.sellingPercentage = undefined;
+      this.buyingFromWholesalerPercentage = undefined;
       
-      // Handle resale fields - clear them if resale is disabled
+      // Handle resale categories
       if (!this.resaleEnabled) {
-        this.directResalePercentage = undefined;
-        this.polishRepairResalePercentage = undefined;
-        this.polishRepairCostPercentage = undefined;
-        this.buyingFromWholesalerPercentage = undefined;
+        // Clear resale categories if resale is disabled
+        this.resaleCategories = [];
+      } else {
+        // Validate resale categories
+        if (!this.resaleCategories || this.resaleCategories.length === 0) {
+          throw new Error('At least one resale category is required when resale is enabled');
+        }
+        
+        // Trim category names and validate uniqueness
+        const categoryNames = new Set();
+        this.resaleCategories.forEach(cat => {
+          if (cat.itemCategory) {
+            cat.itemCategory = cat.itemCategory.trim();
+            const lowerName = cat.itemCategory.toLowerCase();
+            if (categoryNames.has(lowerName)) {
+              throw new Error(`Duplicate category name: ${cat.itemCategory}`);
+            }
+            categoryNames.add(lowerName);
+          }
+        });
       }
     }
     
@@ -259,15 +305,12 @@ categorySchema.pre('save', function(next) {
   }
 });
 
-// FIXED: Instance method to get appropriate description for user role
-// Priority: Universal → Role-based → None
+// Instance method to get appropriate description for user role
 categorySchema.methods.getDescriptionForRole = function(userRole) {
-  // First check for universal description
   if (this.descriptions.universal && this.descriptions.universal.trim()) {
     return this.descriptions.universal.trim();
   }
   
-  // Then check for role-specific description
   const roleMap = {
     'admin': this.descriptions.admin,
     'manager': this.descriptions.manager,
@@ -280,11 +323,10 @@ categorySchema.methods.getDescriptionForRole = function(userRole) {
     return roleDescription.trim();
   }
   
-  // No description available
   return '';
 };
 
-// Method to get all descriptions for admin management
+// Method to get all descriptions
 categorySchema.methods.getAllDescriptions = function() {
   return {
     universal: this.descriptions.universal || '',
@@ -295,11 +337,10 @@ categorySchema.methods.getAllDescriptions = function() {
   };
 };
 
-// Method to set descriptions (for easy bulk updates)
+// Method to set descriptions
 categorySchema.methods.setDescriptions = function(descriptionsObj) {
   if (!descriptionsObj) return;
   
-  // Update each description type if provided
   Object.keys(descriptionsObj).forEach(role => {
     if (this.descriptions.hasOwnProperty(role)) {
       this.descriptions[role] = descriptionsObj[role] || '';
@@ -320,7 +361,6 @@ categorySchema.statics.findByShopAndType = function(shopId, type) {
 categorySchema.statics.findWithFilters = function(filters) {
   const query = { isActive: true, ...filters };
   
-  // Convert type and metal to uppercase if provided
   if (query.type) query.type = query.type.toUpperCase();
   if (query.metal) query.metal = query.metal.toUpperCase();
   
@@ -332,7 +372,7 @@ categorySchema.statics.findWithFilters = function(filters) {
   });
 };
 
-// Static method to check code uniqueness (updated for both NEW and OLD)
+// Static method to check code uniqueness
 categorySchema.statics.isCodeUnique = async function(shopId, type, metal, itemCategory, code, excludeId = null) {
   const query = {
     shopId: shopId,
@@ -347,7 +387,6 @@ categorySchema.statics.isCodeUnique = async function(shopId, type, metal, itemCa
     query.itemCategory = itemCategory ? itemCategory.trim() : undefined;
   }
   
-  // Exclude current document if updating
   if (excludeId) {
     query._id = { $ne: excludeId };
   }
@@ -366,7 +405,7 @@ categorySchema.virtual('displayName').get(function() {
   return `${this.type} ${this.metal} - ${this.code}`;
 });
 
-// Virtual to get the effective purity (for unified access)
+// Virtual to get the effective purity
 categorySchema.virtual('effectivePurity').get(function() {
   return this.type === 'NEW' ? this.purityPercentage : this.truePurityPercentage;
 });

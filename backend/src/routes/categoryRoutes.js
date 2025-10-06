@@ -143,57 +143,84 @@ const createCategoryValidation = [
       return true;
     }),
 
-  // OLD jewelry resale fields (required when resaleEnabled is true)
-  body('directResalePercentage')
+  // Validate resaleCategories array for OLD jewelry with resale enabled
+  body('resaleCategories')
     .custom((value, { req }) => {
       if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
-        if (!value) {
-          throw new Error('Direct resale percentage is required when resale is enabled');
+        // Must be an array
+        if (!Array.isArray(value)) {
+          throw new Error('Resale categories must be an array when resale is enabled');
         }
-        if (parseFloat(value) < 1) {
-          throw new Error('Direct resale percentage must be at least 1');
+        
+        // Must have at least one category
+        if (value.length === 0) {
+          throw new Error('At least one resale category is required when resale is enabled');
+        }
+        
+        // Validate each category in the array
+        for (let i = 0; i < value.length; i++) {
+          const cat = value[i];
+          
+          // Check itemCategory
+          if (!cat.itemCategory || typeof cat.itemCategory !== 'string' || cat.itemCategory.trim() === '') {
+            throw new Error(`Category #${i + 1}: Item category is required`);
+          }
+          if (cat.itemCategory.trim().length > 50) {
+            throw new Error(`Category #${i + 1}: Item category cannot exceed 50 characters`);
+          }
+          
+          // Check directResalePercentage
+          if (cat.directResalePercentage === undefined || cat.directResalePercentage === null) {
+            throw new Error(`Category "${cat.itemCategory}": Direct resale percentage is required`);
+          }
+          const directResale = parseFloat(cat.directResalePercentage);
+          if (isNaN(directResale) || directResale < 1) {
+            throw new Error(`Category "${cat.itemCategory}": Direct resale percentage must be at least 1`);
+          }
+          
+          // Check polishRepairResalePercentage
+          if (cat.polishRepairResalePercentage === undefined || cat.polishRepairResalePercentage === null) {
+            throw new Error(`Category "${cat.itemCategory}": Polish/repair resale percentage is required`);
+          }
+          const polishResale = parseFloat(cat.polishRepairResalePercentage);
+          if (isNaN(polishResale) || polishResale < 1) {
+            throw new Error(`Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`);
+          }
+          
+          // Check polishRepairCostPercentage
+          if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage === null) {
+            throw new Error(`Category "${cat.itemCategory}": Polish/repair cost percentage is required`);
+          }
+          const polishCost = parseFloat(cat.polishRepairCostPercentage);
+          if (isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
+            throw new Error(`Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`);
+          }
+          
+          // Check buyingFromWholesalerPercentage
+          if (cat.buyingFromWholesalerPercentage === undefined || cat.buyingFromWholesalerPercentage === null) {
+            throw new Error(`Category "${cat.itemCategory}": Buying from wholesaler percentage is required`);
+          }
+          const buyingWholesaler = parseFloat(cat.buyingFromWholesalerPercentage);
+          if (isNaN(buyingWholesaler) || buyingWholesaler < 1) {
+            throw new Error(`Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`);
+          }
+        }
+        
+        // Check for duplicate category names
+        const categoryNames = value.map(c => c.itemCategory.trim().toLowerCase());
+        const uniqueNames = new Set(categoryNames);
+        if (categoryNames.length !== uniqueNames.size) {
+          throw new Error('Duplicate category names are not allowed in resale categories');
         }
       }
-      return true;
-    }),
-    
-  body('polishRepairResalePercentage')
-    .custom((value, { req }) => {
-      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
-        if (!value) {
-          throw new Error('Polish/repair resale percentage is required when resale is enabled');
-        }
-        if (parseFloat(value) < 1) {
-          throw new Error('Polish/repair resale percentage must be at least 1');
+      
+      // If resale is not enabled or type is not OLD, resaleCategories should be empty or undefined
+      if (req.body.type === 'OLD' && req.body.resaleEnabled === false) {
+        if (value && Array.isArray(value) && value.length > 0) {
+          throw new Error('Resale categories should be empty when resale is disabled');
         }
       }
-      return true;
-    }),
-    
-  body('polishRepairCostPercentage')
-    .custom((value, { req }) => {
-      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
-        if (value === undefined || value === null || value === '') {
-          throw new Error('Polish/repair cost percentage is required when resale is enabled');
-        }
-        const numValue = parseFloat(value);
-        if (numValue < 0 || numValue > 50) {
-          throw new Error('Polish/repair cost percentage must be between 0 and 50');
-        }
-      }
-      return true;
-    }),
-
-  body('buyingFromWholesalerPercentage')
-    .custom((value, { req }) => {
-      if (req.body.type === 'OLD' && req.body.resaleEnabled === true) {
-        if (!value) {
-          throw new Error('Buying from wholesaler percentage is required when resale is enabled');
-        }
-        if (parseFloat(value) < 1) {
-          throw new Error('Buying from wholesaler percentage must be at least 1');
-        }
-      }
+      
       return true;
     }),
 
@@ -288,20 +315,54 @@ const updateCategoryValidation = [
     .isBoolean()
     .withMessage('Resale enabled must be a boolean value'),
 
-  body('directResalePercentage')
+  // Validate resaleCategories array for updates
+  body('resaleCategories')
     .optional()
-    .isFloat({ min: 1 })
-    .withMessage('Direct resale percentage must be at least 1'),
-    
-  body('polishRepairResalePercentage')
-    .optional()
-    .isFloat({ min: 1 })
-    .withMessage('Polish/repair resale percentage must be at least 1'),
-    
-  body('polishRepairCostPercentage')
-    .optional()
-    .isFloat({ min: 0, max: 50 })
-    .withMessage('Polish/repair cost percentage must be between 0 and 50'),
+    .custom((value, { req }) => {
+      // Only validate if provided
+      if (value !== undefined) {
+        // Must be an array
+        if (!Array.isArray(value)) {
+          throw new Error('Resale categories must be an array');
+        }
+        
+        // If resale is enabled and array is provided, validate contents
+        if (req.body.resaleEnabled === true && value.length > 0) {
+          for (let i = 0; i < value.length; i++) {
+            const cat = value[i];
+            
+            if (!cat.itemCategory || typeof cat.itemCategory !== 'string' || cat.itemCategory.trim() === '') {
+              throw new Error(`Category #${i + 1}: Item category is required`);
+            }
+            
+            if (cat.directResalePercentage === undefined || parseFloat(cat.directResalePercentage) < 1) {
+              throw new Error(`Category "${cat.itemCategory}": Direct resale percentage must be at least 1`);
+            }
+            
+            if (cat.polishRepairResalePercentage === undefined || parseFloat(cat.polishRepairResalePercentage) < 1) {
+              throw new Error(`Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`);
+            }
+            
+            const polishCost = parseFloat(cat.polishRepairCostPercentage);
+            if (cat.polishRepairCostPercentage === undefined || isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
+              throw new Error(`Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`);
+            }
+            
+            if (cat.buyingFromWholesalerPercentage === undefined || parseFloat(cat.buyingFromWholesalerPercentage) < 1) {
+              throw new Error(`Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`);
+            }
+          }
+          
+          // Check for duplicates
+          const categoryNames = value.map(c => c.itemCategory.trim().toLowerCase());
+          const uniqueNames = new Set(categoryNames);
+          if (categoryNames.length !== uniqueNames.size) {
+            throw new Error('Duplicate category names are not allowed in resale categories');
+          }
+        }
+      }
+      return true;
+    }),
 
   // Description validations (optional)
   body('descriptions.universal')

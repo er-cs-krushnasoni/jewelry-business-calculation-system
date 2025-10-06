@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import { Info, Eye, EyeOff, ChevronDown, Plus, Check } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
-import api from '../../services/api';
+import { Info, Eye, EyeOff, ChevronDown, Plus, Check, X, Trash2 } from 'lucide-react';
 
 const ExtendedJewelryForm = ({ 
   initialData = null, 
@@ -12,17 +7,21 @@ const ExtendedJewelryForm = ({
   onCancel, 
   isEditing = false 
 }) => {
-  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showDescriptionHelp, setShowDescriptionHelp] = useState(false);
-
-  // Category dropdown states
+  
+  // Category dropdown states (for NEW jewelry)
   const [availableCategories, setAvailableCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const categoryDropdownRef = useRef(null);
+
+  // Resale category dropdowns (for OLD jewelry)
+  const [resaleCategoryDropdowns, setResaleCategoryDropdowns] = useState({});
+  const [resaleCategorySearchTerms, setResaleCategorySearchTerms] = useState({});
+  const resaleCategoryRefs = useRef({});
 
   // Form state
   const [formData, setFormData] = useState({
@@ -41,9 +40,15 @@ const ExtendedJewelryForm = ({
     scrapBuyOwnPercentage: initialData?.scrapBuyOwnPercentage || '',
     scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage || '',
     resaleEnabled: initialData?.resaleEnabled || false,
-    directResalePercentage: initialData?.directResalePercentage || '',
-    polishRepairResalePercentage: initialData?.polishRepairResalePercentage || '',
-    polishRepairCostPercentage: initialData?.polishRepairCostPercentage || '',
+    
+    // OLD jewelry - Array of resale categories
+    resaleCategories: initialData?.resaleCategories?.map(cat => ({
+      itemCategory: cat.itemCategory || '',
+      directResalePercentage: cat.directResalePercentage || '',
+      polishRepairResalePercentage: cat.polishRepairResalePercentage || '',
+      polishRepairCostPercentage: cat.polishRepairCostPercentage || '',
+      buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || ''
+    })) || [],
     
     // Descriptions
     descriptions: {
@@ -57,10 +62,10 @@ const ExtendedJewelryForm = ({
 
   // Load available categories when metal changes
   useEffect(() => {
-    if (formData.metal) {
+    if (formData.metal && (formData.type === 'NEW' || formData.resaleEnabled)) {
       loadAvailableCategories();
     }
-  }, [formData.metal]);
+  }, [formData.metal, formData.type, formData.resaleEnabled]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -68,8 +73,14 @@ const ExtendedJewelryForm = ({
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
         setShowCategoryDropdown(false);
       }
+      
+      // Close resale category dropdowns
+      Object.keys(resaleCategoryRefs.current).forEach(key => {
+        if (resaleCategoryRefs.current[key] && !resaleCategoryRefs.current[key].contains(event.target)) {
+          setResaleCategoryDropdowns(prev => ({ ...prev, [key]: false }));
+        }
+      });
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -80,10 +91,15 @@ const ExtendedJewelryForm = ({
       const queryParams = new URLSearchParams();
       if (formData.metal) queryParams.append('metal', formData.metal);
       
-      const response = await api.get(`/categories/item-categories?${queryParams.toString()}`);
+      const response = await fetch(`/api/categories/item-categories?${queryParams.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       
-      if (response.data.success) {
-        setAvailableCategories(response.data.data || []);
+      const data = await response.json();
+      if (data.success) {
+        setAvailableCategories(data.data || []);
       }
     } catch (error) {
       console.error('Load categories error:', error);
@@ -98,7 +114,6 @@ const ExtendedJewelryForm = ({
       ...prev,
       [name]: value
     }));
-
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -130,7 +145,6 @@ const ExtendedJewelryForm = ({
     }));
     setCategorySearchTerm(value);
     setShowCategoryDropdown(true);
-
     if (errors.itemCategory) {
       setErrors(prev => ({
         ...prev,
@@ -139,20 +153,96 @@ const ExtendedJewelryForm = ({
     }
   };
 
-  const getFilteredCategories = () => {
-    if (!categorySearchTerm) return availableCategories;
+  const getFilteredCategories = (searchTerm = categorySearchTerm) => {
+    if (!searchTerm) return availableCategories;
     
-    const searchLower = categorySearchTerm.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
     return availableCategories.filter(cat => 
       cat.toLowerCase().includes(searchLower)
     );
   };
 
-  const isCreatingNewCategory = () => {
-    if (!formData.itemCategory.trim()) return false;
+  const isCreatingNewCategory = (categoryValue = formData.itemCategory) => {
+    if (!categoryValue.trim()) return false;
     return !availableCategories.some(
-      cat => cat.toLowerCase() === formData.itemCategory.toLowerCase()
+      cat => cat.toLowerCase() === categoryValue.toLowerCase()
     );
+  };
+
+  // ========================================
+  // RESALE CATEGORIES MANAGEMENT
+  // ========================================
+  
+  const addResaleCategory = () => {
+    setFormData(prev => ({
+      ...prev,
+      resaleCategories: [
+        ...prev.resaleCategories,
+        {
+          itemCategory: '',
+          directResalePercentage: '',
+          polishRepairResalePercentage: '',
+          polishRepairCostPercentage: '',
+          buyingFromWholesalerPercentage: ''
+        }
+      ]
+    }));
+  };
+
+  const removeResaleCategory = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      resaleCategories: prev.resaleCategories.filter((_, i) => i !== index)
+    }));
+    
+    // Clear related errors and dropdown states
+    const newErrors = { ...errors };
+    Object.keys(newErrors).forEach(key => {
+      if (key.startsWith(`resaleCategories.${index}`)) {
+        delete newErrors[key];
+      }
+    });
+    setErrors(newErrors);
+    
+    // Clean up dropdown states
+    setResaleCategoryDropdowns(prev => {
+      const newState = { ...prev };
+      delete newState[index];
+      return newState;
+    });
+    setResaleCategorySearchTerms(prev => {
+      const newState = { ...prev };
+      delete newState[index];
+      return newState;
+    });
+  };
+
+  const updateResaleCategory = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      resaleCategories: prev.resaleCategories.map((cat, i) => 
+        i === index ? { ...cat, [field]: value } : cat
+      )
+    }));
+    
+    if (field === 'itemCategory') {
+      setResaleCategorySearchTerms(prev => ({ ...prev, [index]: value }));
+      setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }));
+    }
+    
+    const errorKey = `resaleCategories.${index}.${field}`;
+    if (errors[errorKey]) {
+      setErrors(prev => ({
+        ...prev,
+        [errorKey]: null
+      }));
+    }
+  };
+
+  const handleResaleCategorySelect = (index, category) => {
+    updateResaleCategory(index, 'itemCategory', category);
+    setResaleCategorySearchTerms(prev => ({ ...prev, [index]: '' }));
+    setResaleCategoryDropdowns(prev => ({ ...prev, [index]: false }));
   };
 
   const handleDescriptionChange = (role, value) => {
@@ -163,7 +253,6 @@ const ExtendedJewelryForm = ({
         [role]: value
       }
     }));
-
     if (errors[`descriptions.${role}`]) {
       setErrors(prev => ({
         ...prev,
@@ -183,9 +272,7 @@ const ExtendedJewelryForm = ({
       scrapBuyOwnPercentage: '',
       scrapBuyOtherPercentage: '',
       resaleEnabled: false,
-      directResalePercentage: '',
-      polishRepairResalePercentage: '',
-      polishRepairCostPercentage: '',
+      resaleCategories: [],
       buyingFromWholesalerPercentage: ''
     }));
     
@@ -196,72 +283,66 @@ const ExtendedJewelryForm = ({
     setFormData(prev => ({
       ...prev,
       resaleEnabled: enabled,
-      ...(enabled ? {} : {
-        directResalePercentage: '',
-        polishRepairResalePercentage: '',
-        polishRepairCostPercentage: '',
-        buyingFromWholesalerPercentage: ''
-      })
+      resaleCategories: enabled && prev.resaleCategories.length === 0 
+        ? [{
+            itemCategory: '',
+            directResalePercentage: '',
+            polishRepairResalePercentage: '',
+            polishRepairCostPercentage: '',
+            buyingFromWholesalerPercentage: ''
+          }]
+        : enabled ? prev.resaleCategories : []
     }));
-
     if (!enabled) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.directResalePercentage;
-        delete newErrors.polishRepairResalePercentage;
-        delete newErrors.polishRepairCostPercentage;
-        delete newErrors.buyingFromWholesalerPercentage;
-        return newErrors;
+      const newErrors = { ...errors };
+      Object.keys(newErrors).forEach(key => {
+        if (key.startsWith('resaleCategories')) {
+          delete newErrors[key];
+        }
       });
+      setErrors(newErrors);
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.type) {
       newErrors.type = 'Type is required';
     }
-
     if (!formData.metal) {
       newErrors.metal = 'Metal is required';
     }
-
     if (!formData.code.trim()) {
       newErrors.code = 'Code is required';
     } else if (formData.code.length > 20) {
       newErrors.code = 'Code cannot exceed 20 characters';
     }
 
-    // Item category validation for both NEW and OLD
-    if (!formData.itemCategory.trim()) {
-      newErrors.itemCategory = 'Item category is required';
-    } else if (formData.itemCategory.length > 50) {
-      newErrors.itemCategory = 'Item category cannot exceed 50 characters';
-    }
-
     // NEW jewelry validations
     if (formData.type === 'NEW') {
+      if (!formData.itemCategory.trim()) {
+        newErrors.itemCategory = 'Item category is required for NEW jewelry';
+      } else if (formData.itemCategory.length > 50) {
+        newErrors.itemCategory = 'Item category cannot exceed 50 characters';
+      }
       if (!formData.purityPercentage) {
-        newErrors.purityPercentage = 'Purity percentage is required for NEW jewelry';
+        newErrors.purityPercentage = 'Purity percentage is required';
       } else {
         const purity = parseFloat(formData.purityPercentage);
         if (isNaN(purity) || purity < 1 || purity > 100) {
           newErrors.purityPercentage = 'Purity percentage must be between 1 and 100';
         }
       }
-
       if (!formData.buyingFromWholesalerPercentage) {
-        newErrors.buyingFromWholesalerPercentage = 'Buying percentage is required for NEW jewelry';
+        newErrors.buyingFromWholesalerPercentage = 'Buying percentage is required';
       } else {
         const buying = parseFloat(formData.buyingFromWholesalerPercentage);
         if (isNaN(buying) || buying < 1) {
           newErrors.buyingFromWholesalerPercentage = 'Buying percentage must be at least 1';
         }
       }
-
       if (!formData.sellingPercentage) {
-        newErrors.sellingPercentage = 'Selling percentage is required for NEW jewelry';
+        newErrors.sellingPercentage = 'Selling percentage is required';
       } else {
         const selling = parseFloat(formData.sellingPercentage);
         if (isNaN(selling) || selling < 1) {
@@ -273,25 +354,23 @@ const ExtendedJewelryForm = ({
     // OLD jewelry validations
     if (formData.type === 'OLD') {
       if (!formData.truePurityPercentage) {
-        newErrors.truePurityPercentage = 'True purity percentage is required for OLD jewelry';
+        newErrors.truePurityPercentage = 'True purity percentage is required';
       } else {
         const purity = parseFloat(formData.truePurityPercentage);
         if (isNaN(purity) || purity < 1 || purity > 100) {
           newErrors.truePurityPercentage = 'True purity percentage must be between 1 and 100';
         }
       }
-
       if (!formData.scrapBuyOwnPercentage) {
-        newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage is required for OLD jewelry';
+        newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage is required';
       } else {
         const scrapOwn = parseFloat(formData.scrapBuyOwnPercentage);
         if (isNaN(scrapOwn) || scrapOwn < 1) {
           newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage must be at least 1';
         }
       }
-
       if (!formData.scrapBuyOtherPercentage) {
-        newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage is required for OLD jewelry';
+        newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage is required';
       } else {
         const scrapOther = parseFloat(formData.scrapBuyOtherPercentage);
         if (isNaN(scrapOther) || scrapOther < 1) {
@@ -299,51 +378,51 @@ const ExtendedJewelryForm = ({
         }
       }
 
+      // Validate resale categories if resale enabled
       if (formData.resaleEnabled) {
-        if (!formData.directResalePercentage) {
-          newErrors.directResalePercentage = 'Direct resale percentage is required when resale is enabled';
+        if (!formData.resaleCategories || formData.resaleCategories.length === 0) {
+          newErrors.resaleCategories = 'At least one resale category is required when resale is enabled';
         } else {
-          const directResale = parseFloat(formData.directResalePercentage);
-          if (isNaN(directResale) || directResale < 1) {
-            newErrors.directResalePercentage = 'Direct resale percentage must be at least 1';
+          // Check for duplicate category names
+          const categoryNames = formData.resaleCategories.map(cat => cat.itemCategory.trim().toLowerCase());
+          const uniqueNames = new Set(categoryNames.filter(name => name));
+          
+          if (categoryNames.filter(name => name).length !== uniqueNames.size) {
+            newErrors.resaleCategories = 'Duplicate category names are not allowed';
           }
-        }
 
-        if (!formData.polishRepairResalePercentage) {
-          newErrors.polishRepairResalePercentage = 'Polish/repair resale percentage is required when resale is enabled';
-        } else {
-          const polishRepair = parseFloat(formData.polishRepairResalePercentage);
-          if (isNaN(polishRepair) || polishRepair < 1) {
-            newErrors.polishRepairResalePercentage = 'Polish/repair resale percentage must be at least 1';
-          }
-        }
-
-        if (formData.polishRepairCostPercentage === '') {
-          newErrors.polishRepairCostPercentage = 'Polish/repair cost percentage is required when resale is enabled';
-        } else {
-          const polishCost = parseFloat(formData.polishRepairCostPercentage);
-          if (isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
-            newErrors.polishRepairCostPercentage = 'Polish/repair cost percentage must be between 0 and 50';
-          }
-        }
-
-        if (!formData.buyingFromWholesalerPercentage) {
-          newErrors.buyingFromWholesalerPercentage = 'Buying from wholesaler percentage is required when resale is enabled';
-        } else {
-          const buying = parseFloat(formData.buyingFromWholesalerPercentage);
-          if (isNaN(buying) || buying < 1) {
-            newErrors.buyingFromWholesalerPercentage = 'Buying from wholesaler percentage must be at least 1';
-          }
+          // Validate each category
+          formData.resaleCategories.forEach((cat, index) => {
+            if (!cat.itemCategory.trim()) {
+              newErrors[`resaleCategories.${index}.itemCategory`] = 'Category name is required';
+            }
+            if (!cat.directResalePercentage) {
+              newErrors[`resaleCategories.${index}.directResalePercentage`] = 'Required';
+            } else if (parseFloat(cat.directResalePercentage) < 1) {
+              newErrors[`resaleCategories.${index}.directResalePercentage`] = 'Must be at least 1';
+            }
+            if (!cat.polishRepairResalePercentage) {
+              newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Required';
+            } else if (parseFloat(cat.polishRepairResalePercentage) < 1) {
+              newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Must be at least 1';
+            }
+            if (cat.polishRepairCostPercentage === '') {
+              newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Required';
+            } else {
+              const cost = parseFloat(cat.polishRepairCostPercentage);
+              if (isNaN(cost) || cost < 0 || cost > 50) {
+                newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Must be 0-50';
+              }
+            }
+            if (!cat.buyingFromWholesalerPercentage) {
+              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Required';
+            } else if (parseFloat(cat.buyingFromWholesalerPercentage) < 1) {
+              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Must be at least 1';
+            }
+          });
         }
       }
     }
-
-    Object.keys(formData.descriptions).forEach(role => {
-      const description = formData.descriptions[role];
-      if (description && description.length > 500) {
-        newErrors[`descriptions.${role}`] = `${role.charAt(0).toUpperCase() + role.slice(1)} description cannot exceed 500 characters`;
-      }
-    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -361,11 +440,11 @@ const ExtendedJewelryForm = ({
       
       const submitData = {
         ...formData,
-        code: formData.code.trim(),
-        itemCategory: formData.itemCategory.trim()
+        code: formData.code.trim()
       };
 
       if (formData.type === 'NEW') {
+        submitData.itemCategory = formData.itemCategory.trim();
         submitData.purityPercentage = parseFloat(formData.purityPercentage);
         submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
         submitData.sellingPercentage = parseFloat(formData.sellingPercentage);
@@ -374,9 +453,7 @@ const ExtendedJewelryForm = ({
         delete submitData.scrapBuyOwnPercentage;
         delete submitData.scrapBuyOtherPercentage;
         delete submitData.resaleEnabled;
-        delete submitData.directResalePercentage;
-        delete submitData.polishRepairResalePercentage;
-        delete submitData.polishRepairCostPercentage;
+        delete submitData.resaleCategories;
       } else if (formData.type === 'OLD') {
         submitData.truePurityPercentage = parseFloat(formData.truePurityPercentage);
         submitData.scrapBuyOwnPercentage = parseFloat(formData.scrapBuyOwnPercentage);
@@ -384,17 +461,21 @@ const ExtendedJewelryForm = ({
         submitData.resaleEnabled = Boolean(formData.resaleEnabled);
         
         if (formData.resaleEnabled) {
-          submitData.directResalePercentage = parseFloat(formData.directResalePercentage);
-          submitData.polishRepairResalePercentage = parseFloat(formData.polishRepairResalePercentage);
-          submitData.polishRepairCostPercentage = parseFloat(formData.polishRepairCostPercentage);
-          submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
+          submitData.resaleCategories = formData.resaleCategories.map(cat => ({
+            itemCategory: cat.itemCategory.trim(),
+            directResalePercentage: parseFloat(cat.directResalePercentage),
+            polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+            polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+            buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+          }));
+        } else {
+          submitData.resaleCategories = [];
         }
         
+        delete submitData.itemCategory;
         delete submitData.purityPercentage;
         delete submitData.sellingPercentage;
-        if (!formData.resaleEnabled) {
-          delete submitData.buyingFromWholesalerPercentage;
-        }
+        delete submitData.buyingFromWholesalerPercentage;
       }
 
       await onSubmit(submitData);
@@ -403,33 +484,21 @@ const ExtendedJewelryForm = ({
       
       if (error.response?.data?.errors) {
         const serverErrors = {};
-        error.response.data.errors.forEach(errorMsg => {
-          if (errorMsg.includes('Code')) {
-            serverErrors.code = errorMsg;
-          } else if (errorMsg.includes('Item category')) {
-            serverErrors.itemCategory = errorMsg;
-          } else if (errorMsg.includes('Purity')) {
-            serverErrors.purityPercentage = errorMsg;
-          } else if (errorMsg.includes('True purity')) {
-            serverErrors.truePurityPercentage = errorMsg;
-          } else if (errorMsg.includes('Buying')) {
-            serverErrors.buyingFromWholesalerPercentage = errorMsg;
-          } else if (errorMsg.includes('Selling')) {
-            serverErrors.sellingPercentage = errorMsg;
-          } else if (errorMsg.includes('Scrap buy own')) {
-            serverErrors.scrapBuyOwnPercentage = errorMsg;
-          } else if (errorMsg.includes('Scrap buy other')) {
-            serverErrors.scrapBuyOtherPercentage = errorMsg;
-          } else if (errorMsg.includes('Direct resale')) {
-            serverErrors.directResalePercentage = errorMsg;
-          } else if (errorMsg.includes('Polish/repair resale')) {
-            serverErrors.polishRepairResalePercentage = errorMsg;
-          } else if (errorMsg.includes('Polish/repair cost')) {
-            serverErrors.polishRepairCostPercentage = errorMsg;
-          } else {
-            serverErrors.general = errorMsg;
-          }
-        });
+        // Handle array of error objects from validation middleware
+        if (Array.isArray(error.response.data.errors)) {
+          // Convert array of error objects to error messages
+          const errorMessages = error.response.data.errors
+            .map(err => {
+              if (typeof err === 'string') return err;
+              if (err.msg) return err.msg;
+              if (err.message) return err.message;
+              return JSON.stringify(err);
+            })
+            .join(', ');
+          serverErrors.general = errorMessages;
+        } else {
+          serverErrors.general = 'Validation failed';
+        }
         setErrors(serverErrors);
       } else if (error.response?.data?.message) {
         setErrors({ general: error.response.data.message });
@@ -495,281 +564,493 @@ const ExtendedJewelryForm = ({
             )}
           </div>
 
-          <Input
-            label="Code/Stamp"
-            name="code"
-            value={formData.code}
-            onChange={(e) => handleInputChange('code', e.target.value)}
-            placeholder="e.g., ABC123, વિશિષ્ટ123"
-            error={errors.code}
-            required
-            maxLength={20}
-          />
-        </div>
-
-        {/* Item Category Dropdown (for both NEW and OLD) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Item Category <span className="text-red-500">*</span>
-          </label>
-          <div className="relative" ref={categoryDropdownRef}>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.itemCategory}
-                onChange={(e) => handleCategoryInputChange(e.target.value)}
-                onFocus={() => setShowCategoryDropdown(true)}
-                placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
-                className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.itemCategory ? 'border-red-500' : 'border-gray-300'
-                }`}
-                disabled={!formData.metal}
-                maxLength={50}
-              />
-              <ChevronDown 
-                size={20} 
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-            </div>
-
-            {showCategoryDropdown && formData.metal && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                {loadingCategories ? (
-                  <div className="p-4 text-center">
-                    <LoadingSpinner size="sm" />
-                    <p className="text-sm text-gray-500 mt-2">Loading categories...</p>
-                  </div>
-                ) : (
-                  <>
-                    {showCreateNewOption && (
-                      <button
-                        type="button"
-                        onClick={() => handleCategorySelect(formData.itemCategory)}
-                        className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-2 border-b border-gray-200 bg-blue-50"
-                      >
-                        <Plus size={16} className="text-blue-600 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-blue-700">
-                            Create new category
-                          </div>
-                          <div className="text-xs text-blue-600 truncate">
-                            "{formData.itemCategory}"
-                          </div>
-                        </div>
-                      </button>
-                    )}
-
-                    {filteredCategories.length > 0 ? (
-                      filteredCategories.map((category, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          onClick={() => handleCategorySelect(category)}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between group"
-                        >
-                          <span className="text-sm text-gray-900">{category}</span>
-                          {formData.itemCategory === category && (
-                            <Check size={16} className="text-green-600" />
-                          )}
-                        </button>
-                      ))
-                    ) : !showCreateNewOption ? (
-                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                        {categorySearchTerm 
-                          ? 'No matching categories found. Type to create new.'
-                          : 'No categories available. Type to create new.'}
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </div>
-            )}
-
-            {!formData.metal && (
-              <p className="text-sm text-gray-500 mt-1">
-                Please select a metal first
-              </p>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Code/Stamp <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.code}
+              onChange={(e) => handleInputChange('code', e.target.value)}
+              placeholder="e.g., ABC123, વિશિષ્ટ123"
+              maxLength={20}
+              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                errors.code ? 'border-red-500' : 'border-gray-300'
+              }`}
+            />
+            {errors.code && (
+              <p className="text-red-500 text-sm mt-1">{errors.code}</p>
             )}
           </div>
-          {errors.itemCategory && (
-            <p className="text-red-500 text-sm mt-1">{errors.itemCategory}</p>
-          )}
-          {showCreateNewOption && !errors.itemCategory && (
-            <p className="text-blue-600 text-sm mt-1 flex items-center gap-1">
-              <Plus size={14} />
-              Creating new category: "{formData.itemCategory}"
-            </p>
-          )}
         </div>
 
-        {/* NEW Jewelry Specific Fields */}
+        {/* Item Category - Only for NEW jewelry */}
         {formData.type === 'NEW' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Input
-              label="Purity Percentage"
-              name="purityPercentage"
-              type="number"
-              value={formData.purityPercentage}
-              onChange={(e) => handleInputChange('purityPercentage', e.target.value)}
-              placeholder="91.6"
-              error={errors.purityPercentage}
-              required
-              min="1"
-              max="100"
-              step="0.01"
-            />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Item Category <span className="text-red-500">*</span>
+            </label>
+            <div className="relative" ref={categoryDropdownRef}>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={formData.itemCategory}
+                  onChange={(e) => handleCategoryInputChange(e.target.value)}
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
+                  className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.itemCategory ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  disabled={!formData.metal}
+                  maxLength={50}
+                />
+                <ChevronDown 
+                  size={20} 
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                />
+              </div>
 
-            <Input
-              label="Buying from Wholesaler %"
-              name="buyingFromWholesalerPercentage"
-              type="number"
-              value={formData.buyingFromWholesalerPercentage}
-              onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
-              placeholder="85.5"
-              error={errors.buyingFromWholesalerPercentage}
-              required
-              min="1"
-              step="0.01"
-            />
-
-            <Input
-              label="Selling Percentage"
-              name="sellingPercentage"
-              type="number"
-              value={formData.sellingPercentage}
-              onChange={(e) => handleInputChange('sellingPercentage', e.target.value)}
-              placeholder="95.0"
-              error={errors.sellingPercentage}
-              required
-              min="1"
-              step="0.01"
-            />
+              {showCategoryDropdown && formData.metal && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                  {loadingCategories ? (
+                    <div className="p-4 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-sm text-gray-500 mt-2">Loading...</p>
+                    </div>
+                  ) : (
+                    <>
+                      {showCreateNewOption && (
+                        <button
+                          type="button"
+                          onClick={() => handleCategorySelect(formData.itemCategory)}
+                          className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-2 border-b border-gray-200 bg-blue-50"
+                        >
+                          <Plus size={16} className="text-blue-600 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-blue-700">
+                              Create new category
+                            </div>
+                            <div className="text-xs text-blue-600 truncate">
+                              "{formData.itemCategory}"
+                            </div>
+                          </div>
+                        </button>
+                      )}
+                      {filteredCategories.length > 0 ? (
+                        filteredCategories.map((category, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleCategorySelect(category)}
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between group"
+                          >
+                            <span className="text-sm text-gray-900">{category}</span>
+                            {formData.itemCategory === category && (
+                              <Check size={16} className="text-green-600" />
+                            )}
+                          </button>
+                        ))
+                      ) : !showCreateNewOption ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                          No categories found. Type to create new.
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                </div>
+              )}
+              {!formData.metal && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Please select a metal first
+                </p>
+              )}
+            </div>
+            {errors.itemCategory && (
+              <p className="text-red-500 text-sm mt-1">{errors.itemCategory}</p>
+            )}
           </div>
         )}
 
-        {/* OLD Jewelry Specific Fields */}
-        {formData.type === 'OLD' && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Input
-                label="True Purity Percentage"
-                name="truePurityPercentage"
+        {/* NEW Jewelry Fields */}
+        {formData.type === 'NEW' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Purity % <span className="text-red-500">*</span>
+              </label>
+              <input
                 type="number"
-                value={formData.truePurityPercentage}
-                onChange={(e) => handleInputChange('truePurityPercentage', e.target.value)}
+                value={formData.purityPercentage}
+                onChange={(e) => handleInputChange('purityPercentage', e.target.value)}
                 placeholder="91.6"
-                error={errors.truePurityPercentage}
-                required
                 min="1"
                 max="100"
                 step="0.01"
+                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.purityPercentage ? 'border-red-500' : 'border-gray-300'
+                }`}
               />
-
-              <Input
-                label="Scrap Buy Own %"
-                name="scrapBuyOwnPercentage"
-                type="number"
-                value={formData.scrapBuyOwnPercentage}
-                onChange={(e) => handleInputChange('scrapBuyOwnPercentage', e.target.value)}
-                placeholder="85.0"
-                error={errors.scrapBuyOwnPercentage}
-                required
-                min="1"
-                step="0.01"
-              />
-
-              <Input
-                label="Scrap Buy Other %"
-                name="scrapBuyOtherPercentage"
-                type="number"
-                value={formData.scrapBuyOtherPercentage}
-                onChange={(e) => handleInputChange('scrapBuyOtherPercentage', e.target.value)}
-                placeholder="80.0"
-                error={errors.scrapBuyOtherPercentage}
-                required
-                min="1"
-                step="0.01"
-              />
+              {errors.purityPercentage && (
+                <p className="text-red-500 text-sm mt-1">{errors.purityPercentage}</p>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <input
-                  type="checkbox"
-                  id="resaleEnabled"
-                  checked={formData.resaleEnabled}
-                  onChange={(e) => handleResaleToggle(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="resaleEnabled" className="text-sm font-medium text-gray-700">
-                  Enable Resale Options
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Buying from Wholesaler % <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={formData.buyingFromWholesalerPercentage}
+                onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
+                placeholder="85.5"
+                min="1"
+                step="0.01"
+                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.buyingFromWholesalerPercentage ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.buyingFromWholesalerPercentage && (
+                <p className="text-red-500 text-sm mt-1">{errors.buyingFromWholesalerPercentage}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Selling % <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={formData.sellingPercentage}
+                onChange={(e) => handleInputChange('sellingPercentage', e.target.value)}
+                placeholder="95.0"
+                min="1"
+                step="0.01"
+                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.sellingPercentage ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.sellingPercentage && (
+                <p className="text-red-500 text-sm mt-1">{errors.sellingPercentage}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* OLD Jewelry Fields */}
+        {formData.type === 'OLD' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  True Purity % <span className="text-red-500">*</span>
                 </label>
+                <input
+                  type="number"
+                  value={formData.truePurityPercentage}
+                  onChange={(e) => handleInputChange('truePurityPercentage', e.target.value)}
+                  placeholder="91.6"
+                  min="1"
+                  max="100"
+                  step="0.01"
+                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.truePurityPercentage ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.truePurityPercentage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.truePurityPercentage}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Scrap Buy Own % <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.scrapBuyOwnPercentage}
+                  onChange={(e) => handleInputChange('scrapBuyOwnPercentage', e.target.value)}
+                  placeholder="85.0"
+                  min="1"
+                  step="0.01"
+                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.scrapBuyOwnPercentage ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.scrapBuyOwnPercentage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.scrapBuyOwnPercentage}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Scrap Buy Other % <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={formData.scrapBuyOtherPercentage}
+                  onChange={(e) => handleInputChange('scrapBuyOtherPercentage', e.target.value)}
+                  placeholder="80.0"
+                  min="1"
+                  step="0.01"
+                  className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.scrapBuyOtherPercentage ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.scrapBuyOtherPercentage && (
+                  <p className="text-red-500 text-sm mt-1">{errors.scrapBuyOtherPercentage}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Resale Enable Toggle */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Resale Options
+              </label>
+              <div className="flex items-center space-x-3">
+                <button
+                  type="button"
+                  onClick={() => handleResaleToggle(!formData.resaleEnabled)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    formData.resaleEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.resaleEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className="text-sm text-gray-700">
+                  {formData.resaleEnabled ? 'Enabled' : 'Disabled'}
+                </span>
               </div>
               <p className="text-sm text-gray-500">
-                When enabled, this category will support direct resale and polish/repair resale calculations.
+                When enabled, you must add at least one resale category with its configuration.
               </p>
             </div>
 
+            {/* Resale Categories Section */}
             {formData.resaleEnabled && (
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h4 className="font-medium text-blue-900">Resale Configuration</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Direct Resale %"
-                    name="directResalePercentage"
-                    type="number"
-                    value={formData.directResalePercentage}
-                    onChange={(e) => handleInputChange('directResalePercentage', e.target.value)}
-                    placeholder="92.0"
-                    error={errors.directResalePercentage}
-                    required
-                    min="1"
-                    step="0.01"
-                  />
-
-                  <Input
-                    label="Polish/Repair Resale %"
-                    name="polishRepairResalePercentage"
-                    type="number"
-                    value={formData.polishRepairResalePercentage}
-                    onChange={(e) => handleInputChange('polishRepairResalePercentage', e.target.value)}
-                    placeholder="90.0"
-                    error={errors.polishRepairResalePercentage}
-                    required
-                    min="1"
-                    step="0.01"
-                  />
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-blue-900">
+                    Resale Categories <span className="text-red-500">*</span>
+                  </h4>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Polish/Repair Cost %"
-                    name="polishRepairCostPercentage"
-                    type="number"
-                    value={formData.polishRepairCostPercentage}
-                    onChange={(e) => handleInputChange('polishRepairCostPercentage', e.target.value)}
-                    placeholder="5.0"
-                    error={errors.polishRepairCostPercentage}
-                    required
-                    min="0"
-                    max="50"
-                    step="0.01"
-                  />
+                {formData.resaleCategories.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <p className="text-sm">No resale categories added yet.</p>
+                    <p className="text-xs mt-1">Click "Add Category" below to create your first resale category.</p>
+                  </div>
+                )}
 
-                  <Input
-                    label="Buying from Wholesaler %"
-                    name="buyingFromWholesalerPercentage"
-                    type="number"
-                    value={formData.buyingFromWholesalerPercentage}
-                    onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
-                    placeholder="85.5"
-                    error={errors.buyingFromWholesalerPercentage}
-                    required
-                    min="1"
-                    step="0.01"
-                  />
-                </div>
+                {formData.resaleCategories.map((category, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg border border-blue-300 space-y-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <h5 className="font-medium text-gray-900">
+                        Category #{index + 1}
+                      </h5>
+                      {formData.resaleCategories.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeResaleCategory(index)}
+                          className="text-red-600 hover:text-red-700 p-1"
+                          title="Remove Category"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Category Name with Dropdown */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category Name <span className="text-red-500">*</span>
+                      </label>
+                      <div 
+                        className="relative" 
+                        ref={(el) => {
+                          if (el) resaleCategoryRefs.current[index] = el;
+                        }}
+                      >
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={category.itemCategory}
+                            onChange={(e) => updateResaleCategory(index, 'itemCategory', e.target.value)}
+                            onFocus={() => setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }))}
+                            placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
+                            maxLength={50}
+                            className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                              errors[`resaleCategories.${index}.itemCategory`] ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                            disabled={!formData.metal}
+                          />
+                          <ChevronDown 
+                            size={20} 
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                          />
+                        </div>
+
+                        {resaleCategoryDropdowns[index] && formData.metal && (
+                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {loadingCategories ? (
+                              <div className="p-4 text-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                <p className="text-sm text-gray-500 mt-2">Loading...</p>
+                              </div>
+                            ) : (
+                              <>
+                                {category.itemCategory.trim() && isCreatingNewCategory(category.itemCategory) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleResaleCategorySelect(index, category.itemCategory)}
+                                    className="w-full px-4 py-3 text-left hover:bg-blue-50 flex items-center gap-2 border-b border-gray-200 bg-blue-50"
+                                  >
+                                    <Plus size={16} className="text-blue-600 flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium text-blue-700">
+                                        Create new category
+                                      </div>
+                                      <div className="text-xs text-blue-600 truncate">
+                                        "{category.itemCategory}"
+                                      </div>
+                                    </div>
+                                  </button>
+                                )}
+                                {getFilteredCategories(resaleCategorySearchTerms[index] || category.itemCategory).length > 0 ? (
+                                  getFilteredCategories(resaleCategorySearchTerms[index] || category.itemCategory).map((cat, catIndex) => (
+                                    <button
+                                      key={catIndex}
+                                      type="button"
+                                      onClick={() => handleResaleCategorySelect(index, cat)}
+                                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center justify-between group"
+                                    >
+                                      <span className="text-sm text-gray-900">{cat}</span>
+                                      {category.itemCategory === cat && (
+                                        <Check size={16} className="text-green-600" />
+                                      )}
+                                    </button>
+                                  ))
+                                ) : !category.itemCategory.trim() || !isCreatingNewCategory(category.itemCategory) ? (
+                                  <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                    No categories found. Type to create new.
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {errors[`resaleCategories.${index}.itemCategory`] && (
+                        <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.itemCategory`]}</p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Direct Resale % <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={category.directResalePercentage}
+                          onChange={(e) => updateResaleCategory(index, 'directResalePercentage', e.target.value)}
+                          placeholder="92.0"
+                          min="1"
+                          step="0.01"
+                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors[`resaleCategories.${index}.directResalePercentage`] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        {errors[`resaleCategories.${index}.directResalePercentage`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.directResalePercentage`]}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Polish/Repair Resale % <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={category.polishRepairResalePercentage}
+                          onChange={(e) => updateResaleCategory(index, 'polishRepairResalePercentage', e.target.value)}
+                          placeholder="90.0"
+                          min="1"
+                          step="0.01"
+                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors[`resaleCategories.${index}.polishRepairResalePercentage`] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        {errors[`resaleCategories.${index}.polishRepairResalePercentage`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairResalePercentage`]}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Polish/Repair Cost % <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={category.polishRepairCostPercentage}
+                          onChange={(e) => updateResaleCategory(index, 'polishRepairCostPercentage', e.target.value)}
+                          placeholder="5.0"
+                          min="0"
+                          max="50"
+                          step="0.01"
+                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors[`resaleCategories.${index}.polishRepairCostPercentage`] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        {errors[`resaleCategories.${index}.polishRepairCostPercentage`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairCostPercentage`]}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Buying from Wholesaler % <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={category.buyingFromWholesalerPercentage}
+                          onChange={(e) => updateResaleCategory(index, 'buyingFromWholesalerPercentage', e.target.value)}
+                          placeholder="85.5"
+                          min="1"
+                          step="0.01"
+                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        {errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`]}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add Category Button - Under category details */}
+                <button
+                  type="button"
+                  onClick={addResaleCategory}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  <Plus size={16} />
+                  Add Category
+                </button>
+
+                {/* Show resale categories error here */}
+                {errors.resaleCategories && (
+                  <p className="text-red-700 text-sm font-medium">{errors.resaleCategories}</p>
+                )}
               </div>
             )}
           </>
@@ -801,9 +1082,6 @@ const ExtendedJewelryForm = ({
                   <li><strong>2. Role-Based Descriptions:</strong> Override universal description for specific roles</li>
                   <li><strong>3. Multi-Language Support:</strong> All descriptions support Gujarati, Hindi, English, and symbols</li>
                 </ul>
-                <p className="mt-2 text-xs text-blue-600">
-                  <strong>Display Logic:</strong> If universal description exists → show it. If role-specific description also exists → show role-specific instead. If neither exists → show nothing.
-                </p>
               </div>
             </div>
           </div>
@@ -819,153 +1097,69 @@ const ExtendedJewelryForm = ({
             <textarea
               value={formData.descriptions.universal}
               onChange={(e) => handleDescriptionChange('universal', e.target.value)}
-              placeholder="Universal description visible to all users when no role-specific description is available. Supports all languages: આ વર્ણન બધા વપરાશકર્તાઓને દેખાય છે | यह विवरण सभी उपयोगकर्ताओं को दिखता है"
+              placeholder="Universal description visible to all users"
               rows={3}
               maxLength={500}
-              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
-                errors['descriptions.universal'] ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical border-gray-300"
             />
-            <div className="flex justify-between items-center mt-1">
-              {errors['descriptions.universal'] && (
-                <p className="text-red-500 text-sm">{errors['descriptions.universal']}</p>
-              )}
-              <p className="text-gray-500 text-sm ml-auto">
-                {formData.descriptions.universal.length}/500
-              </p>
-            </div>
+            <p className="text-gray-500 text-sm mt-1 text-right">
+              {formData.descriptions.universal.length}/500
+            </p>
           </div>
 
           {/* Role-specific Descriptions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Admin Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Admin Only Description
-                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
-              </label>
-              <textarea
-                value={formData.descriptions.admin}
-                onChange={(e) => handleDescriptionChange('admin', e.target.value)}
-                placeholder="Admin-specific description. Supports all languages and symbols: એડમિન માટે વિશેષ વર્ણન | एडमिन के लिए विशेष विवरण"
-                rows={3}
-                maxLength={500}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
-                  errors['descriptions.admin'] ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors['descriptions.admin'] && (
-                  <p className="text-red-500 text-sm">{errors['descriptions.admin']}</p>
-                )}
-                <p className="text-gray-500 text-sm ml-auto">
-                  {formData.descriptions.admin.length}/500
+            {['admin', 'manager', 'proClient', 'client'].map((role) => (
+              <div key={role}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {role.charAt(0).toUpperCase() + role.slice(1).replace('proClient', 'Pro Client')} Only
+                  <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
+                </label>
+                <textarea
+                  value={formData.descriptions[role]}
+                  onChange={(e) => handleDescriptionChange(role, e.target.value)}
+                  placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific description`}
+                  rows={3}
+                  maxLength={500}
+                  className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical border-gray-300"
+                />
+                <p className="text-gray-500 text-sm mt-1 text-right">
+                  {formData.descriptions[role].length}/500
                 </p>
               </div>
-            </div>
-
-            {/* Manager Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Manager Only Description
-                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
-              </label>
-              <textarea
-                value={formData.descriptions.manager}
-                onChange={(e) => handleDescriptionChange('manager', e.target.value)}
-                placeholder="Manager-specific description. Supports all languages and symbols: મેનેજર માટે વિશેષ વર્ણન | मैनेजर के लिए विशेष विवरण"
-                rows={3}
-                maxLength={500}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
-                  errors['descriptions.manager'] ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors['descriptions.manager'] && (
-                  <p className="text-red-500 text-sm">{errors['descriptions.manager']}</p>
-                )}
-                <p className="text-gray-500 text-sm ml-auto">
-                  {formData.descriptions.manager.length}/500
-                </p>
-              </div>
-            </div>
-
-            {/* Pro Client Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Pro Client Only Description
-                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
-              </label>
-              <textarea
-                value={formData.descriptions.proClient}
-                onChange={(e) => handleDescriptionChange('proClient', e.target.value)}
-                placeholder="Pro Client-specific description. Supports all languages and symbols: પ્રો ક્લાયંટ માટે વિશેષ વર્ણન | प्रो क्लाइंट के लिए विशेष विवरण"
-                rows={3}
-                maxLength={500}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
-                  errors['descriptions.proClient'] ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors['descriptions.proClient'] && (
-                  <p className="text-red-500 text-sm">{errors['descriptions.proClient']}</p>
-                )}
-                <p className="text-gray-500 text-sm ml-auto">
-                  {formData.descriptions.proClient.length}/500
-                </p>
-              </div>
-            </div>
-
-            {/* Client Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Client Only Description
-                <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
-              </label>
-              <textarea
-                value={formData.descriptions.client}
-                onChange={(e) => handleDescriptionChange('client', e.target.value)}
-                placeholder="Client-specific description. Supports all languages and symbols: ક્લાયંટ માટે વિશેષ વર્ણન | क्लाइंट के लिए विशेष विवरण"
-                rows={3}
-                maxLength={500}
-                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical ${
-                  errors['descriptions.client'] ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              <div className="flex justify-between items-center mt-1">
-                {errors['descriptions.client'] && (
-                  <p className="text-red-500 text-sm">{errors['descriptions.client']}</p>
-                )}
-                <p className="text-gray-500 text-sm ml-auto">
-                  {formData.descriptions.client.length}/500
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Form Actions */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-        <Button
+        <button
           type="button"
-          variant="outline"
           onClick={onCancel}
           disabled={loading}
+          className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
           Cancel
-        </Button>
-        <Button
-          type="submit"
-          disabled={loading}
-          className="flex items-center gap-2"
-        >
-          {loading && <LoadingSpinner size="sm" />}
-          {loading 
-            ? (isEditing ? 'Updating...' : 'Creating...') 
-            : (isEditing ? 'Update Category' : 'Create Category')
-          }
-        </Button>
+        </button>
+        <div className="flex flex-col items-end gap-2">
+          {errors.resaleCategories && formData.resaleEnabled && (
+            <p className="text-red-700 text-sm font-medium">{errors.resaleCategories}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+          >
+            {loading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
+            {loading 
+              ? (isEditing ? 'Updating...' : 'Creating...') 
+              : (isEditing ? 'Update Category' : 'Create Category')
+            }
+          </button>
+        </div>
       </div>
     </form>
   );

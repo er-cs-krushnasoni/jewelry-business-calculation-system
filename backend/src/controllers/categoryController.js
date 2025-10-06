@@ -1,6 +1,5 @@
 const Category = require('../models/Category');
 
-// AsyncHandler utility - inline definition
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
@@ -13,7 +12,6 @@ const getCategories = asyncHandler(async (req, res) => {
     const { type, metal, itemCategory } = req.query;
     const shopId = req.user.shopId;
 
-    // Build filter object
     const filters = { shopId };
     
     if (type) filters.type = type;
@@ -24,7 +22,6 @@ const getCategories = asyncHandler(async (req, res) => {
       .populate('createdBy', 'username')
       .populate('updatedBy', 'username');
 
-    // Transform categories to include appropriate descriptions
     const transformedCategories = categories.map(category => {
       const categoryObj = category.toJSON();
       categoryObj.description = category.getDescriptionForRole(req.user.role);
@@ -99,12 +96,9 @@ const createCategory = asyncHandler(async (req, res) => {
       scrapBuyOwnPercentage,
       scrapBuyOtherPercentage,
       resaleEnabled,
-      directResalePercentage,
-      polishRepairResalePercentage,
-      polishRepairCostPercentage
+      resaleCategories = [] // Array of resale categories
     } = req.body;
 
-    // Validate required fields
     if (!type || !metal || !code) {
       return res.status(400).json({
         success: false,
@@ -116,7 +110,6 @@ const createCategory = asyncHandler(async (req, res) => {
 
     // Type-specific validations
     if (typeUpper === 'NEW') {
-      // NEW jewelry validations
       if (!itemCategory || !purityPercentage || !buyingFromWholesalerPercentage || !sellingPercentage) {
         return res.status(400).json({
           success: false,
@@ -124,7 +117,6 @@ const createCategory = asyncHandler(async (req, res) => {
         });
       }
 
-      // Validate percentages for NEW jewelry
       if (purityPercentage < 1 || purityPercentage > 100) {
         return res.status(400).json({
           success: false,
@@ -147,7 +139,6 @@ const createCategory = asyncHandler(async (req, res) => {
       }
 
     } else if (typeUpper === 'OLD') {
-      // OLD jewelry validations
       if (!truePurityPercentage || !scrapBuyOwnPercentage || !scrapBuyOtherPercentage || resaleEnabled === undefined) {
         return res.status(400).json({
           success: false,
@@ -155,7 +146,6 @@ const createCategory = asyncHandler(async (req, res) => {
         });
       }
 
-      // Validate percentages for OLD jewelry
       if (truePurityPercentage < 1 || truePurityPercentage > 100) {
         return res.status(400).json({
           success: false,
@@ -177,40 +167,62 @@ const createCategory = asyncHandler(async (req, res) => {
         });
       }
 
-      // Validate resale fields if resale is enabled
+      // Validate resale categories if resale is enabled
       if (resaleEnabled) {
-        if (!directResalePercentage || !polishRepairResalePercentage || polishRepairCostPercentage === undefined || !buyingFromWholesalerPercentage) {
+        if (!resaleCategories || resaleCategories.length === 0) {
           return res.status(400).json({
             success: false,
-            message: 'Direct resale percentage, polish/repair resale percentage, polish/repair cost percentage, and buying from wholesaler percentage are required when resale is enabled'
+            message: 'At least one resale category is required when resale is enabled'
           });
         }
 
-        if (directResalePercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Direct resale percentage must be at least 1'
-          });
+        // Validate each resale category
+        for (let i = 0; i < resaleCategories.length; i++) {
+          const cat = resaleCategories[i];
+          
+          if (!cat.itemCategory || !cat.itemCategory.trim()) {
+            return res.status(400).json({
+              success: false,
+              message: `Category #${i + 1}: Item category is required`
+            });
+          }
+
+          if (!cat.directResalePercentage || cat.directResalePercentage < 1) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Direct resale percentage must be at least 1`
+            });
+          }
+
+          if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`
+            });
+          }
+
+          if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`
+            });
+          }
+
+          if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`
+            });
+          }
         }
 
-        if (polishRepairResalePercentage < 1) {
+        // Check for duplicate category names
+        const categoryNames = resaleCategories.map(c => c.itemCategory.trim().toLowerCase());
+        const uniqueNames = new Set(categoryNames);
+        if (categoryNames.length !== uniqueNames.size) {
           return res.status(400).json({
             success: false,
-            message: 'Polish/repair resale percentage must be at least 1'
-          });
-        }
-
-        if (polishRepairCostPercentage < 0 || polishRepairCostPercentage > 50) {
-          return res.status(400).json({
-            success: false,
-            message: 'Polish/repair cost percentage must be between 0 and 50'
-          });
-        }
-
-        if (buyingFromWholesalerPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Buying from wholesaler percentage must be at least 1'
+            message: 'Duplicate category names are not allowed'
           });
         }
       }
@@ -260,19 +272,20 @@ const createCategory = asyncHandler(async (req, res) => {
       categoryData.scrapBuyOtherPercentage = parseFloat(scrapBuyOtherPercentage);
       categoryData.resaleEnabled = Boolean(resaleEnabled);
       
-      // Add resale fields if enabled
-      if (resaleEnabled) {
-        categoryData.directResalePercentage = parseFloat(directResalePercentage);
-        categoryData.polishRepairResalePercentage = parseFloat(polishRepairResalePercentage);
-        categoryData.polishRepairCostPercentage = parseFloat(polishRepairCostPercentage);
-        categoryData.buyingFromWholesalerPercentage = parseFloat(buyingFromWholesalerPercentage);
+      if (resaleEnabled && resaleCategories.length > 0) {
+        categoryData.resaleCategories = resaleCategories.map(cat => ({
+          itemCategory: cat.itemCategory.trim(),
+          directResalePercentage: parseFloat(cat.directResalePercentage),
+          polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+          polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+          buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+        }));
       }
     }
 
     const category = new Category(categoryData);
     const savedCategory = await category.save();
 
-    // Populate and return
     const populatedCategory = await Category.findById(savedCategory._id)
       .populate('createdBy', 'username')
       .populate('updatedBy', 'username');
@@ -307,7 +320,7 @@ const createCategory = asyncHandler(async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: 'Failed to create category'
+      message: error.message || 'Failed to create category'
     });
   }
 });
@@ -332,9 +345,7 @@ const updateCategory = asyncHandler(async (req, res) => {
       scrapBuyOwnPercentage,
       scrapBuyOtherPercentage,
       resaleEnabled,
-      directResalePercentage,
-      polishRepairResalePercentage,
-      polishRepairCostPercentage
+      resaleCategories = []
     } = req.body;
 
     const category = await Category.findOne({
@@ -355,7 +366,7 @@ const updateCategory = asyncHandler(async (req, res) => {
     const currentItemCategory = itemCategory || category.itemCategory;
     const currentCode = code || category.code;
 
-    // Check code uniqueness if code, type, metal, or itemCategory is being changed
+    // Check code uniqueness if changed
     if (code !== category.code || type !== category.type || metal !== category.metal || itemCategory !== category.itemCategory) {
       const isUnique = await Category.isCodeUnique(
         req.user.shopId,
@@ -374,91 +385,66 @@ const updateCategory = asyncHandler(async (req, res) => {
       }
     }
 
-    // Type-specific validations if type is being changed or updated
-    if (currentType.toUpperCase() === 'NEW') {
-      if (purityPercentage !== undefined) {
-        if (purityPercentage < 1 || purityPercentage > 100) {
+    // Type-specific validations
+    if (currentType.toUpperCase() === 'OLD') {
+      if (resaleEnabled !== undefined) {
+        if (resaleEnabled && (!resaleCategories || resaleCategories.length === 0)) {
           return res.status(400).json({
             success: false,
-            message: 'Purity percentage must be between 1 and 100'
-          });
-        }
-      }
-
-      if (buyingFromWholesalerPercentage !== undefined) {
-        if (buyingFromWholesalerPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Buying percentage must be at least 1'
-          });
-        }
-      }
-
-      if (sellingPercentage !== undefined) {
-        if (sellingPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Selling percentage must be at least 1'
-          });
-        }
-      }
-    } else if (currentType.toUpperCase() === 'OLD') {
-      if (truePurityPercentage !== undefined) {
-        if (truePurityPercentage < 1 || truePurityPercentage > 100) {
-          return res.status(400).json({
-            success: false,
-            message: 'True purity percentage must be between 1 and 100'
-          });
-        }
-      }
-
-      if (scrapBuyOwnPercentage !== undefined) {
-        if (scrapBuyOwnPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Scrap buy own percentage must be at least 1'
-          });
-        }
-      }
-
-      if (scrapBuyOtherPercentage !== undefined) {
-        if (scrapBuyOtherPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Scrap buy other percentage must be at least 1'
-          });
-        }
-      }
-
-      // Validate resale fields if resale is being enabled
-      const currentResaleEnabled = resaleEnabled !== undefined ? resaleEnabled : category.resaleEnabled;
-      if (currentResaleEnabled) {
-        if (directResalePercentage !== undefined && directResalePercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Direct resale percentage must be at least 1'
+            message: 'At least one resale category is required when resale is enabled'
           });
         }
 
-        if (polishRepairResalePercentage !== undefined && polishRepairResalePercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Polish/repair resale percentage must be at least 1'
-          });
-        }
+        // Validate resale categories
+        if (resaleEnabled) {
+          for (let i = 0; i < resaleCategories.length; i++) {
+            const cat = resaleCategories[i];
+            
+            if (!cat.itemCategory || !cat.itemCategory.trim()) {
+              return res.status(400).json({
+                success: false,
+                message: `Category #${i + 1}: Item category is required`
+              });
+            }
 
-        if (polishRepairCostPercentage !== undefined && (polishRepairCostPercentage < 0 || polishRepairCostPercentage > 50)) {
-          return res.status(400).json({
-            success: false,
-            message: 'Polish/repair cost percentage must be between 0 and 50'
-          });
-        }
+            if (!cat.directResalePercentage || cat.directResalePercentage < 1) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Direct resale percentage must be at least 1`
+              });
+            }
 
-        if (buyingFromWholesalerPercentage !== undefined && buyingFromWholesalerPercentage < 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Buying from wholesaler percentage must be at least 1'
-          });
+            if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`
+              });
+            }
+
+            if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`
+              });
+            }
+
+            if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`
+              });
+            }
+          }
+
+          // Check for duplicate category names
+          const categoryNames = resaleCategories.map(c => c.itemCategory.trim().toLowerCase());
+          const uniqueNames = new Set(categoryNames);
+          if (categoryNames.length !== uniqueNames.size) {
+            return res.status(400).json({
+              success: false,
+              message: 'Duplicate category names are not allowed'
+            });
+          }
         }
       }
     }
@@ -485,18 +471,20 @@ const updateCategory = asyncHandler(async (req, res) => {
       if (resaleEnabled !== undefined) {
         category.resaleEnabled = Boolean(resaleEnabled);
         
-        // Update resale fields if resale is enabled
         if (category.resaleEnabled) {
-          if (directResalePercentage !== undefined) category.directResalePercentage = parseFloat(directResalePercentage);
-          if (polishRepairResalePercentage !== undefined) category.polishRepairResalePercentage = parseFloat(polishRepairResalePercentage);
-          if (polishRepairCostPercentage !== undefined) category.polishRepairCostPercentage = parseFloat(polishRepairCostPercentage);
-          if (buyingFromWholesalerPercentage !== undefined) category.buyingFromWholesalerPercentage = parseFloat(buyingFromWholesalerPercentage);
+          // Update resale categories
+          if (resaleCategories && resaleCategories.length > 0) {
+            category.resaleCategories = resaleCategories.map(cat => ({
+              itemCategory: cat.itemCategory.trim(),
+              directResalePercentage: parseFloat(cat.directResalePercentage),
+              polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+              polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+              buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+            }));
+          }
         } else {
-          // Clear resale fields if resale is disabled
-          category.directResalePercentage = undefined;
-          category.polishRepairResalePercentage = undefined;
-          category.polishRepairCostPercentage = undefined;
-          category.buyingFromWholesalerPercentage = undefined;
+          // Clear resale categories if resale is disabled
+          category.resaleCategories = [];
         }
       }
     }
@@ -512,7 +500,6 @@ const updateCategory = asyncHandler(async (req, res) => {
     
     const updatedCategory = await category.save();
 
-    // Populate and return
     const populatedCategory = await Category.findById(updatedCategory._id)
       .populate('createdBy', 'username')
       .populate('updatedBy', 'username');
@@ -570,7 +557,6 @@ const deleteCategory = asyncHandler(async (req, res) => {
       });
     }
 
-    // Soft delete
     category.isActive = false;
     category.updatedBy = req.user._id;
     await category.save();
