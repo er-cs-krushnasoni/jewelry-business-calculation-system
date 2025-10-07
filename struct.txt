@@ -113,7 +113,7 @@ jewellery-calculation-system
         ├── pages
         │   ├── admin
         │   │   ├── CategoryManagement.jsx
-        │   │   ├── DescriptionManager.jsx
+        │   │   ├── UserManagement.jsx
         │   ├── auth
         │   ├── calculator
         │   │   ├── calculator.jsx

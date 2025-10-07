@@ -162,8 +162,16 @@ const createShopUser = async (req, res) => {
 const updateUserCredentials = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { username, password } = req.body;
+    const { username, password, oldPassword } = req.body;
     const shopId = req.user.shopId;
+    const currentUserId = req.user.id; // Current logged-in user's ID
+
+    console.log('[UPDATE CREDENTIALS] Request received');
+    console.log('[UPDATE CREDENTIALS] UserId:', userId);
+    console.log('[UPDATE CREDENTIALS] Current User ID:', currentUserId);
+    console.log('[UPDATE CREDENTIALS] Has username:', !!username);
+    console.log('[UPDATE CREDENTIALS] Has password:', !!password);
+    console.log('[UPDATE CREDENTIALS] Has oldPassword:', !!oldPassword);
 
     // At least one field must be provided
     if (!username && !password) {
@@ -173,30 +181,58 @@ const updateUserCredentials = async (req, res) => {
       });
     }
 
+    // Check if updating own account
+    const isCurrentUser = userId === currentUserId;
+    console.log('[UPDATE CREDENTIALS] Is current user:', isCurrentUser);
+
     // Find user and verify they belong to current shop
     const user = await User.findOne({ 
       _id: userId, 
       shopId,
-      role: { $in: ['manager', 'pro_client', 'client'] }
+      role: { $in: ['admin', 'manager', 'pro_client', 'client'] } // Include admin role
     });
 
     if (!user) {
+      console.log('[UPDATE CREDENTIALS] User not found');
       return res.status(404).json({
         success: false,
         message: 'User not found or not authorized to modify this user'
       });
     }
 
+    console.log('[UPDATE CREDENTIALS] User found:', user.username, 'Role:', user.role);
+
+    // If current user is changing their own password, verify old password
+    if (isCurrentUser && password) {
+      if (!oldPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Old password is required to change your own password'
+        });
+      }
+
+      // Verify old password
+      const isOldPasswordValid = await user.matchPassword(oldPassword);
+      if (!isOldPasswordValid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Current password is incorrect'
+        });
+      }
+      console.log('[UPDATE CREDENTIALS] Old password verified');
+    }
+
     // If username is being updated, check global uniqueness
-    if (username && username !== user.username) {
+    if (username && username.toLowerCase().trim() !== user.username) {
       const existingUser = await User.findByUsername(username);
-      if (existingUser) {
+      if (existingUser && existingUser._id.toString() !== userId) {
         return res.status(400).json({
           success: false,
           message: 'Username already exists. Please choose a different username.'
         });
       }
       user.username = username.toLowerCase().trim();
+      console.log('[UPDATE CREDENTIALS] Username updated');
     }
 
     // If password is being updated, validate and encrypt
@@ -221,8 +257,9 @@ const updateUserCredentials = async (req, res) => {
         try {
           const PasswordEncryption = require('../utils/encryption');
           user.encryptedPassword = PasswordEncryption.encryptPassword(password, shop.masterEncryptionKey);
+          console.log('[UPDATE CREDENTIALS] Password encrypted');
         } catch (error) {
-          console.error('Password encryption failed during update:', error);
+          console.error('[UPDATE CREDENTIALS] Password encryption failed:', error);
           return res.status(500).json({
             success: false,
             message: 'Failed to encrypt password'
@@ -233,9 +270,11 @@ const updateUserCredentials = async (req, res) => {
       // Set temporary plain password for hashing
       User.setTempPlainPassword(password);
       user.password = password;
+      console.log('[UPDATE CREDENTIALS] Password updated');
     }
 
     await user.save();
+    console.log('[UPDATE CREDENTIALS] User saved successfully');
 
     res.status(200).json({
       success: true,
@@ -250,7 +289,7 @@ const updateUserCredentials = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update user credentials error:', error);
+    console.error('[UPDATE CREDENTIALS] Error:', error);
     
     if (error.code === 11000) {
       return res.status(400).json({
