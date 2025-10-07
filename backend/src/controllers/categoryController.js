@@ -194,25 +194,28 @@ const createCategory = asyncHandler(async (req, res) => {
             });
           }
 
-          if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
-            return res.status(400).json({
-              success: false,
-              message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`
-            });
-          }
-
-          if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
-            return res.status(400).json({
-              success: false,
-              message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`
-            });
-          }
-
           if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
             return res.status(400).json({
               success: false,
               message: `Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`
             });
+          }
+
+          // Validate polish/repair fields only if enabled
+          if (cat.polishRepairEnabled) {
+            if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1 when polish/repair is enabled`
+              });
+            }
+
+            if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50 when polish/repair is enabled`
+              });
+            }
           }
         }
 
@@ -276,9 +279,12 @@ const createCategory = asyncHandler(async (req, res) => {
         categoryData.resaleCategories = resaleCategories.map(cat => ({
           itemCategory: cat.itemCategory.trim(),
           directResalePercentage: parseFloat(cat.directResalePercentage),
-          polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-          polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
-          buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+          buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+          polishRepairEnabled: Boolean(cat.polishRepairEnabled),
+          ...(cat.polishRepairEnabled && {
+            polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+            polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+          })
         }));
       }
     }
@@ -414,25 +420,28 @@ const updateCategory = asyncHandler(async (req, res) => {
               });
             }
 
-            if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
-              return res.status(400).json({
-                success: false,
-                message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1`
-              });
-            }
-
-            if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
-              return res.status(400).json({
-                success: false,
-                message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`
-              });
-            }
-
             if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
               return res.status(400).json({
                 success: false,
                 message: `Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`
               });
+            }
+
+            // Validate polish/repair fields only if enabled
+            if (cat.polishRepairEnabled) {
+              if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Category "${cat.itemCategory}": Polish/repair resale percentage must be at least 1 when polish/repair is enabled`
+                });
+              }
+
+              if (cat.polishRepairCostPercentage === undefined || cat.polishRepairCostPercentage < 0 || cat.polishRepairCostPercentage > 50) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50 when polish/repair is enabled`
+                });
+              }
             }
           }
 
@@ -477,9 +486,12 @@ const updateCategory = asyncHandler(async (req, res) => {
             category.resaleCategories = resaleCategories.map(cat => ({
               itemCategory: cat.itemCategory.trim(),
               directResalePercentage: parseFloat(cat.directResalePercentage),
-              polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-              polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
-              buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+              buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+              polishRepairEnabled: Boolean(cat.polishRepairEnabled),
+              ...(cat.polishRepairEnabled && {
+                polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+                polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+              })
             }));
           }
         } else {

@@ -41,13 +41,14 @@ const ExtendedJewelryForm = ({
     scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage || '',
     resaleEnabled: initialData?.resaleEnabled || false,
     
-    // OLD jewelry - Array of resale categories
+    // OLD jewelry - Array of resale categories with polish/repair toggle
     resaleCategories: initialData?.resaleCategories?.map(cat => ({
       itemCategory: cat.itemCategory || '',
       directResalePercentage: cat.directResalePercentage || '',
+      buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || '',
+      polishRepairEnabled: cat.polishRepairEnabled || false,
       polishRepairResalePercentage: cat.polishRepairResalePercentage || '',
-      polishRepairCostPercentage: cat.polishRepairCostPercentage || '',
-      buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || ''
+      polishRepairCostPercentage: cat.polishRepairCostPercentage || ''
     })) || [],
     
     // Descriptions
@@ -74,7 +75,6 @@ const ExtendedJewelryForm = ({
         setShowCategoryDropdown(false);
       }
       
-      // Close resale category dropdowns
       Object.keys(resaleCategoryRefs.current).forEach(key => {
         if (resaleCategoryRefs.current[key] && !resaleCategoryRefs.current[key].contains(event.target)) {
           setResaleCategoryDropdowns(prev => ({ ...prev, [key]: false }));
@@ -181,9 +181,10 @@ const ExtendedJewelryForm = ({
         {
           itemCategory: '',
           directResalePercentage: '',
+          buyingFromWholesalerPercentage: '',
+          polishRepairEnabled: false,
           polishRepairResalePercentage: '',
-          polishRepairCostPercentage: '',
-          buyingFromWholesalerPercentage: ''
+          polishRepairCostPercentage: ''
         }
       ]
     }));
@@ -195,7 +196,6 @@ const ExtendedJewelryForm = ({
       resaleCategories: prev.resaleCategories.filter((_, i) => i !== index)
     }));
     
-    // Clear related errors and dropdown states
     const newErrors = { ...errors };
     Object.keys(newErrors).forEach(key => {
       if (key.startsWith(`resaleCategories.${index}`)) {
@@ -204,7 +204,6 @@ const ExtendedJewelryForm = ({
     });
     setErrors(newErrors);
     
-    // Clean up dropdown states
     setResaleCategoryDropdowns(prev => {
       const newState = { ...prev };
       delete newState[index];
@@ -228,6 +227,33 @@ const ExtendedJewelryForm = ({
     if (field === 'itemCategory') {
       setResaleCategorySearchTerms(prev => ({ ...prev, [index]: value }));
       setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }));
+    }
+    
+    // Clear polish/repair fields when toggle is disabled
+    if (field === 'polishRepairEnabled' && !value) {
+      setFormData(prev => ({
+        ...prev,
+        resaleCategories: prev.resaleCategories.map((cat, i) => 
+          i === index ? { 
+            ...cat, 
+            polishRepairEnabled: false,
+            polishRepairResalePercentage: '',
+            polishRepairCostPercentage: ''
+          } : cat
+        )
+      }));
+      
+      // Clear related errors
+      const errorKey1 = `resaleCategories.${index}.polishRepairResalePercentage`;
+      const errorKey2 = `resaleCategories.${index}.polishRepairCostPercentage`;
+      if (errors[errorKey1] || errors[errorKey2]) {
+        setErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[errorKey1];
+          delete newErrors[errorKey2];
+          return newErrors;
+        });
+      }
     }
     
     const errorKey = `resaleCategories.${index}.${field}`;
@@ -287,9 +313,10 @@ const ExtendedJewelryForm = ({
         ? [{
             itemCategory: '',
             directResalePercentage: '',
+            buyingFromWholesalerPercentage: '',
+            polishRepairEnabled: false,
             polishRepairResalePercentage: '',
-            polishRepairCostPercentage: '',
-            buyingFromWholesalerPercentage: ''
+            polishRepairCostPercentage: ''
           }]
         : enabled ? prev.resaleCategories : []
     }));
@@ -401,23 +428,28 @@ const ExtendedJewelryForm = ({
             } else if (parseFloat(cat.directResalePercentage) < 1) {
               newErrors[`resaleCategories.${index}.directResalePercentage`] = 'Must be at least 1';
             }
-            if (!cat.polishRepairResalePercentage) {
-              newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Required';
-            } else if (parseFloat(cat.polishRepairResalePercentage) < 1) {
-              newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Must be at least 1';
-            }
-            if (cat.polishRepairCostPercentage === '') {
-              newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Required';
-            } else {
-              const cost = parseFloat(cat.polishRepairCostPercentage);
-              if (isNaN(cost) || cost < 0 || cost > 50) {
-                newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Must be 0-50';
-              }
-            }
             if (!cat.buyingFromWholesalerPercentage) {
               newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Required';
             } else if (parseFloat(cat.buyingFromWholesalerPercentage) < 1) {
               newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Must be at least 1';
+            }
+            
+            // Validate polish/repair fields only if enabled
+            if (cat.polishRepairEnabled) {
+              if (!cat.polishRepairResalePercentage) {
+                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Required when polish/repair enabled';
+              } else if (parseFloat(cat.polishRepairResalePercentage) < 1) {
+                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Must be at least 1';
+              }
+              
+              if (cat.polishRepairCostPercentage === '') {
+                newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Required when polish/repair enabled';
+              } else {
+                const cost = parseFloat(cat.polishRepairCostPercentage);
+                if (isNaN(cost) || cost < 0 || cost > 50) {
+                  newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Must be 0-50';
+                }
+              }
             }
           });
         }
@@ -464,9 +496,12 @@ const ExtendedJewelryForm = ({
           submitData.resaleCategories = formData.resaleCategories.map(cat => ({
             itemCategory: cat.itemCategory.trim(),
             directResalePercentage: parseFloat(cat.directResalePercentage),
-            polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-            polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
-            buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage)
+            buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+            polishRepairEnabled: Boolean(cat.polishRepairEnabled),
+            ...(cat.polishRepairEnabled && {
+              polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+              polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+            })
           }));
         } else {
           submitData.resaleCategories = [];
@@ -484,9 +519,7 @@ const ExtendedJewelryForm = ({
       
       if (error.response?.data?.errors) {
         const serverErrors = {};
-        // Handle array of error objects from validation middleware
         if (Array.isArray(error.response.data.errors)) {
-          // Convert array of error objects to error messages
           const errorMessages = error.response.data.errors
             .map(err => {
               if (typeof err === 'string') return err;
@@ -827,7 +860,7 @@ const ExtendedJewelryForm = ({
                 </span>
               </div>
               <p className="text-sm text-gray-500">
-                When enabled, you must add at least one resale category with its configuration.
+                When enabled, you must add at least one resale category with direct resale configuration.
               </p>
             </div>
 
@@ -950,6 +983,7 @@ const ExtendedJewelryForm = ({
                       )}
                     </div>
 
+                    {/* Direct Resale and Buying from Wholesaler (Always Mandatory) */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -973,49 +1007,6 @@ const ExtendedJewelryForm = ({
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Polish/Repair Resale % <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={category.polishRepairResalePercentage}
-                          onChange={(e) => updateResaleCategory(index, 'polishRepairResalePercentage', e.target.value)}
-                          placeholder="90.0"
-                          min="1"
-                          step="0.01"
-                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors[`resaleCategories.${index}.polishRepairResalePercentage`] ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                        />
-                        {errors[`resaleCategories.${index}.polishRepairResalePercentage`] && (
-                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairResalePercentage`]}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Polish/Repair Cost % <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={category.polishRepairCostPercentage}
-                          onChange={(e) => updateResaleCategory(index, 'polishRepairCostPercentage', e.target.value)}
-                          placeholder="5.0"
-                          min="0"
-                          max="50"
-                          step="0.01"
-                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                            errors[`resaleCategories.${index}.polishRepairCostPercentage`] ? 'border-red-500' : 'border-gray-300'
-                          }`}
-                        />
-                        {errors[`resaleCategories.${index}.polishRepairCostPercentage`] && (
-                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairCostPercentage`]}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
                           Buying from Wholesaler % <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -1034,10 +1025,84 @@ const ExtendedJewelryForm = ({
                         )}
                       </div>
                     </div>
+
+                    {/* Polish/Repair Toggle */}
+                    <div className="pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-medium text-gray-700">
+                          Polish/Repair Resale
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => updateResaleCategory(index, 'polishRepairEnabled', !category.polishRepairEnabled)}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                            category.polishRepairEnabled ? 'bg-green-600' : 'bg-gray-300'
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                              category.polishRepairEnabled ? 'translate-x-5' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      
+                      {/* Polish/Repair Fields - Only shown when toggle is enabled */}
+                      {category.polishRepairEnabled && (
+                        <div className="grid grid-cols-2 gap-3 mt-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Polish/Repair Resale % <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={category.polishRepairResalePercentage}
+                              onChange={(e) => updateResaleCategory(index, 'polishRepairResalePercentage', e.target.value)}
+                              placeholder="90.0"
+                              min="1"
+                              step="0.01"
+                              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                errors[`resaleCategories.${index}.polishRepairResalePercentage`] ? 'border-red-500' : 'border-gray-300'
+                              }`}
+                            />
+                            {errors[`resaleCategories.${index}.polishRepairResalePercentage`] && (
+                              <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairResalePercentage`]}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Polish/Repair Cost % <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={category.polishRepairCostPercentage}
+                              onChange={(e) => updateResaleCategory(index, 'polishRepairCostPercentage', e.target.value)}
+                              placeholder="5.0"
+                              min="0"
+                              max="50"
+                              step="0.01"
+                              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                errors[`resaleCategories.${index}.polishRepairCostPercentage`] ? 'border-red-500' : 'border-gray-300'
+                              }`}
+                            />
+                            {errors[`resaleCategories.${index}.polishRepairCostPercentage`] && (
+                              <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairCostPercentage`]}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {!category.polishRepairEnabled && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Enable this option to add polish/repair resale configuration
+                        </p>
+                      )}
+                    </div>
                   </div>
                 ))}
 
-                {/* Add Category Button - Under category details */}
+                {/* Add Category Button */}
                 <button
                   type="button"
                   onClick={addResaleCategory}

@@ -13,23 +13,32 @@ const resaleCategorySchema = new mongoose.Schema({
     required: true,
     min: [1, 'Direct resale percentage must be at least 1%']
   },
-  polishRepairResalePercentage: {
-    type: Number,
-    required: true,
-    min: [1, 'Polish/Repair resale percentage must be at least 1%']
-  },
-  polishRepairCostPercentage: {
-    type: Number,
-    required: true,
-    min: [0, 'Polish/Repair cost percentage must be at least 0%'],
-    max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
-  },
   buyingFromWholesalerPercentage: {
     type: Number,
     required: true,
     min: [1, 'Buying from wholesaler percentage must be at least 1%']
+  },
+  // Polish/Repair toggle and fields (optional based on toggle)
+  polishRepairEnabled: {
+    type: Boolean,
+    default: false
+  },
+  polishRepairResalePercentage: {
+    type: Number,
+    required: function() {
+      return this.polishRepairEnabled === true;
+    },
+    min: [1, 'Polish/Repair resale percentage must be at least 1%']
+  },
+  polishRepairCostPercentage: {
+    type: Number,
+    required: function() {
+      return this.polishRepairEnabled === true;
+    },
+    min: [0, 'Polish/Repair cost percentage must be at least 0%'],
+    max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
   }
-}, { _id: true }); // Enable _id for each sub-category
+}, { _id: true });
 
 const categorySchema = new mongoose.Schema({
   // Basic category info
@@ -195,7 +204,6 @@ const categorySchema = new mongoose.Schema({
 });
 
 // Compound indexes for code uniqueness
-// NEW jewelry: shopId + type + metal + itemCategory + code
 categorySchema.index({ 
   shopId: 1, 
   type: 1, 
@@ -210,7 +218,6 @@ categorySchema.index({
   }
 });
 
-// OLD jewelry: shopId + type + metal + code (no itemCategory in index)
 categorySchema.index({ 
   shopId: 1, 
   type: 1, 
@@ -294,6 +301,12 @@ categorySchema.pre('save', function(next) {
               throw new Error(`Duplicate category name: ${cat.itemCategory}`);
             }
             categoryNames.add(lowerName);
+          }
+          
+          // Clear polish/repair fields if toggle is disabled
+          if (!cat.polishRepairEnabled) {
+            cat.polishRepairResalePercentage = undefined;
+            cat.polishRepairCostPercentage = undefined;
           }
         });
       }

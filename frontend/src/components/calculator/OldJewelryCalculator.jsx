@@ -4,7 +4,7 @@ import api from '../../services/api';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { Calculator, Info, AlertCircle, ChevronDown, ChevronUp, Coins, Sparkles, Package } from 'lucide-react';
+import { Calculator, Info, AlertCircle, ChevronDown, ChevronUp, Coins, Sparkles, Package, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const OldJewelryCalculator = ({ rates }) => {
@@ -428,7 +428,7 @@ const OldJewelryCalculator = ({ rates }) => {
         </div>
       )}
 
-      {/* Step 4: Select Resale Category (NEW - only if applicable) */}
+      {/* Step 4: Select Resale Category (only if applicable) */}
       {selectedCategory && selectedCategory.resaleEnabled && selectedCategory.resaleCategories && selectedCategory.resaleCategories.length > 0 && canSeeResale && (
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
@@ -447,6 +447,9 @@ const OldJewelryCalculator = ({ rates }) => {
                 }`}
               >
                 <div className="font-medium">{resaleCat.itemCategory}</div>
+                {resaleCat.polishRepairEnabled && (
+                  <div className="text-xs text-green-600 mt-1">+ Polish/Repair</div>
+                )}
                 {selectedResaleCategory?._id === resaleCat._id && (
                   <div className="text-xs text-green-600 mt-1">✓ Selected</div>
                 )}
@@ -519,7 +522,7 @@ const OldJewelryCalculator = ({ rates }) => {
             </div>
           </div>
 
-          {/* SCRAP VALUE SECTION - Always Visible (based on role) */}
+          {/* SCRAP VALUE SECTION */}
           <div className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-300 rounded-xl p-6">
             <div className="flex items-center gap-2 mb-3">
               <Package className="text-orange-700" size={24} />
@@ -541,7 +544,7 @@ const OldJewelryCalculator = ({ rates }) => {
               )}
             </div>
 
-            {/* Scrap Margin - For Pro Client (amount only) and Admin/Manager (full breakdown) */}
+            {/* Scrap Margin */}
             {permissions?.canViewMargins && (
               <div className="bg-white border-2 border-orange-200 rounded-lg overflow-hidden mt-4">
                 <button
@@ -568,7 +571,6 @@ const OldJewelryCalculator = ({ rates }) => {
                   )}
                 </button>
                 
-                {/* Detailed Breakdown - Only for Admin/Manager */}
                 {expandedSections.scrapMargin && canSeeMarginBreakdown && (
                   <div className="px-5 py-4 bg-orange-50 border-t border-orange-200">
                     <h5 className="font-semibold text-orange-900 mb-3">Margin Breakdown</h5>
@@ -699,108 +701,130 @@ const OldJewelryCalculator = ({ rates }) => {
                 )}
               </div>
 
-              {/* POLISH/REPAIR RESALE */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6">
-                <h5 className="text-md font-semibold text-blue-900 mb-3">Polish/Repair Resale</h5>
-                
-                <div className="text-center mb-4">
-                  <div className="text-sm font-medium text-blue-700 mb-2">Polish/Repair Resale Value</div>
-                  <div className="text-4xl font-bold text-blue-900">
-                    ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)}
-                  </div>
-                  <div className="text-sm text-blue-600 mt-2">
-                    for {formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.effectiveWeight)}g 
-                    <span className="text-xs"> (after {result.resaleCalculations.polishRepairResale.weightInfo.polishRepairCostPercentage}% weight loss)</span>
-                  </div>
-                  {result.resaleCalculations.polishRepairResale.breakdown.roundingApplied && (
-                    <div className="text-xs text-blue-600 mt-1">
-                      (Rounded from ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.beforeRounding)})
+              {/* POLISH/REPAIR RESALE - Show based on availability */}
+              {result.resaleCalculations.polishRepairResale && (
+                result.resaleCalculations.polishRepairResale.available ? (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-xl p-6">
+                    <h5 className="text-md font-semibold text-blue-900 mb-3">Polish/Repair Resale</h5>
+                    
+                    <div className="text-center mb-4">
+                      <div className="text-sm font-medium text-blue-700 mb-2">Polish/Repair Resale Value</div>
+                      <div className="text-4xl font-bold text-blue-900">
+                        ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)}
+                      </div>
+                      <div className="text-sm text-blue-600 mt-2">
+                        for {formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.effectiveWeight)}g 
+                        <span className="text-xs"> (after {result.resaleCalculations.polishRepairResale.weightInfo.polishRepairCostPercentage}% weight loss)</span>
+                      </div>
+                      {result.resaleCalculations.polishRepairResale.breakdown.roundingApplied && (
+                        <div className="text-xs text-blue-600 mt-1">
+                          (Rounded from ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.beforeRounding)})
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
 
-                {/* Weight Info */}
-                <div className="bg-white border border-blue-200 rounded-lg p-3 mb-4">
-                  <div className="text-xs font-semibold text-blue-900 mb-2">Weight Adjustment</div>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div>
-                      <div className="text-xs text-blue-600">Original</div>
-                      <div className="font-semibold text-blue-900">{result.resaleCalculations.polishRepairResale.weightInfo.originalWeight}g</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-blue-600">Loss</div>
-                      <div className="font-semibold text-blue-900">{formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.weightLoss)}g</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-blue-600">Effective</div>
-                      <div className="font-semibold text-blue-900">{formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.effectiveWeight)}g</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Polish/Repair Margin */}
-                {permissions?.canViewMargins && (
-                  <div className="bg-white border-2 border-blue-200 rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => toggleSection('polishRepairMargin')}
-                      className={`w-full px-5 py-4 flex items-center justify-between transition-colors ${
-                        canSeeMarginBreakdown ? 'hover:bg-blue-50' : 'cursor-default'
-                      }`}
-                      disabled={!canSeeMarginBreakdown}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-left">
-                          <div className="text-sm font-medium text-blue-700">Polish/Repair Margin</div>
-                          <div className="text-2xl font-bold text-blue-900">
-                            ₹{formatCurrency(result.resaleCalculations.polishRepairResale.margin)}
-                          </div>
+                    {/* Weight Info */}
+                    <div className="bg-white border border-blue-200 rounded-lg p-3 mb-4">
+                      <div className="text-xs font-semibold text-blue-900 mb-2">Weight Adjustment</div>
+                      <div className="grid grid-cols-3 gap-2 text-sm">
+                        <div>
+                          <div className="text-xs text-blue-600">Original</div>
+                          <div className="font-semibold text-blue-900">{result.resaleCalculations.polishRepairResale.weightInfo.originalWeight}g</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-blue-600">Loss</div>
+                          <div className="font-semibold text-blue-900">{formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.weightLoss)}g</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-blue-600">Effective</div>
+                          <div className="font-semibold text-blue-900">{formatNumber(result.resaleCalculations.polishRepairResale.weightInfo.effectiveWeight)}g</div>
                         </div>
                       </div>
-                      {canSeeMarginBreakdown && (
-                        expandedSections.polishRepairMargin ? (
-                          <ChevronUp className="text-blue-600" size={24} />
-                        ) : (
-                          <ChevronDown className="text-blue-600" size={24} />
-                        )
-                      )}
-                    </button>
-                    
-                    {expandedSections.polishRepairMargin && canSeeMarginBreakdown && (
-                      <div className="px-5 py-4 bg-blue-50 border-t border-blue-200">
-                        <h6 className="font-semibold text-blue-900 mb-3">Margin Breakdown</h6>
-                        <div className="space-y-3">
-                          <div className="bg-white rounded-lg p-3 border border-blue-200">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-blue-800">Wholesaler Cost (Effective Weight)</span>
-                              <span className="text-sm font-semibold text-blue-900">
-                                ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)}
-                              </span>
-                            </div>
-                          </div>
+                    </div>
 
-                          <div className="bg-white rounded-lg p-3 border border-blue-200">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-blue-800">Polish/Repair Resale Value</span>
-                              <span className="text-sm font-semibold text-blue-900">
-                                ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)}
-                              </span>
+                    {/* Polish/Repair Margin */}
+                    {permissions?.canViewMargins && (
+                      <div className="bg-white border-2 border-blue-200 rounded-lg overflow-hidden">
+                        <button
+                          onClick={() => toggleSection('polishRepairMargin')}
+                          className={`w-full px-5 py-4 flex items-center justify-between transition-colors ${
+                            canSeeMarginBreakdown ? 'hover:bg-blue-50' : 'cursor-default'
+                          }`}
+                          disabled={!canSeeMarginBreakdown}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="text-left">
+                              <div className="text-sm font-medium text-blue-700">Polish/Repair Margin</div>
+                              <div className="text-2xl font-bold text-blue-900">
+                                ₹{formatCurrency(result.resaleCalculations.polishRepairResale.margin)}
+                              </div>
                             </div>
                           </div>
+                          {canSeeMarginBreakdown && (
+                            expandedSections.polishRepairMargin ? (
+                              <ChevronUp className="text-blue-600" size={24} />
+                            ) : (
+                              <ChevronDown className="text-blue-600" size={24} />
+                            )
+                          )}
+                        </button>
+                        
+                        {expandedSections.polishRepairMargin && canSeeMarginBreakdown && (
+                          <div className="px-5 py-4 bg-blue-50 border-t border-blue-200">
+                            <h6 className="font-semibold text-blue-900 mb-3">Margin Breakdown</h6>
+                            <div className="space-y-3">
+                              <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-blue-800">Wholesaler Cost (Effective Weight)</span>
+                                  <span className="text-sm font-semibold text-blue-900">
+                                    ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)}
+                                  </span>
+                                </div>
+                              </div>
 
-                          <div className="bg-blue-100 rounded-lg p-4 border-2 border-blue-300">
-                            <div className="text-xs font-semibold text-blue-900 mb-2 uppercase tracking-wide">
-                              Calculation Formula
-                            </div>
-                            <div className="font-mono text-sm text-blue-900">
-                              ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)} - ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)} = ₹{formatCurrency(result.resaleCalculations.polishRepairResale.margin)}
+                              <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm text-blue-800">Polish/Repair Resale Value</span>
+                                  <span className="text-sm font-semibold text-blue-900">
+                                    ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="bg-blue-100 rounded-lg p-4 border-2 border-blue-300">
+                                <div className="text-xs font-semibold text-blue-900 mb-2 uppercase tracking-wide">
+                                  Calculation Formula
+                                </div>
+                                <div className="font-mono text-sm text-blue-900">
+                                  ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)} - ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)} = ₹{formatCurrency(result.resaleCalculations.polishRepairResale.margin)}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
+                ) : (
+                  // Polish/Repair NOT AVAILABLE
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 rounded-xl p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <XCircle className="text-gray-500" size={24} />
+                      <h5 className="text-md font-semibold text-gray-700">Polish/Repair Resale</h5>
+                    </div>
+                    
+                    <div className="bg-white border border-gray-300 rounded-lg p-4 text-center">
+                      <div className="text-gray-600 mb-2">
+                        <XCircle className="mx-auto mb-2 text-gray-400" size={32} />
+                      </div>
+                      <div className="text-sm font-medium text-gray-700 mb-1">Not Available</div>
+                      <p className="text-xs text-gray-600">
+                        {result.resaleCalculations.polishRepairResale.message || 'Polish/Repair resale is not enabled for this category'}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
             </div>
           )}
 

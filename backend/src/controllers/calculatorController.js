@@ -659,21 +659,7 @@ const calculateOldJewelryPrice = async (req, res) => {
         const directResaleWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
         const directResaleMargin = directResaleWholesalerCost - totalDirectResaleValue;
 
-        // ========================================
-        // POLISH/REPAIR RESALE CALCULATION (using SELLING rate with weight reduction)
-        // ========================================
-        const polishRepairCostWeight = weightNum * (selectedResaleCategory.polishRepairCostPercentage / 100);
-        const effectiveWeightAfterPolish = weightNum - polishRepairCostWeight;
-        
-        const polishRepairResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.polishRepairResalePercentage / 100);
-        const totalPolishRepairResaleBeforeRounding = polishRepairResaleValuePerGram * effectiveWeightAfterPolish;
-        const totalPolishRepairResaleValue = applyOldJewelryRounding(totalPolishRepairResaleBeforeRounding);
-
-        // POLISH/REPAIR RESALE MARGIN CALCULATION
-        const polishRepairWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
-        const polishRepairResaleMargin = polishRepairWholesalerCost - totalPolishRepairResaleValue;
-
-        // Add resale data to calculation result
+        // Add direct resale to result
         calculationResult.resaleCalculations = {
           // Direct Resale
           directResale: {
@@ -687,8 +673,31 @@ const calculateOldJewelryPrice = async (req, res) => {
             }
           },
 
-          // Polish/Repair Resale
-          polishRepairResale: {
+          // Resale percentages
+          percentages: {
+            directResale: selectedResaleCategory.directResalePercentage,
+            buyingFromWholesaler: selectedResaleCategory.buyingFromWholesalerPercentage
+          }
+        };
+
+        // ========================================
+        // POLISH/REPAIR RESALE CALCULATION (only if enabled)
+        // ========================================
+        if (selectedResaleCategory.polishRepairEnabled) {
+          const polishRepairCostWeight = weightNum * (selectedResaleCategory.polishRepairCostPercentage / 100);
+          const effectiveWeightAfterPolish = weightNum - polishRepairCostWeight;
+          
+          const polishRepairResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.polishRepairResalePercentage / 100);
+          const totalPolishRepairResaleBeforeRounding = polishRepairResaleValuePerGram * effectiveWeightAfterPolish;
+          const totalPolishRepairResaleValue = applyOldJewelryRounding(totalPolishRepairResaleBeforeRounding);
+
+          // POLISH/REPAIR RESALE MARGIN CALCULATION
+          const polishRepairWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
+          const polishRepairResaleMargin = polishRepairWholesalerCost - totalPolishRepairResaleValue;
+
+          // Add polish/repair resale to result
+          calculationResult.resaleCalculations.polishRepairResale = {
+            available: true,
             totalAmount: totalPolishRepairResaleValue,
             margin: polishRepairResaleMargin,
             weightInfo: {
@@ -703,16 +712,18 @@ const calculateOldJewelryPrice = async (req, res) => {
               roundingApplied: totalPolishRepairResaleBeforeRounding !== totalPolishRepairResaleValue,
               wholesalerCost: polishRepairWholesalerCost
             }
-          },
+          };
 
-          // Resale percentages
-          percentages: {
-            directResale: selectedResaleCategory.directResalePercentage,
-            polishRepairResale: selectedResaleCategory.polishRepairResalePercentage,
-            polishRepairCost: selectedResaleCategory.polishRepairCostPercentage,
-            buyingFromWholesaler: selectedResaleCategory.buyingFromWholesalerPercentage
-          }
-        };
+          // Add polish/repair percentages
+          calculationResult.resaleCalculations.percentages.polishRepairResale = selectedResaleCategory.polishRepairResalePercentage;
+          calculationResult.resaleCalculations.percentages.polishRepairCost = selectedResaleCategory.polishRepairCostPercentage;
+        } else {
+          // Polish/repair is disabled for this category
+          calculationResult.resaleCalculations.polishRepairResale = {
+            available: false,
+            message: 'Polish/Repair resale is not enabled for this category'
+          };
+        }
 
         calculationResult.metadata.calculationType = 'scrap_and_resale';
       }
