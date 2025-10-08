@@ -193,7 +193,24 @@ const NewJewelryCalculator = ({ rates }) => {
     return new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(num);
+    }).format(Math.ceil(num));
+  };
+
+  // Calculate making charges percentage (of rate per gram)
+  const calculateMakingChargesPercentage = (makingCharges, ratePerGram) => {
+    if (!ratePerGram || ratePerGram === 0) return 0;
+    return (makingCharges / ratePerGram) * 100;
+  };
+
+  // Calculate our margin percentage (of final selling amount)
+  const calculateOurMarginPercentage = (ourMargin, finalSellingAmount) => {
+    if (!finalSellingAmount || finalSellingAmount === 0) return 0;
+    return (ourMargin / finalSellingAmount) * 100;
+  };
+
+  // Calculate wholesaler wastage percentage
+  const calculateWholesalerWastage = (buyingPercentage, purityPercentage) => {
+    return buyingPercentage - purityPercentage;
   };
 
   return (
@@ -347,7 +364,7 @@ const NewJewelryCalculator = ({ rates }) => {
         </div>
       )}
 
-      {/* Category Descriptions (shown after selection) - PHASE 5A UPDATE */}
+      {/* Category Descriptions (shown after selection) */}
       {selectedCategory && selectedCategory.descriptions && selectedCategory.descriptions.length > 0 && (
         <div className="space-y-3">
           {selectedCategory.descriptions.map((desc, index) => (
@@ -453,7 +470,7 @@ const NewJewelryCalculator = ({ rates }) => {
                 <div className="text-left">
                   <div className="text-sm font-medium text-blue-700">Total Selling Rate Per Gram</div>
                   <div className="text-2xl font-bold text-blue-900">
-                    ₹{formatNumber(result.sellingRateBreakdown.sellingRatePerGram)}
+                    ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
                   </div>
                 </div>
               </div>
@@ -471,19 +488,34 @@ const NewJewelryCalculator = ({ rates }) => {
                   <div className="flex justify-between items-center py-2">
                     <span className="text-blue-800">Rate Per Gram</span>
                     <span className="font-semibold text-blue-900">
-                      ₹{formatNumber(result.sellingRateBreakdown.actualRatePerGram)}
+                      ₹{formatCurrency(result.sellingRateBreakdown.actualRatePerGram)}
+                      <span className="text-xs text-blue-600 ml-2">
+                        ({formatNumber(result.percentages.purity)}% purity)
+                      </span>
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t border-blue-200">
                     <span className="text-blue-800">Making Charges Per Gram</span>
                     <span className="font-semibold text-blue-900">
-                      ₹{formatNumber(result.sellingRateBreakdown.makingChargesPerGram)}
+                      ₹{formatCurrency(result.sellingRateBreakdown.makingChargesPerGram)}
+                      <span className="text-xs text-blue-600 ml-2">
+                        ({formatNumber(calculateMakingChargesPercentage(
+                          result.sellingRateBreakdown.makingChargesPerGram,
+                          // result.rates.ratePerGram
+                          result.sellingRateBreakdown.actualRatePerGram
+                        ))}% of rate)
+                      </span>
                     </span>
                   </div>
                   <div className="pt-2 border-t-2 border-blue-300 mt-2">
                     <div className="flex justify-between items-center font-bold text-blue-900">
                       <span>Total Selling Rate Per Gram</span>
-                      <span className="text-lg">₹{formatNumber(result.sellingRateBreakdown.sellingRatePerGram)}</span>
+                      <span className="text-lg">
+                        ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
+                        <span className="text-xs text-blue-600 ml-2 font-normal">
+                          ({formatNumber(result.percentages.selling)}% rate)
+                        </span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -506,6 +538,12 @@ const NewJewelryCalculator = ({ rates }) => {
                     <div className="text-sm font-medium text-purple-700">Margin Amount</div>
                     <div className="text-3xl font-bold text-purple-900">
                       ₹{formatCurrency(result.marginBreakdown.ourMargin)}
+                      <span className="text-base text-purple-600 ml-2">
+                        ({formatNumber(calculateOurMarginPercentage(
+                          result.marginBreakdown.ourMargin,
+                          result.finalSellingAmount
+                        ))}% of selling amount)
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -528,7 +566,10 @@ const NewJewelryCalculator = ({ rates }) => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-purple-800">Purchase from Wholesaler Amount</span>
                         <span className="text-sm font-semibold text-purple-900">
-                          ₹{formatNumber(result.marginBreakdown.purchaseFromWholesaler)}
+                          ₹{formatCurrency(result.marginBreakdown.purchaseFromWholesaler)}
+                          <span className="text-xs text-purple-600 ml-2">
+                            ({formatNumber(result.percentages.buying)}% rate)
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -538,7 +579,10 @@ const NewJewelryCalculator = ({ rates }) => {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-purple-800">Actual Value According to Purity</span>
                         <span className="text-sm font-semibold text-purple-900">
-                          ₹{formatNumber(result.marginBreakdown.actualValueByPurity)}
+                          ₹{formatCurrency(result.marginBreakdown.actualValueByPurity)}
+                          <span className="text-xs text-purple-600 ml-2">
+                            ({formatNumber(result.percentages.purity)}% purity)
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -553,7 +597,12 @@ const NewJewelryCalculator = ({ rates }) => {
                           <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">1</div>
                           <div className="flex-1">
                             <div className="text-purple-800">Actual Value (Purity)</div>
-                            <div className="font-mono text-purple-900">₹{formatNumber(result.marginBreakdown.actualValueByPurity)}</div>
+                            <div className="font-mono text-purple-900">
+                              ₹{formatCurrency(result.marginBreakdown.actualValueByPurity)}
+                              <span className="text-xs text-purple-600 ml-2">
+                                ({formatNumber(result.percentages.purity)}% purity)
+                              </span>
+                            </div>
                           </div>
                         </div>
                         
@@ -561,7 +610,15 @@ const NewJewelryCalculator = ({ rates }) => {
                           <div className="text-purple-600 font-bold">+</div>
                           <div className="flex-1">
                             <div className="text-purple-800">Wholesaler Margin</div>
-                            <div className="font-mono text-purple-900">₹{formatNumber(result.marginBreakdown.wholesalerMargin)}</div>
+                            <div className="font-mono text-purple-900">
+                              ₹{formatCurrency(result.marginBreakdown.wholesalerMargin)}
+                              <span className="text-xs text-purple-600 ml-2">
+                                (wastage {formatNumber(calculateWholesalerWastage(
+                                  result.percentages.buying,
+                                  result.percentages.purity
+                                ))}%)
+                              </span>
+                            </div>
                           </div>
                         </div>
                         
@@ -569,7 +626,12 @@ const NewJewelryCalculator = ({ rates }) => {
                           <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">=</div>
                           <div className="flex-1">
                             <div className="text-purple-800 font-medium">Purchase from Wholesaler</div>
-                            <div className="font-mono font-semibold text-purple-900">₹{formatNumber(result.marginBreakdown.purchaseFromWholesaler)}</div>
+                            <div className="font-mono font-semibold text-purple-900">
+                              ₹{formatCurrency(result.marginBreakdown.purchaseFromWholesaler)}
+                              <span className="text-xs text-purple-600 ml-2">
+                                ({formatNumber(result.percentages.buying)}% rate)
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -577,7 +639,15 @@ const NewJewelryCalculator = ({ rates }) => {
                           <div className="text-purple-600 font-bold">+</div>
                           <div className="flex-1">
                             <div className="text-purple-800">Our Margin</div>
-                            <div className="font-mono text-purple-900">₹{formatCurrency(result.marginBreakdown.ourMargin)}</div>
+                            <div className="font-mono text-purple-900">
+                              ₹{formatCurrency(result.marginBreakdown.ourMargin)}
+                              <span className="text-xs text-purple-600 ml-2">
+                                ({formatNumber(calculateOurMarginPercentage(
+                                  result.marginBreakdown.ourMargin,
+                                  result.finalSellingAmount
+                                ))}% of selling amount)
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -585,7 +655,12 @@ const NewJewelryCalculator = ({ rates }) => {
                           <div className="flex-shrink-0 w-4 h-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xs">=</div>
                           <div className="flex-1">
                             <div className="text-green-800 font-bold">Final Selling Amount</div>
-                            <div className="font-mono font-bold text-green-900 text-lg">₹{formatCurrency(result.finalSellingAmount)}</div>
+                            <div className="font-mono font-bold text-green-900 text-lg">
+                              ₹{formatCurrency(result.finalSellingAmount)}
+                              <span className="text-sm text-green-600 ml-2">
+                                ({formatNumber(result.percentages.selling)}% rate)
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>

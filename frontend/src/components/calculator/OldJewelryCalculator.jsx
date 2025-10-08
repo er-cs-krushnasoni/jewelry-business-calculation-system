@@ -201,7 +201,13 @@ const OldJewelryCalculator = ({ rates }) => {
     return new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(num);
+    }).format(Math.floor(num));
+  };
+
+  // Calculate percentage
+  const calculatePercentage = (part, whole) => {
+    if (!whole || whole === 0) return 0;
+    return ((part / whole) * 100).toFixed(2);
   };
 
   // Check if user can see resale options
@@ -560,6 +566,9 @@ const OldJewelryCalculator = ({ rates }) => {
                       <div className="text-2xl font-bold text-orange-900">
                         ₹{formatCurrency(result.marginBreakdown.scrapMargin)}
                       </div>
+                      <div className="text-xs text-orange-600 mt-1">
+                        ({calculatePercentage(result.marginBreakdown.scrapMargin, result.totalScrapValue)}% of Scrap Value)
+                      </div>
                     </div>
                   </div>
                   {canSeeMarginBreakdown && (
@@ -579,14 +588,14 @@ const OldJewelryCalculator = ({ rates }) => {
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-orange-800">Actual Value by Purity ({result.percentages.truePurity}%)</span>
                           <span className="text-sm font-semibold text-orange-900">
-                            ₹{formatNumber(result.marginBreakdown.actualValueByPurity)}
+                            ₹{formatCurrency(result.marginBreakdown.actualValueByPurity)}
                           </span>
                         </div>
                       </div>
 
                       <div className="bg-white rounded-lg p-3 border border-orange-200">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm text-orange-800">Total Scrap Buying Value</span>
+                          <span className="text-sm text-orange-800">Total Scrap Buying Value ({result.percentages.scrapBuy}%)</span>
                           <span className="text-sm font-semibold text-orange-900">
                             ₹{formatCurrency(result.marginBreakdown.totalScrapValue)}
                           </span>
@@ -653,6 +662,9 @@ const OldJewelryCalculator = ({ rates }) => {
                           <div className="text-2xl font-bold text-green-900">
                             ₹{formatCurrency(result.resaleCalculations.directResale.margin)}
                           </div>
+                          <div className="text-xs text-green-600 mt-1">
+                            ({calculatePercentage(result.resaleCalculations.directResale.margin, result.resaleCalculations.directResale.totalAmount)}% of Wholesaler Cost)
+                          </div>
                         </div>
                       </div>
                       {canSeeMarginBreakdown && (
@@ -670,16 +682,20 @@ const OldJewelryCalculator = ({ rates }) => {
                         <div className="space-y-3">
                           <div className="bg-white rounded-lg p-3 border border-green-200">
                             <div className="flex justify-between items-center">
-                              <span className="text-sm text-green-800">Wholesaler Cost</span>
+                              <span className="text-sm text-green-800">
+                                Wholesaler Cost ({result.resaleCalculations.percentages.buyingFromWholesaler}%)
+                              </span>
                               <span className="text-sm font-semibold text-green-900">
-                                ₹{formatNumber(result.resaleCalculations.directResale.breakdown.wholesalerCost)}
+                                ₹{formatCurrency(result.resaleCalculations.directResale.breakdown.wholesalerCost)}
                               </span>
                             </div>
                           </div>
 
                           <div className="bg-white rounded-lg p-3 border border-green-200">
                             <div className="flex justify-between items-center">
-                              <span className="text-sm text-green-800">Direct Resale Value</span>
+                              <span className="text-sm text-green-800">
+                                Direct Resale Value ({result.resaleCalculations.percentages.directResale}%)
+                              </span>
                               <span className="text-sm font-semibold text-green-900">
                                 ₹{formatCurrency(result.resaleCalculations.directResale.totalAmount)}
                               </span>
@@ -758,6 +774,9 @@ const OldJewelryCalculator = ({ rates }) => {
                               <div className="text-2xl font-bold text-blue-900">
                                 ₹{formatCurrency(result.resaleCalculations.polishRepairResale.margin)}
                               </div>
+                              <div className="text-xs text-blue-600 mt-1">
+                                ({calculatePercentage(result.resaleCalculations.polishRepairResale.margin, result.resaleCalculations.polishRepairResale.totalAmount)}% of Wholesaler Cost)
+                              </div>
                             </div>
                           </div>
                           {canSeeMarginBreakdown && (
@@ -775,16 +794,20 @@ const OldJewelryCalculator = ({ rates }) => {
                             <div className="space-y-3">
                               <div className="bg-white rounded-lg p-3 border border-blue-200">
                                 <div className="flex justify-between items-center">
-                                  <span className="text-sm text-blue-800">Wholesaler Cost (Effective Weight)</span>
+                                  <span className="text-sm text-blue-800">
+                                    Wholesaler Cost (Effective Weight) ({result.resaleCalculations.percentages.buyingFromWholesaler}%)
+                                  </span>
                                   <span className="text-sm font-semibold text-blue-900">
-                                    ₹{formatNumber(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)}
+                                    ₹{formatCurrency(result.resaleCalculations.polishRepairResale.breakdown.wholesalerCost)}
                                   </span>
                                 </div>
                               </div>
 
                               <div className="bg-white rounded-lg p-3 border border-blue-200">
                                 <div className="flex justify-between items-center">
-                                  <span className="text-sm text-blue-800">Polish/Repair Resale Value</span>
+                                  <span className="text-sm text-blue-800">
+                                    Polish/Repair Resale Value ({result.resaleCalculations.percentages.polishRepairResale}%)
+                                  </span>
                                   <span className="text-sm font-semibold text-blue-900">
                                     ₹{formatCurrency(result.resaleCalculations.polishRepairResale.totalAmount)}
                                   </span>
