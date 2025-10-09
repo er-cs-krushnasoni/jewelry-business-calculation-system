@@ -12,6 +12,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 const CategoryManagement = React.lazy(() => import('./pages/admin/CategoryManagement'));
 const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
+const RateTables = React.lazy(() => import('./pages/reports/RateTables'));
 
 
 // Layout
@@ -203,6 +204,35 @@ function App() {
                         </ProtectedRoute>
                       } 
                     />
+
+                    {/* Rate Tables Route - Available to all shop users */}
+<Route 
+  path="reports" 
+  element={
+    <ProtectedRoute roles={["admin", "manager", "pro_client", "client"]} requireShop={true}>
+      <RateTables />
+    </ProtectedRoute>
+  } 
+/>
+
+{/* You can also keep the old /admin/reports route for backward compatibility */}
+<Route 
+  path="admin/reports" 
+  element={
+    <ProtectedRoute roles={["admin", "manager", "pro_client", "client"]} requireShop={true}>
+      <RateTables />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="manager/reports" 
+  element={
+    <ProtectedRoute roles={["admin", "manager", "pro_client", "client"]} requireShop={true}>
+      <RateTables />
+    </ProtectedRoute>
+  } 
+/>
                     
                     {/* Role-specific dashboards */}
                     <Route 

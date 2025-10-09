@@ -140,6 +140,18 @@ const broadcastSystemBlocking = (shopId, blockingStatus) => {
   console.log(`Broadcasting system blocking update to shop ${shopId}:`, blockingStatus.shouldBlock);
 };
 
+const broadcastRateTableUpdate = (shopId, metalType, tableData) => {
+  const roomName = `shop_${shopId}`;
+  io.to(roomName).emit('rate-table-updated', {
+    metalType,
+    ...tableData,
+    timestamp: new Date().toISOString()
+  });
+  
+  console.log(`Broadcasting rate table update to shop ${shopId} for ${metalType}`);
+};
+global.broadcastRateTableUpdate = broadcastRateTableUpdate;
+
 // Make these functions available globally
 global.broadcastRateUpdate = broadcastRateUpdate;
 global.broadcastSystemBlocking = broadcastSystemBlocking;
@@ -211,6 +223,15 @@ try {
 } catch (error) {
   console.error('✗ Error loading category management routes:', error.message);
 }
+
+try {
+  const rateTableRoutes = require('./routes/rateTableRoutes');
+  app.use('/api/rate-tables', rateTableRoutes);
+  console.log('✓ Rate table management routes loaded successfully');
+} catch (error) {
+  console.error('✗ Error loading rate table management routes:', error.message);
+}
+
 
 // Test routes
 app.get('/api/test/server', (req, res) => {
@@ -315,6 +336,7 @@ server.listen(PORT, () => {
   console.log(`   - Super Admin: /api/super-admin/*`);
   console.log(`   - User Management: /api/users/*`);
   console.log(`   - Rate Management: /api/rates/*`);
+  console.log(`   - Rate Tables: /api/rate-tables/*`); 
   console.log(`   - Calculator: /api/calculator/*`);
   console.log(`   - Category Management: /api/categories/*`);
   console.log('=================================');

@@ -47,7 +47,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       roles: ['admin', 'manager', 'pro_client', 'client']
     });
   }
-
+  
   // Super Admin Navigation
   if (isSuperAdmin && isSuperAdmin()) {
     navigationItems.push(
@@ -65,7 +65,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       }
     );
   }
-
+  
   // Shop Admin Navigation
   if (isShopAdmin && isShopAdmin()) {
     navigationItems.push(
@@ -88,14 +88,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         roles: ['admin']
       },
       {
-        name: t('nav.reports', 'Reports'),
-        href: '/admin/reports',
+        name: t('nav.reports', 'Rate Tables'),
+        href: '/reports',
         icon: BarChart3,
-        roles: ['admin']
+        roles: ['admin', 'manager', 'pro_client', 'client']
       }
     );
   }
-
+  
   // Manager Navigation
   if (isManager && isManager()) {
     navigationItems.push(
@@ -106,14 +106,24 @@ const Sidebar = ({ isOpen, onClose }) => {
         roles: ['manager']
       },
       {
-        name: t('nav.reports', 'Reports'),
-        href: '/manager/reports',
+        name: t('nav.reports', 'Rate Tables'),
+        href: '/reports',
         icon: BarChart3,
-        roles: ['manager']
+        roles: ['admin', 'manager', 'pro_client', 'client']
       }
     );
   }
-
+  
+  // Pro Client and Client - Add Reports
+  if (user.role === 'pro_client' || user.role === 'client') {
+    navigationItems.push({
+      name: t('nav.reports', 'Rate Tables'),
+      href: '/reports',
+      icon: BarChart3,
+      roles: ['admin', 'manager', 'pro_client', 'client']
+    });
+  }
+  
   // Settings (Super Admin and Shop Admin only)
   if (canManageUsers && canManageUsers()) {
     navigationItems.push({
