@@ -122,6 +122,7 @@ const getNewJewelryCategories = async (req, res) => {
         displayText: `${category.code} - ${category.itemCategory}`,
         purityPercentage: category.purityPercentage,
         buyingFromWholesalerPercentage: category.buyingFromWholesalerPercentage,
+        wholesalerLabourPerGram: category.wholesalerLabourPerGram,
         sellingPercentage: category.sellingPercentage
       };
     });
@@ -197,7 +198,7 @@ const getNewJewelryItemCategories = async (req, res) => {
   }
 };
 
-// @desc    Calculate NEW jewelry price (WITH rounding - Phase 4B)
+// @desc    Calculate NEW jewelry price (WITH rounding - Phase 4B + Labour)
 // @route   POST /api/calculator/new-jewelry/calculate
 // @access  Private (Shop users only, blocked if rates not updated)
 const calculateNewJewelryPrice = async (req, res) => {
@@ -257,12 +258,23 @@ const calculateNewJewelryPrice = async (req, res) => {
     
     const finalSellingAmountBeforeRounding = sellingRatePerGram * weightNum;
     const actualValueByPurity = actualRatePerGram * weightNum;
-    const purchaseFromWholesaler = buyingRatePerGram * weightNum;
+    
+    // NEW CALCULATION: Purchase from Wholesaler includes base cost + labour charges
+    const purchaseFromWholesalerBaseCost = buyingRatePerGram * weightNum;
+    const labourCharges = category.wholesalerLabourPerGram * weightNum;
+    const purchaseFromWholesaler = purchaseFromWholesalerBaseCost + labourCharges;
     
     const finalSellingAmount = applyNewJewelryRounding(finalSellingAmountBeforeRounding);
     
+    // NEW CALCULATION: Wholesaler Margin breakdown into wastage + labour
+    const wastageAmount = purchaseFromWholesalerBaseCost - actualValueByPurity;
     const wholesalerMargin = purchaseFromWholesaler - actualValueByPurity;
+    
     const ourMargin = finalSellingAmount - purchaseFromWholesaler;
+
+    // Calculate margin percentages based on finalSellingAmount
+    const ourMarginPercentage = (ourMargin / finalSellingAmount) * 100;
+    const wholesalerMarginPercentage = (wholesalerMargin / finalSellingAmount) * 100;
 
     // Get BOTH descriptions
     const descriptions = [];
@@ -320,9 +332,25 @@ const calculateNewJewelryPrice = async (req, res) => {
 
       marginBreakdown: {
         ourMargin: ourMargin,
+        ourMarginPercentage: ourMarginPercentage,
         purchaseFromWholesaler: purchaseFromWholesaler,
+        purchaseFromWholesalerBreakdown: {
+          baseCost: purchaseFromWholesalerBaseCost,
+          labourCharges: labourCharges
+        },
         actualValueByPurity: actualValueByPurity,
-        wholesalerMargin: wholesalerMargin
+        wholesalerMargin: wholesalerMargin,
+        wholesalerMarginPercentage: wholesalerMarginPercentage,
+        // Wholesaler Margin Breakdown (Admin/Manager only)
+        wholesalerMarginBreakdown: {
+          wastageMargin: wastageAmount,
+          labourCharges: labourCharges
+        }
+      },
+
+      labourInfo: {
+        labourPerGram: category.wholesalerLabourPerGram,
+        totalLabourCharges: labourCharges
       },
 
       roundingInfo: {
@@ -418,9 +446,12 @@ const getOldJewelryCategories = async (req, res) => {
               _id: rc._id,
               itemCategory: rc.itemCategory,
               directResalePercentage: rc.directResalePercentage,
+              buyingFromWholesalerPercentage: rc.buyingFromWholesalerPercentage,
+              wholesalerLabourPerGram: rc.wholesalerLabourPerGram,
               polishRepairResalePercentage: rc.polishRepairResalePercentage,
               polishRepairCostPercentage: rc.polishRepairCostPercentage,
-              buyingFromWholesalerPercentage: rc.buyingFromWholesalerPercentage
+              polishRepairLabourPerGram: rc.polishRepairLabourPerGram,
+              polishRepairEnabled: rc.polishRepairEnabled
             }))
           : []
       };
@@ -450,7 +481,7 @@ const getOldJewelryCategories = async (req, res) => {
   }
 };
 
-// @desc    Calculate old jewelry price (scrap/resale) with resale category support
+// @desc    Calculate old jewelry price (scrap/resale) with resale category support + Labour
 // @route   POST /api/calculator/old-jewelry/calculate
 // @access  Private (Shop users only, blocked if rates not updated)
 const calculateOldJewelryPrice = async (req, res) => {
@@ -649,15 +680,19 @@ const calculateOldJewelryPrice = async (req, res) => {
       
       if (canSeeResale) {
         // ========================================
-        // DIRECT RESALE CALCULATION (using SELLING rate)
+        // DIRECT RESALE CALCULATION (using SELLING rate + Labour)
         // ========================================
         const directResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.directResalePercentage / 100);
         const totalDirectResaleBeforeRounding = directResaleValuePerGram * weightNum;
         const totalDirectResaleValue = applyOldJewelryRounding(totalDirectResaleBeforeRounding);
 
-        // DIRECT RESALE MARGIN CALCULATION
-        const directResaleWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
+        // CALCULATION: Wholesaler Cost includes base cost + labour charges
+        const directResaleWholesalerBaseCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
+        const directResaleLabourCharges = selectedResaleCategory.wholesalerLabourPerGram * weightNum;
+        const directResaleWholesalerCost = directResaleWholesalerBaseCost + directResaleLabourCharges;
+        
         const directResaleMargin = directResaleWholesalerCost - totalDirectResaleValue;
+        const directResaleMarginPercentage = (directResaleMargin / totalDirectResaleValue) * 100;
 
         // Add direct resale to result
         calculationResult.resaleCalculations = {
@@ -665,11 +700,25 @@ const calculateOldJewelryPrice = async (req, res) => {
           directResale: {
             totalAmount: totalDirectResaleValue,
             margin: directResaleMargin,
+            marginPercentage: directResaleMarginPercentage,
             breakdown: {
               beforeRounding: totalDirectResaleBeforeRounding,
               afterRounding: totalDirectResaleValue,
               roundingApplied: totalDirectResaleBeforeRounding !== totalDirectResaleValue,
-              wholesalerCost: directResaleWholesalerCost
+              wholesalerCost: directResaleWholesalerCost,
+              wholesalerCostBreakdown: {
+                baseCost: directResaleWholesalerBaseCost,
+                labourCharges: directResaleLabourCharges
+              },
+              // Wholesaler Margin Breakdown (Admin/Manager only)
+              wholesalerMarginBreakdown: {
+                wastageMargin: directResaleWholesalerBaseCost - totalDirectResaleValue,
+                labourCharges: directResaleLabourCharges
+              }
+            },
+            labourInfo: {
+              labourPerGram: selectedResaleCategory.wholesalerLabourPerGram,
+              totalLabourCharges: directResaleLabourCharges
             }
           },
 
@@ -681,7 +730,7 @@ const calculateOldJewelryPrice = async (req, res) => {
         };
 
         // ========================================
-        // POLISH/REPAIR RESALE CALCULATION (only if enabled)
+        // POLISH/REPAIR RESALE CALCULATION (only if enabled + Labour)
         // ========================================
         if (selectedResaleCategory.polishRepairEnabled) {
           const polishRepairCostWeight = weightNum * (selectedResaleCategory.polishRepairCostPercentage / 100);
@@ -691,15 +740,30 @@ const calculateOldJewelryPrice = async (req, res) => {
           const totalPolishRepairResaleBeforeRounding = polishRepairResaleValuePerGram * effectiveWeightAfterPolish;
           const totalPolishRepairResaleValue = applyOldJewelryRounding(totalPolishRepairResaleBeforeRounding);
 
-          // POLISH/REPAIR RESALE MARGIN CALCULATION
-          const polishRepairWholesalerCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
-          const polishRepairResaleMargin = polishRepairWholesalerCost - totalPolishRepairResaleValue;
+          // CORRECTED CALCULATION:
+          // 1. Wholesaler Labour: Calculated on EFFECTIVE weight (after polish/repair loss)
+          // 2. Polish/Repair Labour: Calculated on ORIGINAL weight
+          const polishRepairWholesalerBaseCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
+          const polishRepairWholesalerLabourCharges = selectedResaleCategory.wholesalerLabourPerGram * effectiveWeightAfterPolish;
+          const polishRepairWholesalerCost = polishRepairWholesalerBaseCost + polishRepairWholesalerLabourCharges;
+          
+          // Polish/Repair Labour charges (on ORIGINAL weight)
+          const polishRepairLabourCharges = selectedResaleCategory.polishRepairLabourPerGram * weightNum;
+          
+          // Final Value = Resale Value - Polish/Repair Labour
+          const finalPolishRepairValue = totalPolishRepairResaleValue - polishRepairLabourCharges;
+          
+          // Margin = Wholesaler Cost - Final Value
+          const polishRepairResaleMargin = polishRepairWholesalerCost - finalPolishRepairValue;
+          const polishRepairMarginPercentage = (polishRepairResaleMargin / finalPolishRepairValue) * 100;
 
           // Add polish/repair resale to result
           calculationResult.resaleCalculations.polishRepairResale = {
             available: true,
             totalAmount: totalPolishRepairResaleValue,
+            finalValue: finalPolishRepairValue,
             margin: polishRepairResaleMargin,
+            marginPercentage: polishRepairMarginPercentage,
             weightInfo: {
               originalWeight: weightNum,
               polishRepairCostPercentage: selectedResaleCategory.polishRepairCostPercentage,
@@ -710,7 +774,23 @@ const calculateOldJewelryPrice = async (req, res) => {
               beforeRounding: totalPolishRepairResaleBeforeRounding,
               afterRounding: totalPolishRepairResaleValue,
               roundingApplied: totalPolishRepairResaleBeforeRounding !== totalPolishRepairResaleValue,
-              wholesalerCost: polishRepairWholesalerCost
+              wholesalerCost: polishRepairWholesalerCost,
+              wholesalerCostBreakdown: {
+                baseCost: polishRepairWholesalerBaseCost,
+                labourCharges: polishRepairWholesalerLabourCharges
+              }
+            },
+            labourInfo: {
+              wholesalerLabour: {
+                labourPerGram: selectedResaleCategory.wholesalerLabourPerGram,
+                calculatedOnWeight: effectiveWeightAfterPolish,
+                totalLabourCharges: polishRepairWholesalerLabourCharges
+              },
+              polishRepairLabour: {
+                labourPerGram: selectedResaleCategory.polishRepairLabourPerGram,
+                calculatedOnWeight: weightNum,
+                totalLabourCharges: polishRepairLabourCharges
+              }
             }
           };
 

@@ -33,6 +33,7 @@ const ExtendedJewelryForm = ({
     itemCategory: initialData?.itemCategory || '',
     purityPercentage: initialData?.purityPercentage || '',
     buyingFromWholesalerPercentage: initialData?.buyingFromWholesalerPercentage || '',
+    wholesalerLabourPerGram: initialData?.wholesalerLabourPerGram || '', // ADDED
     sellingPercentage: initialData?.sellingPercentage || '',
     
     // OLD jewelry fields
@@ -46,9 +47,11 @@ const ExtendedJewelryForm = ({
       itemCategory: cat.itemCategory || '',
       directResalePercentage: cat.directResalePercentage || '',
       buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || '',
+      wholesalerLabourPerGram: cat.wholesalerLabourPerGram || '', // ADDED
       polishRepairEnabled: cat.polishRepairEnabled || false,
       polishRepairResalePercentage: cat.polishRepairResalePercentage || '',
-      polishRepairCostPercentage: cat.polishRepairCostPercentage || ''
+      polishRepairCostPercentage: cat.polishRepairCostPercentage || '',
+      polishRepairLabourPerGram: cat.polishRepairLabourPerGram || '' // ADDED
     })) || [],
     
     // Descriptions
@@ -182,9 +185,11 @@ const ExtendedJewelryForm = ({
           itemCategory: '',
           directResalePercentage: '',
           buyingFromWholesalerPercentage: '',
+          wholesalerLabourPerGram: '', // ADDED
           polishRepairEnabled: false,
           polishRepairResalePercentage: '',
-          polishRepairCostPercentage: ''
+          polishRepairCostPercentage: '',
+          polishRepairLabourPerGram: '' // ADDED
         }
       ]
     }));
@@ -238,19 +243,22 @@ const ExtendedJewelryForm = ({
             ...cat, 
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
-            polishRepairCostPercentage: ''
+            polishRepairCostPercentage: '',
+            polishRepairLabourPerGram: '' // ADDED
           } : cat
         )
       }));
       
-      // Clear related errors
+      // Clear related errors including labour field
       const errorKey1 = `resaleCategories.${index}.polishRepairResalePercentage`;
       const errorKey2 = `resaleCategories.${index}.polishRepairCostPercentage`;
-      if (errors[errorKey1] || errors[errorKey2]) {
+      const errorKey3 = `resaleCategories.${index}.polishRepairLabourPerGram`; // ADDED
+      if (errors[errorKey1] || errors[errorKey2] || errors[errorKey3]) {
         setErrors(prev => {
           const newErrors = { ...prev };
           delete newErrors[errorKey1];
           delete newErrors[errorKey2];
+          delete newErrors[errorKey3]; // ADDED
           return newErrors;
         });
       }
@@ -294,6 +302,7 @@ const ExtendedJewelryForm = ({
       itemCategory: '',
       purityPercentage: '',
       sellingPercentage: '',
+      wholesalerLabourPerGram: '', // ADDED
       truePurityPercentage: '',
       scrapBuyOwnPercentage: '',
       scrapBuyOtherPercentage: '',
@@ -314,9 +323,11 @@ const ExtendedJewelryForm = ({
             itemCategory: '',
             directResalePercentage: '',
             buyingFromWholesalerPercentage: '',
+            wholesalerLabourPerGram: '', // ADDED
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
-            polishRepairCostPercentage: ''
+            polishRepairCostPercentage: '',
+            polishRepairLabourPerGram: '' // ADDED
           }]
         : enabled ? prev.resaleCategories : []
     }));
@@ -366,6 +377,15 @@ const ExtendedJewelryForm = ({
         const buying = parseFloat(formData.buyingFromWholesalerPercentage);
         if (isNaN(buying) || buying < 1) {
           newErrors.buyingFromWholesalerPercentage = 'Buying percentage must be at least 1';
+        }
+      }
+      // ADDED: Wholesaler Labour Per Gram validation
+      if (formData.wholesalerLabourPerGram === '') {
+        newErrors.wholesalerLabourPerGram = 'Wholesaler labour per gram is required';
+      } else {
+        const labour = parseFloat(formData.wholesalerLabourPerGram);
+        if (isNaN(labour) || labour < 0) {
+          newErrors.wholesalerLabourPerGram = 'Wholesaler labour per gram must be 0 or greater';
         }
       }
       if (!formData.sellingPercentage) {
@@ -434,6 +454,13 @@ const ExtendedJewelryForm = ({
               newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Must be at least 1';
             }
             
+            // ADDED: Wholesaler Labour Per Gram validation
+            if (cat.wholesalerLabourPerGram === '') {
+              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = 'Required';
+            } else if (parseFloat(cat.wholesalerLabourPerGram) < 0) {
+              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = 'Must be 0 or greater';
+            }
+            
             // Validate polish/repair fields only if enabled
             if (cat.polishRepairEnabled) {
               if (!cat.polishRepairResalePercentage) {
@@ -449,6 +476,13 @@ const ExtendedJewelryForm = ({
                 if (isNaN(cost) || cost < 0 || cost > 50) {
                   newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Must be 0-50';
                 }
+              }
+              
+              // ADDED: Polish/Repair Labour Per Gram validation
+              if (cat.polishRepairLabourPerGram === '') {
+                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = 'Required when polish/repair enabled';
+              } else if (parseFloat(cat.polishRepairLabourPerGram) < 0) {
+                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = 'Must be 0 or greater';
               }
             }
           });
@@ -479,6 +513,7 @@ const ExtendedJewelryForm = ({
         submitData.itemCategory = formData.itemCategory.trim();
         submitData.purityPercentage = parseFloat(formData.purityPercentage);
         submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
+        submitData.wholesalerLabourPerGram = parseFloat(formData.wholesalerLabourPerGram); // ADDED
         submitData.sellingPercentage = parseFloat(formData.sellingPercentage);
         
         delete submitData.truePurityPercentage;
@@ -497,10 +532,12 @@ const ExtendedJewelryForm = ({
             itemCategory: cat.itemCategory.trim(),
             directResalePercentage: parseFloat(cat.directResalePercentage),
             buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+            wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram), // ADDED
             polishRepairEnabled: Boolean(cat.polishRepairEnabled),
             ...(cat.polishRepairEnabled && {
               polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-              polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+              polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+              polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram) // ADDED
             })
           }));
         } else {
@@ -511,6 +548,7 @@ const ExtendedJewelryForm = ({
         delete submitData.purityPercentage;
         delete submitData.sellingPercentage;
         delete submitData.buyingFromWholesalerPercentage;
+        delete submitData.wholesalerLabourPerGram; // ADDED
       }
 
       await onSubmit(submitData);
@@ -706,7 +744,7 @@ const ExtendedJewelryForm = ({
 
         {/* NEW Jewelry Fields */}
         {formData.type === 'NEW' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Purity % <span className="text-red-500">*</span>
@@ -745,6 +783,28 @@ const ExtendedJewelryForm = ({
               />
               {errors.buyingFromWholesalerPercentage && (
                 <p className="text-red-500 text-sm mt-1">{errors.buyingFromWholesalerPercentage}</p>
+              )}
+            </div>
+
+            {/* ADDED: Wholesaler Labour Per Gram */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Wholesaler Labour Per Gram (₹) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                value={formData.wholesalerLabourPerGram}
+                onChange={(e) => handleInputChange('wholesalerLabourPerGram', e.target.value)}
+                placeholder="50"
+                min="0"
+                step="0.01"
+                className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.wholesalerLabourPerGram ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+              {errors.wholesalerLabourPerGram && (
+                <p className="text-red-500 text-sm mt-1">{errors.wholesalerLabourPerGram}</p>
               )}
             </div>
 
@@ -983,8 +1043,8 @@ const ExtendedJewelryForm = ({
                       )}
                     </div>
 
-                    {/* Direct Resale and Buying from Wholesaler (Always Mandatory) */}
-                    <div className="grid grid-cols-2 gap-3">
+                    {/* Direct Resale and Buying from Wholesaler */}
+                    <div className="grid grid-cols-3 gap-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Direct Resale % <span className="text-red-500">*</span>
@@ -1024,6 +1084,28 @@ const ExtendedJewelryForm = ({
                           <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`]}</p>
                         )}
                       </div>
+
+                      {/* ADDED: Wholesaler Labour Per Gram */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Wholesaler Labour Per Gram (₹) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="number"
+                          value={category.wholesalerLabourPerGram}
+                          onChange={(e) => updateResaleCategory(index, 'wholesalerLabourPerGram', e.target.value)}
+                          placeholder="50"
+                          min="0"
+                          step="0.01"
+                          className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors[`resaleCategories.${index}.wholesalerLabourPerGram`] ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+                        {errors[`resaleCategories.${index}.wholesalerLabourPerGram`] && (
+                          <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.wholesalerLabourPerGram`]}</p>
+                        )}
+                      </div>
                     </div>
 
                     {/* Polish/Repair Toggle */}
@@ -1049,7 +1131,7 @@ const ExtendedJewelryForm = ({
                       
                       {/* Polish/Repair Fields - Only shown when toggle is enabled */}
                       {category.polishRepairEnabled && (
-                        <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="grid grid-cols-3 gap-3 mt-3">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Polish/Repair Resale % <span className="text-red-500">*</span>
@@ -1088,6 +1170,28 @@ const ExtendedJewelryForm = ({
                             />
                             {errors[`resaleCategories.${index}.polishRepairCostPercentage`] && (
                               <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairCostPercentage`]}</p>
+                            )}
+                          </div>
+
+                          {/* ADDED: Polish Repair Labour Per Gram */}
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Polish Repair Labour Per Gram (₹) <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={category.polishRepairLabourPerGram}
+                              onChange={(e) => updateResaleCategory(index, 'polishRepairLabourPerGram', e.target.value)}
+                              placeholder="30"
+                              min="0"
+                              step="0.01"
+                              className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                errors[`resaleCategories.${index}.polishRepairLabourPerGram`] ? 'border-red-500' : 'border-gray-300'
+                              }`}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+                            {errors[`resaleCategories.${index}.polishRepairLabourPerGram`] && (
+                              <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairLabourPerGram`]}</p>
                             )}
                           </div>
                         </div>
@@ -1183,7 +1287,7 @@ const ExtendedJewelryForm = ({
                 <textarea
                   value={formData.descriptions[role]}
                   onChange={(e) => handleDescriptionChange(role, e.target.value)}
-                  placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific description`}
+placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific description`}
                   rows={3}
                   maxLength={500}
                   className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical border-gray-300"

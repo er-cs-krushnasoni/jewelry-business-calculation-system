@@ -18,6 +18,13 @@ const resaleCategorySchema = new mongoose.Schema({
     required: true,
     min: [1, 'Buying from wholesaler percentage must be at least 1%']
   },
+  // Wholesaler Labour Per Gram for direct resale (required, can be 0)
+  wholesalerLabourPerGram: {
+    type: Number,
+    required: true,
+    min: [0, 'Wholesaler labour per gram cannot be negative'],
+    default: 0
+  },
   // Polish/Repair toggle and fields (optional based on toggle)
   polishRepairEnabled: {
     type: Boolean,
@@ -37,6 +44,15 @@ const resaleCategorySchema = new mongoose.Schema({
     },
     min: [0, 'Polish/Repair cost percentage must be at least 0%'],
     max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
+  },
+  // Polish/Repair Labour Per Gram (required when polish/repair enabled, can be 0)
+  polishRepairLabourPerGram: {
+    type: Number,
+    required: function() {
+      return this.polishRepairEnabled === true;
+    },
+    min: [0, 'Polish repair labour per gram cannot be negative'],
+    default: 0
   }
 }, { _id: true });
 
@@ -79,6 +95,14 @@ const categorySchema = new mongoose.Schema({
     type: Number,
     required: function() { return this.type === 'NEW'; },
     min: [1, 'Buying percentage must be at least 1%']
+  },
+  
+  // NEW jewelry - Wholesaler Labour Per Gram (required, can be 0)
+  wholesalerLabourPerGram: {
+    type: Number,
+    required: function() { return this.type === 'NEW'; },
+    min: [0, 'Wholesaler labour per gram cannot be negative'],
+    default: 0
   },
   
   sellingPercentage: {
@@ -267,6 +291,11 @@ categorySchema.pre('save', function(next) {
         throw new Error('Item category is required for NEW jewelry');
       }
       
+      // Ensure wholesalerLabourPerGram is provided
+      if (this.wholesalerLabourPerGram === undefined || this.wholesalerLabourPerGram === null) {
+        throw new Error('Wholesaler labour per gram is required for NEW jewelry');
+      }
+      
       // Clear OLD jewelry specific fields
       this.truePurityPercentage = undefined;
       this.scrapBuyOwnPercentage = undefined;
@@ -280,6 +309,7 @@ categorySchema.pre('save', function(next) {
       this.purityPercentage = undefined;
       this.sellingPercentage = undefined;
       this.buyingFromWholesalerPercentage = undefined;
+      this.wholesalerLabourPerGram = undefined;
       
       // Handle resale categories
       if (!this.resaleEnabled) {
@@ -303,10 +333,21 @@ categorySchema.pre('save', function(next) {
             categoryNames.add(lowerName);
           }
           
+          // Ensure wholesalerLabourPerGram is provided
+          if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null) {
+            cat.wholesalerLabourPerGram = 0;
+          }
+          
           // Clear polish/repair fields if toggle is disabled
           if (!cat.polishRepairEnabled) {
             cat.polishRepairResalePercentage = undefined;
             cat.polishRepairCostPercentage = undefined;
+            cat.polishRepairLabourPerGram = undefined;
+          } else {
+            // Ensure polishRepairLabourPerGram is provided when enabled
+            if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null) {
+              cat.polishRepairLabourPerGram = 0;
+            }
           }
         });
       }

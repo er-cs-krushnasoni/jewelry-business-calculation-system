@@ -75,6 +75,21 @@ const createCategoryValidation = [
       }
       return true;
     }),
+  
+  // NEW: Wholesaler Labour Per Gram validation
+  body('wholesalerLabourPerGram')
+    .custom((value, { req }) => {
+      if (req.body.type === 'NEW') {
+        if (value === undefined || value === null || value === '') {
+          throw new Error('Wholesaler labour per gram is required for NEW jewelry');
+        }
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0) {
+          throw new Error('Wholesaler labour per gram must be 0 or greater');
+        }
+      }
+      return true;
+    }),
     
   body('sellingPercentage')
     .custom((value, { req }) => {
@@ -187,6 +202,15 @@ const createCategoryValidation = [
             throw new Error(`Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`);
           }
           
+          // NEW: Check wholesalerLabourPerGram (ALWAYS REQUIRED, can be 0)
+          if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === '') {
+            throw new Error(`Category "${cat.itemCategory}": Wholesaler labour per gram is required`);
+          }
+          const labourPerGram = parseFloat(cat.wholesalerLabourPerGram);
+          if (isNaN(labourPerGram) || labourPerGram < 0) {
+            throw new Error(`Category "${cat.itemCategory}": Wholesaler labour per gram must be 0 or greater`);
+          }
+          
           // Check polishRepairEnabled (optional, defaults to false)
           const polishRepairEnabled = cat.polishRepairEnabled === true;
           
@@ -208,6 +232,15 @@ const createCategoryValidation = [
             const polishCost = parseFloat(cat.polishRepairCostPercentage);
             if (isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
               throw new Error(`Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50`);
+            }
+            
+            // NEW: Check polishRepairLabourPerGram (REQUIRED when polish/repair enabled, can be 0)
+            if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null || cat.polishRepairLabourPerGram === '') {
+              throw new Error(`Category "${cat.itemCategory}": Polish/repair labour per gram is required when polish/repair is enabled`);
+            }
+            const polishLabour = parseFloat(cat.polishRepairLabourPerGram);
+            if (isNaN(polishLabour) || polishLabour < 0) {
+              throw new Error(`Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater`);
             }
           }
         }
@@ -294,6 +327,17 @@ const updateCategoryValidation = [
     .optional()
     .isFloat({ min: 1 })
     .withMessage('Buying percentage must be at least 1'),
+  
+  // NEW: Wholesaler Labour Per Gram validation for updates
+  body('wholesalerLabourPerGram')
+    .optional()
+    .custom((value) => {
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue < 0) {
+        throw new Error('Wholesaler labour per gram must be 0 or greater');
+      }
+      return true;
+    }),
     
   body('sellingPercentage')
     .optional()
@@ -349,6 +393,15 @@ const updateCategoryValidation = [
               throw new Error(`Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`);
             }
             
+            // NEW: Check wholesalerLabourPerGram
+            if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === '') {
+              throw new Error(`Category "${cat.itemCategory}": Wholesaler labour per gram is required`);
+            }
+            const labourPerGram = parseFloat(cat.wholesalerLabourPerGram);
+            if (isNaN(labourPerGram) || labourPerGram < 0) {
+              throw new Error(`Category "${cat.itemCategory}": Wholesaler labour per gram must be 0 or greater`);
+            }
+            
             // Check polishRepairEnabled
             const polishRepairEnabled = cat.polishRepairEnabled === true;
             
@@ -361,6 +414,15 @@ const updateCategoryValidation = [
               const polishCost = parseFloat(cat.polishRepairCostPercentage);
               if (cat.polishRepairCostPercentage === undefined || isNaN(polishCost) || polishCost < 0 || polishCost > 50) {
                 throw new Error(`Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50 when polish/repair is enabled`);
+              }
+              
+              // NEW: Check polishRepairLabourPerGram
+              if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null || cat.polishRepairLabourPerGram === '') {
+                throw new Error(`Category "${cat.itemCategory}": Polish/repair labour per gram is required when polish/repair is enabled`);
+              }
+              const polishLabour = parseFloat(cat.polishRepairLabourPerGram);
+              if (isNaN(polishLabour) || polishLabour < 0) {
+                throw new Error(`Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater when polish/repair is enabled`);
               }
             }
           }

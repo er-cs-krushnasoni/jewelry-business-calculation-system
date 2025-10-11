@@ -90,6 +90,7 @@ const createCategory = asyncHandler(async (req, res) => {
       itemCategory,
       purityPercentage,
       buyingFromWholesalerPercentage,
+      wholesalerLabourPerGram,
       sellingPercentage,
       // OLD jewelry fields
       truePurityPercentage,
@@ -114,6 +115,21 @@ const createCategory = asyncHandler(async (req, res) => {
         return res.status(400).json({
           success: false,
           message: 'Item category, purity percentage, buying percentage, and selling percentage are required for NEW jewelry'
+        });
+      }
+
+      if (wholesalerLabourPerGram === undefined || wholesalerLabourPerGram === null || wholesalerLabourPerGram === '') {
+        return res.status(400).json({
+          success: false,
+          message: 'Wholesaler labour per gram is required for NEW jewelry'
+        });
+      }
+
+      const labourNum = parseFloat(wholesalerLabourPerGram);
+      if (isNaN(labourNum) || labourNum < 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Wholesaler labour per gram must be 0 or greater'
         });
       }
 
@@ -201,6 +217,21 @@ const createCategory = asyncHandler(async (req, res) => {
             });
           }
 
+          if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === '') {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Wholesaler labour per gram is required`
+            });
+          }
+
+          const catLabour = parseFloat(cat.wholesalerLabourPerGram);
+          if (isNaN(catLabour) || catLabour < 0) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Wholesaler labour per gram must be 0 or greater`
+            });
+          }
+
           // Validate polish/repair fields only if enabled
           if (cat.polishRepairEnabled) {
             if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
@@ -214,6 +245,21 @@ const createCategory = asyncHandler(async (req, res) => {
               return res.status(400).json({
                 success: false,
                 message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50 when polish/repair is enabled`
+              });
+            }
+
+            if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null || cat.polishRepairLabourPerGram === '') {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair labour per gram is required when polish/repair is enabled`
+              });
+            }
+
+            const polishLabour = parseFloat(cat.polishRepairLabourPerGram);
+            if (isNaN(polishLabour) || polishLabour < 0) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater`
               });
             }
           }
@@ -268,6 +314,7 @@ const createCategory = asyncHandler(async (req, res) => {
       categoryData.itemCategory = itemCategory.trim();
       categoryData.purityPercentage = parseFloat(purityPercentage);
       categoryData.buyingFromWholesalerPercentage = parseFloat(buyingFromWholesalerPercentage);
+      categoryData.wholesalerLabourPerGram = parseFloat(wholesalerLabourPerGram);
       categoryData.sellingPercentage = parseFloat(sellingPercentage);
     } else if (typeUpper === 'OLD') {
       categoryData.truePurityPercentage = parseFloat(truePurityPercentage);
@@ -280,10 +327,12 @@ const createCategory = asyncHandler(async (req, res) => {
           itemCategory: cat.itemCategory.trim(),
           directResalePercentage: parseFloat(cat.directResalePercentage),
           buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+          wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
           polishRepairEnabled: Boolean(cat.polishRepairEnabled),
           ...(cat.polishRepairEnabled && {
             polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-            polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+            polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+            polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
           })
         }));
       }
@@ -345,6 +394,7 @@ const updateCategory = asyncHandler(async (req, res) => {
       itemCategory,
       purityPercentage,
       buyingFromWholesalerPercentage,
+      wholesalerLabourPerGram,
       sellingPercentage,
       // OLD jewelry fields
       truePurityPercentage,
@@ -427,6 +477,21 @@ const updateCategory = asyncHandler(async (req, res) => {
               });
             }
 
+            if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === '') {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Wholesaler labour per gram is required`
+              });
+            }
+
+            const catLabour = parseFloat(cat.wholesalerLabourPerGram);
+            if (isNaN(catLabour) || catLabour < 0) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Wholesaler labour per gram must be 0 or greater`
+              });
+            }
+
             // Validate polish/repair fields only if enabled
             if (cat.polishRepairEnabled) {
               if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
@@ -440,6 +505,21 @@ const updateCategory = asyncHandler(async (req, res) => {
                 return res.status(400).json({
                   success: false,
                   message: `Category "${cat.itemCategory}": Polish/repair cost percentage must be between 0 and 50 when polish/repair is enabled`
+                });
+              }
+
+              if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null || cat.polishRepairLabourPerGram === '') {
+                return res.status(400).json({
+                  success: false,
+                  message: `Category "${cat.itemCategory}": Polish/repair labour per gram is required when polish/repair is enabled`
+                });
+              }
+
+              const polishLabour = parseFloat(cat.polishRepairLabourPerGram);
+              if (isNaN(polishLabour) || polishLabour < 0) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater`
                 });
               }
             }
@@ -468,6 +548,7 @@ const updateCategory = asyncHandler(async (req, res) => {
       if (itemCategory) category.itemCategory = itemCategory.trim();
       if (purityPercentage !== undefined) category.purityPercentage = parseFloat(purityPercentage);
       if (buyingFromWholesalerPercentage !== undefined) category.buyingFromWholesalerPercentage = parseFloat(buyingFromWholesalerPercentage);
+      if (wholesalerLabourPerGram !== undefined) category.wholesalerLabourPerGram = parseFloat(wholesalerLabourPerGram);
       if (sellingPercentage !== undefined) category.sellingPercentage = parseFloat(sellingPercentage);
     }
 
@@ -487,10 +568,12 @@ const updateCategory = asyncHandler(async (req, res) => {
               itemCategory: cat.itemCategory.trim(),
               directResalePercentage: parseFloat(cat.directResalePercentage),
               buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
+              wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
               polishRepairEnabled: Boolean(cat.polishRepairEnabled),
               ...(cat.polishRepairEnabled && {
                 polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
-                polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage)
+                polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
+                polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
               })
             }));
           }
