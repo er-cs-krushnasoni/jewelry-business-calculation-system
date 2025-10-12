@@ -89,12 +89,12 @@ rateSchema.index({ shopId: 1, updatedAt: -1 });
 rateSchema.pre('save', function(next) {
   const errors = [];
   
-  if (this.goldSell <= this.goldBuy) {
-    errors.push('Gold selling rate must be higher than gold buying rate');
+  if (this.goldSell < this.goldBuy) {
+    errors.push('Gold selling rate must be equal to or higher than gold buying rate');
   }
   
-  if (this.silverSell <= this.silverBuy) {
-    errors.push('Silver selling rate must be higher than silver buying rate');
+  if (this.silverSell < this.silverBuy) {
+    errors.push('Silver selling rate must be equal to or higher than silver buying rate');
   }
   
   if (errors.length > 0) {

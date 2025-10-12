@@ -117,11 +117,12 @@ const Header = () => {
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-gray-900">
-                  {t('brand.name', 'Jewelry Calculator')}
+                  {/* {t('brand.name', 'Jewelry Calculator')} */}
+                  {user.shopName}
                 </h1>
-                {user?.shopName && (
+                {/* {user?.shopName && (
                   <p className="text-sm text-gray-600">{user.shopName}</p>
-                )}
+                )} */}
               </div>
             </div>
 

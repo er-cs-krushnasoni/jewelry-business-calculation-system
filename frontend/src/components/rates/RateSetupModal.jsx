@@ -72,8 +72,8 @@ const RateSetupModal = ({
         errors.push('Gold selling rate must be a positive number');
       }
       
-      if (!isNaN(goldBuy) && !isNaN(goldSell) && goldSell <= goldBuy) {
-        errors.push('Gold selling rate must be higher than buying rate');
+      if (!isNaN(goldBuy) && !isNaN(goldSell) && goldSell < goldBuy) {
+        errors.push('Gold selling rate must be equal to or higher than buying rate');
       }
     }
     
@@ -94,8 +94,8 @@ const RateSetupModal = ({
         errors.push('Silver selling rate must be a positive number');
       }
       
-      if (!isNaN(silverBuy) && !isNaN(silverSell) && silverSell <= silverBuy) {
-        errors.push('Silver selling rate must be higher than buying rate');
+      if (!isNaN(silverBuy) && !isNaN(silverSell) && silverSell < silverBuy) {
+        errors.push('Silver selling rate must be equal to or higher than buying rate');
       }
     }
     
@@ -211,8 +211,8 @@ const RateSetupModal = ({
                   <h4 className="text-lg font-semibold text-yellow-800">Gold Rates Setup</h4>
                 </div>
                 <p className="text-yellow-700 text-sm mb-4">
-                  Set your gold rates per 10 grams. Selling rate must be higher than buying rate.
-                </p>
+  Set your gold rates per 10 grams. Selling rate must be equal to or higher than buying rate.
+</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -271,8 +271,8 @@ const RateSetupModal = ({
                   <h4 className="text-lg font-semibold text-gray-800">Silver Rates Setup</h4>
                 </div>
                 <p className="text-gray-700 text-sm mb-4">
-                  Set your silver rates per 1 kg. Selling rate must be higher than buying rate.
-                </p>
+  Set your silver rates per 1 kg. Selling rate must be equal to or higher than buying rate.
+</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -406,12 +406,12 @@ const RateSetupModal = ({
         <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
           <p className="font-medium mb-2">Important Notes:</p>
           <ul className="space-y-1">
-            <li>• Only whole numbers are accepted (no decimal values)</li>
-            <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
-            <li>• Selling rates must always be higher than buying rates</li>
-            <li>• These rates will be used for all calculations in your shop</li>
-            <li>• You can update these rates anytime from the rate management section</li>
-          </ul>
+  <li>• Only whole numbers are accepted (no decimal values)</li>
+  <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
+  <li>• Selling rates must be equal to or higher than buying rates</li>
+  <li>• These rates will be used for all calculations in your shop</li>
+  <li>• You can update these rates anytime from the rate management section</li>
+</ul>
         </div>
       </div>
     </Modal>

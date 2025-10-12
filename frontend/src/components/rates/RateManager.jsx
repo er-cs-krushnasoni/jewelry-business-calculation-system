@@ -152,13 +152,13 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
       errors.push('Silver selling rate must be a positive number');
     }
     
-    // Check selling > buying
-    if (!isNaN(goldSell) && !isNaN(goldBuy) && goldSell <= goldBuy) {
-      errors.push('Gold selling rate must be higher than buying rate');
-    }
-    if (!isNaN(silverSell) && !isNaN(silverBuy) && silverSell <= silverBuy) {
-      errors.push('Silver selling rate must be higher than buying rate');
-    }
+    // Check selling >= buying
+if (!isNaN(goldSell) && !isNaN(goldBuy) && goldSell < goldBuy) {
+  errors.push('Gold selling rate must be equal to or higher than buying rate');
+}
+if (!isNaN(silverSell) && !isNaN(silverBuy) && silverSell < silverBuy) {
+  errors.push('Silver selling rate must be equal to or higher than buying rate');
+}
     
     return errors;
   };
@@ -314,30 +314,30 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
           <div>
             <h3 className="text-lg font-medium text-gray-800 mb-3">Gold Rates (₹ per 10 grams)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Gold Buying Rate"
-                type="number"
-                value={rates.goldBuy}
-                onChange={(e) => handleInputChange('goldBuy', e.target.value)}
-                placeholder="e.g., 52000"
-                min="1"
-                step="1"
-                required
-                helperText="Rate at which gold is purchased"
-                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
-              />
-              <Input
-                label="Gold Selling Rate"
-                type="number"
-                value={rates.goldSell}
-                onChange={(e) => handleInputChange('goldSell', e.target.value)}
-                placeholder="e.g., 53000"
-                min="1"
-                step="1"
-                required
-                helperText="Rate at which gold is sold"
-                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
-              />
+            <Input
+  label="Gold Buying Rate"
+  type="number"
+  value={rates.goldBuy}
+  onChange={(e) => handleInputChange('goldBuy', e.target.value)}
+  placeholder="e.g., 52000"
+  min="1"
+  step="1"
+  required
+  helperText="Rate at which gold is purchased (can be equal to selling rate)"
+  className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
+/>
+<Input
+  label="Gold Selling Rate"
+  type="number"
+  value={rates.goldSell}
+  onChange={(e) => handleInputChange('goldSell', e.target.value)}
+  placeholder="e.g., 53000"
+  min="1"
+  step="1"
+  required
+  helperText="Rate at which gold is sold (must be equal to or higher than buying rate)"
+  className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
+/>
             </div>
           </div>
 
@@ -345,30 +345,30 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
           <div>
             <h3 className="text-lg font-medium text-gray-800 mb-3">Silver Rates (₹ per kg)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Silver Buying Rate"
-                type="number"
-                value={rates.silverBuy}
-                onChange={(e) => handleInputChange('silverBuy', e.target.value)}
-                placeholder="e.g., 75000"
-                min="1"
-                step="1"
-                required
-                helperText="Rate at which silver is purchased"
-                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
-              />
-              <Input
-                label="Silver Selling Rate"
-                type="number"
-                value={rates.silverSell}
-                onChange={(e) => handleInputChange('silverSell', e.target.value)}
-                placeholder="e.g., 78000"
-                min="1"
-                step="1"
-                required
-                helperText="Rate at which silver is sold"
-                className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
-              />
+            <Input
+  label="Silver Buying Rate"
+  type="number"
+  value={rates.silverBuy}
+  onChange={(e) => handleInputChange('silverBuy', e.target.value)}
+  placeholder="e.g., 75000"
+  min="1"
+  step="1"
+  required
+  helperText="Rate at which silver is purchased (can be equal to selling rate)"
+  className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
+/>
+<Input
+  label="Silver Selling Rate"
+  type="number"
+  value={rates.silverSell}
+  onChange={(e) => handleInputChange('silverSell', e.target.value)}
+  placeholder="e.g., 78000"
+  min="1"
+  step="1"
+  required
+  helperText="Rate at which silver is sold (must be equal to or higher than buying rate)"
+  className={realTimeUpdate ? 'ring-2 ring-blue-300 animate-pulse' : ''}
+/>
             </div>
           </div>
 
@@ -413,15 +413,15 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
         <div className="mt-8 bg-gray-50 rounded-lg p-4">
           <h4 className="font-medium text-gray-800 mb-2">Important Notes:</h4>
           <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Selling rates must be higher than buying rates</li>
-            <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
-            <li>• Only whole numbers are accepted (no decimals)</li>
-            <li>• {isConnected ? 'Updates are broadcasted instantly to all users' : 'Updates will sync when connection is restored'}</li>
-            <li>• Rate changes trigger real-time notifications</li>
-            {!isConnected && (
-              <li className="text-yellow-600 font-medium">• Currently in offline mode - real-time features unavailable</li>
-            )}
-          </ul>
+  <li>• Selling rates must be equal to or higher than buying rates</li>
+  <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
+  <li>• Only whole numbers are accepted (no decimals)</li>
+  <li>• {isConnected ? 'Updates are broadcasted instantly to all users' : 'Updates will sync when connection is restored'}</li>
+  <li>• Rate changes trigger real-time notifications</li>
+  {!isConnected && (
+    <li className="text-yellow-600 font-medium">• Currently in offline mode - real-time features unavailable</li>
+  )}
+</ul>
         </div>
 
         {/* Real-time Status Info */}

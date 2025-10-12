@@ -85,17 +85,17 @@ const rateValidation = [
   body('silverSell')
     .isInt({ min: 1 })
     .withMessage('Silver selling rate must be a positive integer'),
-  body('goldSell')
+    body('goldSell')
     .custom((value, { req }) => {
-      if (parseInt(value) <= parseInt(req.body.goldBuy)) {
-        throw new Error('Gold selling rate must be higher than buying rate');
+      if (parseInt(value) < parseInt(req.body.goldBuy)) {
+        throw new Error('Gold selling rate must be equal to or higher than buying rate');
       }
       return true;
     }),
   body('silverSell')
     .custom((value, { req }) => {
-      if (parseInt(value) <= parseInt(req.body.silverBuy)) {
-        throw new Error('Silver selling rate must be higher than buying rate');
+      if (parseInt(value) < parseInt(req.body.silverBuy)) {
+        throw new Error('Silver selling rate must be equal to or higher than buying rate');
       }
       return true;
     })

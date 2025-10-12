@@ -207,11 +207,11 @@ const RateDisplay = ({ className = '' }) => {
       </div>
 
       {/* Real-time Status Tooltip */}
-      {isReady && (
+      {/* {isReady && (
         <div className="hidden xl:flex items-center text-xs text-green-600">
           <span className="bg-green-50 px-2 py-1 rounded">Real-time updates active</span>
         </div>
-      )}
+      )} */}
 
       {/* Connection Issues Warning */}
       {!isConnected && connectionStatus !== 'disconnected' && (
