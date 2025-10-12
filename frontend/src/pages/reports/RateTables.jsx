@@ -84,7 +84,32 @@ const RateTables = () => {
   const enterEditMode = () => {
     if (!canEdit) return;
     const table = activeTab === 'gold' ? goldTable : silverTable;
-    setEditingTable(JSON.parse(JSON.stringify(table.table)));
+    let tableToEdit = JSON.parse(JSON.stringify(table.table));
+    
+    // If table is empty, add initial row and column
+    if (tableToEdit.rows.length === 0 && tableToEdit.columns.length === 0) {
+      tableToEdit.rows = [{
+        rowIndex: 0,
+        title: 'Row 1'
+      }];
+      
+      tableToEdit.columns = [{
+        colIndex: 0,
+        title: 'Column 1',
+        roundingEnabled: false,
+        roundDirection: 'low',
+        roundingType: 'decimals'
+      }];
+      
+      tableToEdit.cells = [{
+        rowIndex: 0,
+        colIndex: 0,
+        useRate: 'buying',
+        percentage: 100
+      }];
+    }
+    
+    setEditingTable(tableToEdit);
     setEditMode(true);
   };
 
@@ -256,10 +281,23 @@ const RateTables = () => {
     return table.cells?.find(c => c.rowIndex === rowIndex && c.colIndex === colIndex);
   };
 
+  const getColumnConfig = (colIndex, table = activeTable?.table) => {
+    if (!table) return null;
+    return table.columns?.find(c => c.colIndex === colIndex);
+  };
+
   const getCellValue = (rowIndex, colIndex) => {
     if (!activeTable?.calculatedValues) return '-';
     const value = activeTable.calculatedValues[rowIndex]?.[colIndex];
-    return value != null ? `₹${value.toFixed(2)}` : '-';
+    if (value == null) return '-';
+    
+    // Check if column has rounding enabled
+    const columnConfig = getColumnConfig(colIndex);
+    const hasRounding = columnConfig?.roundingEnabled;
+    
+    // If rounding is enabled, display as integer (no decimals)
+    // If no rounding, display with 2 decimal places
+    return hasRounding ? `₹${Math.round(value)}` : `₹${value.toFixed(2)}`;
   };
 
   if (loading) {
@@ -641,6 +679,7 @@ const RateTables = () => {
               <ul className="list-disc list-inside space-y-1 text-gray-600">
                 <li>Formula: (Live Rate ÷ {activeTab === 'gold' ? '10' : '1000'}) × Value Per Gram × Percentage ÷ 100</li>
                 <li>Column-based rounding rules apply to all cells in that column</li>
+                <li>When rounding is enabled, values display as whole numbers (no decimals)</li>
                 <li>Tables update automatically when live rates change</li>
                 {canEdit && <li>Only admins can edit table structure and formulas</li>}
               </ul>
