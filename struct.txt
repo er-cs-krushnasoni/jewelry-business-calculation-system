@@ -30,6 +30,10 @@ jewellery-calculation-system
 │       │   ├── rateBlocking.js
 │       │   └── validation.js
 │       │
+│       ├── utils
+│       │   ├── encryption.js
+│       │   ├── shopScheduler.js
+│       │
 │       ├── models
 │       │   ├── Category.js
 │       │   ├── Rate.js
@@ -90,6 +94,17 @@ jewellery-calculation-system
         │   │   ├── BlockingMessage.jsx
         │   │   └── RateSetupModal.jsx
         │   │
+        │   ├── subscription
+        │   │   ├── SubscriptionCountdown.jsx
+        │   │
+        │   ├── superadmin
+        │   │   ├── BulkAction.jsx
+        │   │   ├── ProfileCredentialsModal.jsx
+        │   │   ├── ShopDetailsModal.jsx
+        │   │   ├── ShopForm.jsx
+        │   │   ├── ShopManagement.jsx
+        │   │   ├── SubscriptionModal.jsx
+        │   │
         │   ├── categories
         │   │   ├── ExtendedJewelryForm.jsx
         │   │   ├── DescriptionManager.jsx
@@ -112,6 +127,11 @@ jewellery-calculation-system
         │
         ├── hooks
         │   └── useBlockingStatus.js
+        │
+        ├── locals
+        │   ├── en.json
+        │   ├── gu.json
+        │   ├── hi.json
         │
         ├── pages
         │   ├── admin
@@ -136,6 +156,8 @@ jewellery-calculation-system
         ├── services
         │   ├── api.js
         │   ├── authService.js
+        │   ├── rateService.js
+        │   ├── superAdminService.js
         │   └── socketService.js
         │
         └── utils

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import Button from '../ui/Button';
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast';
 
 const NewJewelryCalculator = ({ rates }) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   
   // State management
   const [loading, setLoading] = useState(false);
@@ -93,7 +95,7 @@ const NewJewelryCalculator = ({ rates }) => {
       }
     } catch (error) {
       console.error('Error loading categories:', error);
-      toast.error('Failed to load categories');
+      toast.error(t('calculator.new.toast.categoriesLoadFailed'));
     } finally {
       setCategoriesLoading(false);
     }
@@ -113,13 +115,13 @@ const NewJewelryCalculator = ({ rates }) => {
 
   const handleCalculate = async () => {
     if (!selectedCategory || !weight) {
-      toast.error('Please select a category and enter weight');
+      toast.error(t('calculator.new.toast.selectCategoryWeight'));
       return;
     }
 
     const weightNum = parseFloat(weight);
     if (isNaN(weightNum) || weightNum <= 0) {
-      toast.error('Please enter a valid weight');
+      toast.error(t('calculator.new.toast.validWeight'));
       return;
     }
 
@@ -134,15 +136,15 @@ const NewJewelryCalculator = ({ rates }) => {
       if (response.data.success) {
         setResult(response.data.data);
         setExpandedSections({ sellingRate: false, margin: false });
-        toast.success('Calculation completed');
+        toast.success(t('calculator.new.toast.calculationComplete'));
       }
     } catch (error) {
       console.error('Calculation error:', error);
-      const errorMessage = error.response?.data?.message || 'Calculation failed';
+      const errorMessage = error.response?.data?.message || t('calculator.new.toast.calculationFailed');
       toast.error(errorMessage);
       
       if (error.response?.status === 404) {
-        toast.error('Category not found. It may have been deleted.');
+        toast.error(t('calculator.new.toast.categoryNotFound'));
         if (metal) {
           loadCategories(metal);
         }
@@ -208,18 +210,18 @@ const NewJewelryCalculator = ({ rates }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Calculator className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-semibold text-gray-900">NEW Jewelry Calculator</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{t('calculator.new.title')}</h2>
         </div>
         {(metal || selectedCategory) && (
           <Button variant="outline" size="sm" onClick={resetAll}>
-            Reset All
+            {t('calculator.new.buttons.resetAll')}
           </Button>
         )}
       </div>
 
       <div className="space-y-3">
         <label className="block text-sm font-medium text-gray-700">
-          Step 1: Select Metal Type <span className="text-red-500">*</span>
+          {t('calculator.new.steps.step1')} {t('calculator.new.steps.selectMetal')} <span className="text-red-500">{t('common.required')}</span>
         </label>
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -233,11 +235,11 @@ const NewJewelryCalculator = ({ rates }) => {
           >
             <div className="flex items-center justify-center gap-2">
               <Coins className={metal === 'GOLD' ? 'text-yellow-600' : 'text-gray-400'} />
-              <span className="font-medium">Gold</span>
+              <span className="font-medium">{t('calculator.new.metal.gold')}</span>
             </div>
             {rates && (
               <div className="text-sm mt-2">
-                <div className="text-gray-600">Sell: ₹{rates.goldSell}/10g</div>
+                <div className="text-gray-600">{t('calculator.new.metal.sell')} ₹{rates.goldSell}{t('calculator.new.metal.per10g')}</div>
               </div>
             )}
           </button>
@@ -253,11 +255,11 @@ const NewJewelryCalculator = ({ rates }) => {
           >
             <div className="flex items-center justify-center gap-2">
               <Coins className={metal === 'SILVER' ? 'text-gray-600' : 'text-gray-400'} />
-              <span className="font-medium">Silver</span>
+              <span className="font-medium">{t('calculator.new.metal.silver')}</span>
             </div>
             {rates && (
               <div className="text-sm mt-2">
-                <div className="text-gray-600">Sell: ₹{rates.silverSell}/kg</div>
+                <div className="text-gray-600">{t('calculator.new.metal.sell')} ₹{rates.silverSell}{t('calculator.new.metal.perKg')}</div>
               </div>
             )}
           </button>
@@ -267,14 +269,14 @@ const NewJewelryCalculator = ({ rates }) => {
       {metal && itemCategories.length > 0 && permissions?.canAccessAllCategories && (
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
-            Step 2: Filter by Item Category (Optional)
+            {t('calculator.new.steps.step2')} {t('calculator.new.steps.filterCategory')}
           </label>
           <select
             value={itemCategory}
             onChange={(e) => setItemCategory(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">All Categories ({categories.length})</option>
+            <option value="">{t('calculator.new.category.allCategories')} ({categories.length})</option>
             {itemCategories.map((cat) => (
               <option key={cat.name} value={cat.name}>
                 {cat.name} ({cat.count})
@@ -287,24 +289,24 @@ const NewJewelryCalculator = ({ rates }) => {
       {metal && (
         <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700">
-            {permissions?.canAccessAllCategories ? 'Step 3:' : 'Step 2:'} Select Code/Stamp <span className="text-red-500">*</span>
+            {permissions?.canAccessAllCategories ? t('calculator.new.steps.step3') : t('calculator.new.steps.step2')} {t('calculator.new.steps.selectCode')} <span className="text-red-500">{t('common.required')}</span>
           </label>
           
           {categoriesLoading ? (
             <div className="flex items-center justify-center p-8">
               <LoadingSpinner />
-              <span className="ml-3 text-gray-600">Loading categories...</span>
+              <span className="ml-3 text-gray-600">{t('calculator.new.category.loading')}</span>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
                 <AlertCircle size={20} className="text-yellow-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-yellow-800">
-                  <p className="font-medium">No categories available</p>
+                  <p className="font-medium">{t('calculator.new.category.noAvailable')}</p>
                   <p className="text-yellow-700 mt-1">
                     {itemCategory 
-                      ? `No categories found for ${metal} - ${itemCategory}. Try selecting a different item category.`
-                      : `No ${metal} categories found. Please contact your administrator to add categories.`
+                      ? `${t('calculator.new.category.notFound')} ${metal} - ${itemCategory}. ${t('calculator.new.category.noMatchFilter')}`
+                      : `${t('calculator.new.category.notFound')} ${metal} ${t('calculator.new.category.notFound')}. ${t('calculator.new.category.contactAdmin')}`
                     }
                   </p>
                 </div>
@@ -360,7 +362,7 @@ const NewJewelryCalculator = ({ rates }) => {
               <h3 className={`font-medium mb-2 text-sm uppercase tracking-wide ${
                 desc.type === 'universal' ? 'text-purple-900' : 'text-blue-900'
               }`}>
-                {desc.type === 'universal' ? 'Universal Description' : 'Role-Specific Description'}
+                {desc.type === 'universal' ? t('calculator.new.descriptions.universal') : t('calculator.new.descriptions.roleSpecific')}
               </h3>
               <p className={desc.type === 'universal' ? 'text-purple-800' : 'text-blue-800'}>
                 {desc.text}
@@ -373,11 +375,11 @@ const NewJewelryCalculator = ({ rates }) => {
       {selectedCategory && (
         <div className="space-y-4">
           <Input
-            label={`${permissions?.canAccessAllCategories ? 'Step 4:' : 'Step 3:'} Enter Weight (grams)`}
+            label={`${permissions?.canAccessAllCategories ? t('calculator.new.steps.step4') : t('calculator.new.steps.step3')} ${t('calculator.new.steps.enterWeight')}`}
             type="number"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            placeholder="0.00"
+            placeholder={t('calculator.new.weight.placeholder')}
             min="0"
             step="0.01"
             required
@@ -392,12 +394,12 @@ const NewJewelryCalculator = ({ rates }) => {
               {loading ? (
                 <>
                   <LoadingSpinner size="sm" />
-                  <span className="ml-2">Calculating...</span>
+                  <span className="ml-2">{t('calculator.new.buttons.calculating')}</span>
                 </>
               ) : (
                 <>
                   <Calculator size={18} />
-                  <span className="ml-2">Calculate</span>
+                  <span className="ml-2">{t('calculator.new.buttons.calculate')}</span>
                 </>
               )}
             </Button>
@@ -408,7 +410,7 @@ const NewJewelryCalculator = ({ rates }) => {
                 onClick={resetCalculation}
                 disabled={loading}
               >
-                Clear
+                {t('calculator.new.buttons.clear')}
               </Button>
             )}
           </div>
@@ -418,20 +420,20 @@ const NewJewelryCalculator = ({ rates }) => {
       {result && (
         <div className="space-y-4 border-t-2 border-gray-200 pt-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Calculation Results</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t('calculator.new.results.title')}</h3>
           </div>
 
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 text-center">
-            <div className="text-sm font-medium text-green-700 mb-2">Final Selling Amount</div>
+            <div className="text-sm font-medium text-green-700 mb-2">{t('calculator.new.results.finalAmount')}</div>
             <div className="text-5xl font-bold text-green-900">
               ₹{formatCurrency(result.finalSellingAmount)}
             </div>
             <div className="text-sm text-green-600 mt-2">
-              for {result.input.weight}g of {result.input.code}
+              {t('calculator.new.results.for')} {result.input.weight}g {t('calculator.new.results.of')} {result.input.code}
             </div>
             {result.roundingInfo?.roundingApplied && (
               <div className="text-xs text-green-600 mt-2">
-                (Rounded from ₹{formatNumber(result.roundingInfo.beforeRounding)})
+                ({t('calculator.new.results.roundedFrom')} ₹{formatNumber(result.roundingInfo.beforeRounding)})
               </div>
             )}
           </div>
@@ -443,7 +445,7 @@ const NewJewelryCalculator = ({ rates }) => {
             >
               <div className="flex items-center gap-3">
                 <div className="text-left">
-                  <div className="text-sm font-medium text-blue-700">Total Selling Rate Per Gram</div>
+                  <div className="text-sm font-medium text-blue-700">{t('calculator.new.sellingRate.title')}</div>
                   <div className="text-2xl font-bold text-blue-900">
                     ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
                   </div>
@@ -458,39 +460,41 @@ const NewJewelryCalculator = ({ rates }) => {
             
             {expandedSections.sellingRate && (
               <div className="px-5 py-4 bg-blue-50 border-t border-blue-200">
-                <h4 className="font-semibold text-blue-900 mb-3">Selling Rate Breakdown</h4>
+                <h4 className="font-semibold text-blue-900 mb-3">{t('calculator.new.sellingRate.breakdown')}</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-blue-800">Rate Per Gram</span>
+                    <span className="text-blue-800">{t('calculator.new.sellingRate.ratePerGram')}</span>
                     <span className="font-semibold text-blue-900">
                       ₹{formatCurrency(result.sellingRateBreakdown.actualRatePerGram)}
                       {['admin', 'manager'].includes(user?.role) && (
                         <span className="text-xs text-blue-600 ml-2">
-                          ({formatNumber(result.percentages.purity)}% purity)
+                          ({formatNumber(result.percentages.purity)}% {t('calculator.new.sellingRate.purity')})
                         </span>
                       )}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-t border-blue-200">
-                    <span className="text-blue-800">Making Charges Per Gram</span>
+                    <span className="text-blue-800">{t('calculator.new.sellingRate.makingCharges')}</span>
                     <span className="font-semibold text-blue-900">
                       ₹{formatCurrency(result.sellingRateBreakdown.makingChargesPerGram)}
                       <span className="text-xs text-blue-600 ml-2">
                         ({formatNumber(calculateMakingChargesPercentage(
                           result.sellingRateBreakdown.makingChargesPerGram,
                           result.sellingRateBreakdown.actualRatePerGram
-                        ))}% of rate)
+                        ))}% {t('calculator.new.sellingRate.ofRate')})
                       </span>
                     </span>
                   </div>
                   <div className="pt-2 border-t-2 border-blue-300 mt-2">
                     <div className="flex justify-between items-center font-bold text-blue-900">
-                      <span>Total Selling Rate Per Gram</span>
+                      <span>{t('calculator.new.sellingRate.total')}</span>
                       <span className="text-lg">
                         ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
+                        {['admin', 'manager'].includes(user?.role) && (
                         <span className="text-xs text-blue-600 ml-2 font-normal">
-                          ({formatNumber(result.percentages.selling)}% rate)
+                          ({formatNumber(result.percentages.selling)}% {t('calculator.new.sellingRate.rate')})
                         </span>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -507,14 +511,14 @@ const NewJewelryCalculator = ({ rates }) => {
               >
                 <div className="flex items-center gap-3">
                   <div className="text-left">
-                    <div className="text-sm font-medium text-purple-700">Margin Amount</div>
+                    <div className="text-sm font-medium text-purple-700">{t('calculator.new.margin.title')}</div>
                     <div className="text-3xl font-bold text-purple-900">
                       ₹{formatCurrency(result.marginBreakdown.ourMargin)}
                       <span className="text-base text-purple-600 ml-2">
                         ({formatNumber(calculateOurMarginPercentage(
                           result.marginBreakdown.ourMargin,
                           result.finalSellingAmount
-                        ))}% of selling amount)
+                        ))}% {t('calculator.new.margin.ofSelling')})
                       </span>
                     </div>
                   </div>
@@ -528,50 +532,34 @@ const NewJewelryCalculator = ({ rates }) => {
               
               {expandedSections.margin && permissions?.canViewWholesaleRates && (
                 <div className="px-5 py-4 bg-purple-50 border-t border-purple-200">
-                  <h4 className="font-semibold text-purple-900 mb-3">Margin Breakdown</h4>
+                  <h4 className="font-semibold text-purple-900 mb-3">{t('calculator.new.margin.breakdown')}</h4>
                   <div className="space-y-3">
                     <div className="bg-white rounded-lg p-3 border border-purple-200">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-purple-800">Purchase from Wholesaler Amount</span>
+                        <span className="text-sm text-purple-800">{t('calculator.new.margin.purchaseFromWholesaler')}</span>
                         <span className="text-sm font-semibold text-purple-900">
                           ₹{formatCurrency(result.marginBreakdown.purchaseFromWholesaler)}
-                          {/* <span className="text-xs text-purple-600 ml-2">
-                            ({formatNumber(result.percentages.buying)}% rate)
-                          </span> */}
                         </span>
                       </div>
                       <div className="ml-4 space-y-1 text-xs">
                         <div className="flex justify-between text-purple-700">
-                          <span>Base Cost: ({formatNumber(result.percentages.buying)}% rate)</span>
+                          <span>{t('calculator.new.margin.baseCost')} ({formatNumber(result.percentages.buying)}% {t('calculator.new.sellingRate.rate')})</span>
                           <span>₹{formatCurrency(result.marginBreakdown.purchaseFromWholesalerBreakdown.baseCost)}</span>
-                            
                         </div>
                         <div className="flex justify-between text-purple-700">
-                          <span>Labour Charges:  ₹{formatNumber(result.labourInfo.labourPerGram)} per gram × {result.input.weight}g 
-
-                            
-                          </span>
+                          <span>{t('calculator.new.margin.labourCharges')} ₹{formatNumber(result.labourInfo.labourPerGram)} {t('calculator.new.margin.perGram')} × {result.input.weight}g</span>
                           <span>₹{formatCurrency(result.marginBreakdown.purchaseFromWholesalerBreakdown.labourCharges)}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* {result.labourInfo && result.labourInfo.labourPerGram > 0 && (
-                      <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <div className="text-xs font-semibold text-blue-900 mb-1">Labour Charges</div>
-                        <div className="text-sm text-blue-800">
-                          ₹{formatNumber(result.labourInfo.labourPerGram)} per gram × {result.input.weight}g = ₹{formatCurrency(result.labourInfo.totalLabourCharges)}
-                        </div>
-                      </div>
-                    )} */}
-
                     <div className="bg-white rounded-lg p-3 border border-purple-200">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-purple-800">Actual Value According to Purity</span>
+                        <span className="text-sm text-purple-800">{t('calculator.new.margin.actualValue')}</span>
                         <span className="text-sm font-semibold text-purple-900">
                           ₹{formatCurrency(result.marginBreakdown.actualValueByPurity)}
                           <span className="text-xs text-purple-600 ml-2">
-                            ({formatNumber(result.percentages.purity)}% purity)
+                            ({formatNumber(result.percentages.purity)}% {t('calculator.new.sellingRate.purity')})
                           </span>
                         </span>
                       </div>
@@ -579,17 +567,17 @@ const NewJewelryCalculator = ({ rates }) => {
 
                     <div className="bg-purple-100 rounded-lg p-4 border-2 border-purple-300">
                       <h5 className="text-xs font-semibold text-purple-900 mb-3 uppercase tracking-wide">
-                        Calculation Formula
+                        {t('calculator.new.margin.formula')}
                       </h5>
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                           <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">1</div>
                           <div className="flex-1">
-                            <div className="text-purple-800">Actual Value (Purity)</div>
+                            <div className="text-purple-800">{t('calculator.new.margin.actualValuePurity')}</div>
                             <div className="font-mono text-purple-900">
                               ₹{formatCurrency(result.marginBreakdown.actualValueByPurity)}
                               <span className="text-xs text-purple-600 ml-2">
-                                ({formatNumber(result.percentages.purity)}% purity)
+                                ({formatNumber(result.percentages.purity)}% {t('calculator.new.sellingRate.purity')})
                               </span>
                             </div>
                           </div>
@@ -598,17 +586,17 @@ const NewJewelryCalculator = ({ rates }) => {
                         <div className="flex items-center gap-2 pl-6">
                           <div className="text-purple-600 font-bold">+</div>
                           <div className="flex-1">
-                            <div className="text-purple-800">Wholesaler Margin</div>
+                            <div className="text-purple-800">{t('calculator.new.margin.wholesalerMargin')}</div>
                             <div className="font-mono text-purple-900">
                               ₹{formatCurrency(result.marginBreakdown.wholesalerMargin)}
                             </div>
                             <div className="ml-4 mt-1 text-xs space-y-1">
                               <div className="flex justify-between text-purple-700">
-                                <span>├─ Wastage: {formatNumber(result.percentages.buying - result.percentages.purity)}</span>
+                                <span>├─ {t('calculator.new.margin.wastage')} {formatNumber(result.percentages.buying - result.percentages.purity)}%</span>
                                 <span>₹{formatCurrency(result.marginBreakdown.wholesalerMarginBreakdown.wastageMargin)}</span>
                               </div>
                               <div className="flex justify-between text-purple-700">
-                                <span>└─ Labour: ₹{formatNumber(result.labourInfo.labourPerGram)} per gram</span>
+                                <span>└─ {t('calculator.new.margin.labour')} ₹{formatNumber(result.labourInfo.labourPerGram)} {t('calculator.new.margin.perGram')}</span>
                                 <span>₹{formatCurrency(result.marginBreakdown.wholesalerMarginBreakdown.labourCharges)}</span>
                               </div>
                             </div>
@@ -618,11 +606,11 @@ const NewJewelryCalculator = ({ rates }) => {
                         <div className="flex items-center gap-2 border-t border-purple-300 pt-2">
                           <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs">=</div>
                           <div className="flex-1">
-                            <div className="text-purple-800 font-medium">Purchase from Wholesaler</div>
+                            <div className="text-purple-800 font-medium">{t('calculator.new.margin.purchaseFromWholesaler')}</div>
                             <div className="font-mono font-semibold text-purple-900">
                               ₹{formatCurrency(result.marginBreakdown.purchaseFromWholesaler)}
                               <span className="text-xs text-purple-600 ml-2">
-                                ({formatNumber(result.percentages.buying)}% rate + ₹{formatNumber(result.labourInfo.labourPerGram)} per gram labour)
+                                ({formatNumber(result.percentages.buying)}% {t('calculator.new.sellingRate.rate')} + ₹{formatNumber(result.labourInfo.labourPerGram)} {t('calculator.new.margin.perGram')} {t('calculator.new.margin.labour')})
                               </span>
                             </div>
                           </div>
@@ -631,14 +619,14 @@ const NewJewelryCalculator = ({ rates }) => {
                         <div className="flex items-center gap-2 pl-6 mt-3">
                           <div className="text-purple-600 font-bold">+</div>
                           <div className="flex-1">
-                            <div className="text-purple-800">Our Margin</div>
+                            <div className="text-purple-800">{t('calculator.new.margin.ourMargin')}</div>
                             <div className="font-mono text-purple-900">
                               ₹{formatCurrency(result.marginBreakdown.ourMargin)}
                               <span className="text-xs text-purple-600 ml-2">
                                 ({formatNumber(calculateOurMarginPercentage(
                                   result.marginBreakdown.ourMargin,
                                   result.finalSellingAmount
-                                ))}% of selling amount)
+                                ))}% {t('calculator.new.margin.ofSelling')})
                               </span>
                             </div>
                           </div>
@@ -647,11 +635,11 @@ const NewJewelryCalculator = ({ rates }) => {
                         <div className="flex items-center gap-2 border-t-2 border-purple-400 pt-2 mt-2">
                           <div className="flex-shrink-0 w-4 h-4 bg-green-600 rounded-full flex items-center justify-center text-white text-xs">=</div>
                           <div className="flex-1">
-                            <div className="text-green-800 font-bold">Final Selling Amount</div>
+                            <div className="text-green-800 font-bold">{t('calculator.new.margin.finalSellingAmount')}</div>
                             <div className="font-mono font-bold text-green-900 text-lg">
                               ₹{formatCurrency(result.finalSellingAmount)}
                               <span className="text-sm text-green-600 ml-2">
-                                ({formatNumber(result.percentages.selling)}% rate)
+                                ({formatNumber(result.percentages.selling)}% {t('calculator.new.sellingRate.rate')})
                               </span>
                             </div>
                           </div>
@@ -665,7 +653,7 @@ const NewJewelryCalculator = ({ rates }) => {
           )}
 
           <div className="text-xs text-gray-500 text-center pt-4">
-            Calculated at: {new Date(result.metadata.calculatedAt).toLocaleString('en-IN', {
+            {t('calculator.new.results.calculatedAt')} {new Date(result.metadata.calculatedAt).toLocaleString('en-IN', {
               timeZone: 'Asia/Kolkata',
               year: 'numeric',
               month: 'short',

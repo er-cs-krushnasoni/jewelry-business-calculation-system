@@ -5,7 +5,6 @@ const { generateToken } = require('../middleware/auth');
 // Enhanced change password - Super Admin and Shop Admin can change their own password
 const changePassword = async (req, res) => {
   try {
-    // Only Super Admin and Shop Admin can change their own password
     const allowedRoles = ['super_admin', 'admin'];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
@@ -16,7 +15,6 @@ const changePassword = async (req, res) => {
 
     const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    // Validate input
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -38,10 +36,8 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Get current user
     const user = await User.findById(req.user._id);
 
-    // Verify current password
     const isCurrentPasswordValid = await user.matchPassword(currentPassword);
     if (!isCurrentPasswordValid) {
       return res.status(400).json({
@@ -50,17 +46,15 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Update password (will be hashed by pre-save middleware)
     user.password = newPassword;
     await user.save();
 
-    // Generate new token with updated info
     const newToken = generateToken(user);
 
     res.status(200).json({
       success: true,
       message: 'Password changed successfully. Please use your new password for future logins.',
-      token: newToken, // Provide new token
+      token: newToken,
       user: {
         _id: user._id,
         username: user.username,
@@ -90,7 +84,6 @@ const getMyProfile = async (req, res) => {
       });
     }
 
-    // Get shop info if user has shopId
     let shopInfo = null;
     if (user.shopId) {
       const shop = await Shop.findById(user.shopId);
@@ -103,7 +96,6 @@ const getMyProfile = async (req, res) => {
       }
     }
 
-    // Only show relevant profile info, NO passwords
     res.status(200).json({
       success: true,
       profile: {
@@ -129,12 +121,11 @@ const getMyProfile = async (req, res) => {
   }
 };
 
-// Login user (all roles)
+// Login user (all roles) - ENHANCED with subscription status and pause detection
 const login = async (req, res) => {
   try {
     const { username, password, deviceInfo, ipAddress } = req.body;
 
-    // Validate input
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -142,7 +133,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Find user by username (case-insensitive)
     const user = await User.findByUsername(username);
 
     if (!user) {
@@ -152,7 +142,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check if user is active
     if (!user.isActive) {
       return res.status(401).json({
         success: false,
@@ -160,7 +149,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check password
     const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -169,20 +157,55 @@ const login = async (req, res) => {
       });
     }
 
-    // For shop users, check if shop is active and get shop info
+    // For shop users, check shop status with enhanced messages
     let shopInfo = null;
     if (user.shopId) {
       const shop = await Shop.findById(user.shopId);
-      if (!shop || !shop.isActive) {
+      
+      if (!shop) {
         return res.status(401).json({
           success: false,
-          message: 'Shop account is deactivated'
+          message: 'Shop not found'
         });
       }
+
+      // ENHANCED: Check if shop is inactive and provide appropriate message
+      if (!shop.isActive) {
+        const deactivationReason = shop.deactivation?.reason;
+        
+        if (deactivationReason === 'subscription_expired') {
+          return res.status(401).json({
+            success: false,
+            message: 'Shop subscription has expired. Please contact administrator to renew.',
+            deactivationReason: 'subscription_expired'
+          });
+        } else if (deactivationReason === 'manual' || deactivationReason === 'admin_action') {
+          // Shop is manually deactivated - subscription is paused
+          const subscriptionStatus = shop.getSubscriptionStatus();
+          const pausedDays = subscriptionStatus.pausedSince || 0;
+          
+          return res.status(401).json({
+            success: false,
+            message: `Shop is temporarily deactivated by administrator. Subscription is paused (${pausedDays} days). Please contact administrator.`,
+            deactivationReason: 'manual_deactivation',
+            isPaused: true,
+            pausedSince: pausedDays,
+            subscriptionStatus: subscriptionStatus
+          });
+        } else {
+          return res.status(401).json({
+            success: false,
+            message: 'Shop account is deactivated. Please contact administrator.',
+            deactivationReason: deactivationReason || 'unknown'
+          });
+        }
+      }
+      
       shopInfo = {
         _id: shop._id,
         shopName: shop.shopName,
-        shopCode: shop.shopCode
+        shopCode: shop.shopCode,
+        subscriptionStatus: shop.getSubscriptionStatus()
       };
     }
 
@@ -194,17 +217,14 @@ const login = async (req, res) => {
       ipAddress: ipAddress || req.ip || 'Unknown'
     });
 
-    // Keep only last 10 login records
     if (user.loginHistory.length > 10) {
       user.loginHistory = user.loginHistory.slice(-10);
     }
 
     await user.save();
 
-    // Generate JWT token
     const token = generateToken(user);
 
-    // Prepare response data
     const responseData = {
       success: true,
       message: 'Login successful',
@@ -216,6 +236,7 @@ const login = async (req, res) => {
         shopId: user.shopId || null,
         shopName: shopInfo?.shopName || null,
         shopCode: shopInfo?.shopCode || null,
+        subscriptionStatus: shopInfo?.subscriptionStatus || null,
         isActive: user.isActive,
         lastLogin: user.lastLogin
       }
@@ -235,7 +256,6 @@ const login = async (req, res) => {
 // Get current user info - ENHANCED with fresh database lookup
 const getMe = async (req, res) => {
   try {
-    // Always fetch fresh user data from database (not from JWT claims)
     const user = await User.findById(req.user._id);
 
     if (!user || !user.isActive) {
@@ -245,7 +265,6 @@ const getMe = async (req, res) => {
       });
     }
 
-    // Get shop info if user has shopId
     let shopInfo = null;
     if (user.shopId) {
       const shop = await Shop.findById(user.shopId);
@@ -253,10 +272,10 @@ const getMe = async (req, res) => {
         shopInfo = {
           _id: shop._id,
           shopName: shop.shopName,
-          shopCode: shop.shopCode
+          shopCode: shop.shopCode,
+          subscriptionStatus: shop.getSubscriptionStatus()
         };
       } else if (user.role !== 'super_admin') {
-        // Shop is inactive but user requires shop
         return res.status(401).json({
           success: false,
           message: 'Associated shop is inactive'
@@ -269,10 +288,11 @@ const getMe = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        role: user.role, // Fresh role from database
+        role: user.role,
         shopId: user.shopId || null,
         shopName: shopInfo?.shopName || null,
         shopCode: shopInfo?.shopCode || null,
+        subscriptionStatus: shopInfo?.subscriptionStatus || null,
         isActive: user.isActive,
         lastLogin: user.lastLogin,
         createdAt: user.createdAt
@@ -293,7 +313,6 @@ const verifyAccess = async (req, res) => {
   try {
     const { requiredRoles, requireShop } = req.body;
 
-    // Get fresh user data from database
     const user = await User.findById(req.user._id);
 
     if (!user || !user.isActive) {
@@ -304,7 +323,6 @@ const verifyAccess = async (req, res) => {
       });
     }
 
-    // Check role requirements
     if (requiredRoles && requiredRoles.length > 0) {
       if (!requiredRoles.includes(user.role)) {
         return res.status(403).json({
@@ -315,7 +333,6 @@ const verifyAccess = async (req, res) => {
       }
     }
 
-    // Check shop requirements
     if (requireShop && user.role !== 'super_admin') {
       if (!user.shopId) {
         return res.status(403).json({
@@ -325,7 +342,6 @@ const verifyAccess = async (req, res) => {
         });
       }
 
-      // Verify shop is still active
       const shop = await Shop.findById(user.shopId);
       if (!shop || !shop.isActive) {
         return res.status(403).json({
@@ -360,10 +376,6 @@ const verifyAccess = async (req, res) => {
 // NEW: Token validation endpoint 
 const validateToken = async (req, res) => {
   try {
-    // The authenticate middleware already validated the token
-    // and attached the user to req.user
-    
-    // Get fresh user data from database
     const user = await User.findById(req.user._id);
 
     if (!user || !user.isActive) {
@@ -374,7 +386,6 @@ const validateToken = async (req, res) => {
       });
     }
 
-    // Check if shop is still active (for shop users)
     if (user.shopId) {
       const shop = await Shop.findById(user.shopId);
       if (!shop || !shop.isActive) {
@@ -430,7 +441,6 @@ const createSuperAdmin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Check if super admin already exists
     const existingSuperAdmin = await User.findOne({ role: 'super_admin' });
     if (existingSuperAdmin) {
       return res.status(400).json({
@@ -439,7 +449,6 @@ const createSuperAdmin = async (req, res) => {
       });
     }
 
-    // Validate input
     if (!username || !password) {
       return res.status(400).json({
         success: false,
@@ -454,7 +463,6 @@ const createSuperAdmin = async (req, res) => {
       });
     }
 
-    // Check if username already exists
     const existingUser = await User.findByUsername(username);
     if (existingUser) {
       return res.status(400).json({
@@ -463,7 +471,6 @@ const createSuperAdmin = async (req, res) => {
       });
     }
 
-    // Create Super Admin
     const superAdmin = await User.create({
       username: username.toLowerCase(),
       password,
@@ -535,6 +542,6 @@ module.exports = {
   logout,
   createSuperAdmin,
   checkSuperAdmin,
-  verifyAccess,        // NEW: Verify role-based access
-  validateToken        // NEW: Token validation
+  verifyAccess,
+  validateToken
 };

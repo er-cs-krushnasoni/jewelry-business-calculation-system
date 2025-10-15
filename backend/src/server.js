@@ -23,6 +23,20 @@ const io = socketIo(server, {
   }
 });
 
+// Initialize Shop Scheduler
+const ShopScheduler = require('./utils/shopScheduler');
+const shopScheduler = new ShopScheduler(io);
+shopScheduler.start();
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  shopScheduler.stop();
+  server.close(() => {
+    console.log('HTTP server closed');
+  });
+});
+
 // Connect to MongoDB
 connectDB();
 

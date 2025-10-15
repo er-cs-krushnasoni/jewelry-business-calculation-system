@@ -352,16 +352,16 @@ const ExtendedJewelryForm = ({
     }
     if (!formData.code.trim()) {
       newErrors.code = 'Code is required';
-    } else if (formData.code.length > 20) {
-      newErrors.code = 'Code cannot exceed 20 characters';
+    } else if (formData.code.length > 100) {
+      newErrors.code = 'Code cannot exceed 100 characters';
     }
 
     // NEW jewelry validations
     if (formData.type === 'NEW') {
       if (!formData.itemCategory.trim()) {
         newErrors.itemCategory = 'Item category is required for NEW jewelry';
-      } else if (formData.itemCategory.length > 50) {
-        newErrors.itemCategory = 'Item category cannot exceed 50 characters';
+      } else if (formData.itemCategory.length > 100) {
+        newErrors.itemCategory = 'Item category cannot exceed 100 characters';
       }
       if (!formData.purityPercentage) {
         newErrors.purityPercentage = 'Purity percentage is required';
@@ -644,7 +644,7 @@ const ExtendedJewelryForm = ({
               value={formData.code}
               onChange={(e) => handleInputChange('code', e.target.value)}
               placeholder="e.g., ABC123, વિશિષ્ટ123"
-              maxLength={20}
+              maxLength={100}
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.code ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -673,7 +673,7 @@ const ExtendedJewelryForm = ({
                     errors.itemCategory ? 'border-red-500' : 'border-gray-300'
                   }`}
                   disabled={!formData.metal}
-                  maxLength={50}
+                  maxLength={100}
                 />
                 <ChevronDown 
                   size={20} 
@@ -976,7 +976,7 @@ const ExtendedJewelryForm = ({
                             onChange={(e) => updateResaleCategory(index, 'itemCategory', e.target.value)}
                             onFocus={() => setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }))}
                             placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
-                            maxLength={50}
+                            maxLength={100}
                             className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                               errors[`resaleCategories.${index}.itemCategory`] ? 'border-red-500' : 'border-gray-300'
                             }`}

@@ -13,6 +13,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 const CategoryManagement = React.lazy(() => import('./pages/admin/CategoryManagement'));
 const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
 const RateTables = React.lazy(() => import('./pages/reports/RateTables'));
+import ShopManagement from './components/superadmin/ShopManagement'
 
 
 // Layout
@@ -235,14 +236,25 @@ function App() {
 />
                     
                     {/* Role-specific dashboards */}
-                    <Route 
-                      path="super-admin" 
-                      element={
-                        <ProtectedRoute roles={["super_admin"]}>
-                          <SuperAdminDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
+                    {/* Super Admin Routes */}
+<Route 
+  path="super-admin" 
+  element={
+    <ProtectedRoute roles={["super_admin"]}>
+      {/* <SuperAdminDashboard /> */}
+      <ShopManagement />
+    </ProtectedRoute>
+  } 
+/>
+
+<Route 
+  path="super-admin/shops" 
+  element={
+    <ProtectedRoute roles={["super_admin"]}>
+      <ShopManagement />
+    </ProtectedRoute>
+  } 
+/>
                     
                     <Route 
                       path="admin" 

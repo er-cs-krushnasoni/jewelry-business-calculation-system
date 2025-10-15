@@ -472,16 +472,17 @@ const getUserWithPassword = async (req, res) => {
     const shopId = req.user.shopId;
 
     // Find user and verify they belong to current shop
+    // ONLY allow viewing passwords for non-admin roles
     const user = await User.findOne({ 
       _id: userId, 
       shopId,
-      role: { $in: ['manager', 'pro_client', 'client'] }
+      role: { $in: ['manager', 'pro_client', 'client'] } // Removed 'admin' from here
     });
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found or password viewing not allowed for this user type'
       });
     }
 
@@ -502,7 +503,7 @@ const getUserWithPassword = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        password: decryptedPassword, // Only returned for shop admin
+        password: decryptedPassword,
         role: user.role,
         isActive: user.isActive,
         createdAt: user.createdAt,

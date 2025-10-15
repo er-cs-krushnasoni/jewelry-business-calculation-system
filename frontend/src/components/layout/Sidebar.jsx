@@ -47,24 +47,18 @@ const Sidebar = ({ isOpen, onClose }) => {
       roles: ['admin', 'manager', 'pro_client', 'client']
     });
   }
-  
+
   // Super Admin Navigation
-  if (isSuperAdmin && isSuperAdmin()) {
-    navigationItems.push(
-      {
-        name: t('nav.shops', 'Shop Management'),
-        href: '/super-admin/shops',
-        icon: Store,
-        roles: ['super_admin']
-      },
-      {
-        name: t('nav.dashboard', 'Dashboard'),
-        href: '/dashboard/super-admin',
-        icon: BarChart3,
-        roles: ['super_admin']
-      }
-    );
-  }
+if (isSuperAdmin && isSuperAdmin()) {
+  navigationItems.push(
+    {
+      name: t('nav.shops', 'Shop Management'),
+      href: '/super-admin/shops',
+      icon: Store,
+      roles: ['super_admin']
+    }
+  );
+}
   
   // Shop Admin Navigation
   if (isShopAdmin && isShopAdmin()) {

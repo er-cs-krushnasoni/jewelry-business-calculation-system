@@ -30,6 +30,19 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // Listen for shop deactivation events
+  useEffect(() => {
+    const handleShopDeactivated = (event) => {
+      console.log('Shop deactivated event received:', event.detail);
+      logout();
+    };
+
+    window.addEventListener('shop-deactivated', handleShopDeactivated);
+    return () => {
+      window.removeEventListener('shop-deactivated', handleShopDeactivated);
+    };
+  }, []);
+
   // Check if user is authenticated on app load
   useEffect(() => {
     checkAuth();
@@ -49,7 +62,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await api.get('/auth/me');
           if (response.data.success) {
-            // Use fresh server data
+            // Use fresh server data (includes subscription status)
             const serverUser = response.data.user;
             setUser(serverUser);
             localStorage.setItem('user', JSON.stringify(serverUser));
@@ -100,8 +113,9 @@ export const AuthProvider = ({ children }) => {
         const { token, user: userData } = response.data;
         
         console.log('Login successful, storing data...');
+        console.log('Subscription status:', userData.subscriptionStatus); // Debug log
         
-        // Store token and user data
+        // Store token and user data (includes subscriptionStatus)
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
         
@@ -212,8 +226,14 @@ export const AuthProvider = ({ children }) => {
     return {
       shopId: user.shopId,
       shopName: user.shopName,
-      shopCode: user.shopCode
+      shopCode: user.shopCode,
+      subscriptionStatus: user.subscriptionStatus // ADD THIS LINE
     };
+  };
+
+  // NEW: Get subscription status
+  const getSubscriptionStatus = () => {
+    return user?.subscriptionStatus || null;
   };
 
   // Check if user has minimum role level
@@ -279,7 +299,8 @@ export const AuthProvider = ({ children }) => {
     
     // Utility methods
     getUserDisplayRole,
-    getShopInfo
+    getShopInfo,
+    getSubscriptionStatus // ADD THIS LINE
   };
 
   return (

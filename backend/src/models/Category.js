@@ -6,7 +6,7 @@ const resaleCategorySchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxlength: [50, 'Item category cannot exceed 50 characters']
+    maxlength: [100, 'Item category cannot exceed 100 characters'] // INCREASED from 50
   },
   directResalePercentage: {
     type: Number,
@@ -18,14 +18,12 @@ const resaleCategorySchema = new mongoose.Schema({
     required: true,
     min: [1, 'Buying from wholesaler percentage must be at least 1%']
   },
-  // Wholesaler Labour Per Gram for direct resale (required, can be 0)
   wholesalerLabourPerGram: {
     type: Number,
     required: true,
     min: [0, 'Wholesaler labour per gram cannot be negative'],
     default: 0
   },
-  // Polish/Repair toggle and fields (optional based on toggle)
   polishRepairEnabled: {
     type: Boolean,
     default: false
@@ -45,7 +43,6 @@ const resaleCategorySchema = new mongoose.Schema({
     min: [0, 'Polish/Repair cost percentage must be at least 0%'],
     max: [50, 'Polish/Repair cost percentage cannot exceed 50%']
   },
-  // Polish/Repair Labour Per Gram (required when polish/repair enabled, can be 0)
   polishRepairLabourPerGram: {
     type: Number,
     required: function() {
@@ -57,7 +54,6 @@ const resaleCategorySchema = new mongoose.Schema({
 }, { _id: true });
 
 const categorySchema = new mongoose.Schema({
-  // Basic category info
   type: {
     type: String,
     enum: ['NEW', 'OLD'],
@@ -79,10 +75,16 @@ const categorySchema = new mongoose.Schema({
       return this.type === 'NEW';
     },
     trim: true,
-    maxlength: [50, 'Item category cannot exceed 50 characters']
+    maxlength: [100, 'Item category cannot exceed 100 characters'] // INCREASED from 50
   },
   
-  // NEW jewelry - purity percentage (actual purity for NEW)
+  // NEW: Store lowercase version for case-insensitive uniqueness
+  itemCategoryLower: {
+    type: String,
+    lowercase: true,
+    trim: true
+  },
+  
   purityPercentage: {
     type: Number,
     required: function() { return this.type === 'NEW'; },
@@ -90,14 +92,12 @@ const categorySchema = new mongoose.Schema({
     max: [100, 'Purity percentage cannot exceed 100%']
   },
   
-  // NEW jewelry - buying and selling percentages
   buyingFromWholesalerPercentage: {
     type: Number,
     required: function() { return this.type === 'NEW'; },
     min: [1, 'Buying percentage must be at least 1%']
   },
   
-  // NEW jewelry - Wholesaler Labour Per Gram (required, can be 0)
   wholesalerLabourPerGram: {
     type: Number,
     required: function() { return this.type === 'NEW'; },
@@ -111,7 +111,6 @@ const categorySchema = new mongoose.Schema({
     min: [1, 'Selling percentage must be at least 1%']
   },
   
-  // OLD jewelry specific fields
   truePurityPercentage: {
     type: Number,
     required: function() { return this.type === 'OLD'; },
@@ -131,24 +130,20 @@ const categorySchema = new mongoose.Schema({
     min: [1, 'Scrap buy other percentage must be at least 1%']
   },
   
-  // OLD jewelry - resale system
   resaleEnabled: {
     type: Boolean,
     default: false,
     required: function() { return this.type === 'OLD'; }
   },
   
-  // OLD jewelry - Array of resale categories (when resale enabled)
   resaleCategories: {
     type: [resaleCategorySchema],
     default: [],
     validate: {
       validator: function(categories) {
-        // If resale enabled, must have at least one category
         if (this.type === 'OLD' && this.resaleEnabled) {
           return categories && categories.length > 0;
         }
-        // If resale disabled, array must be empty
         if (this.type === 'OLD' && !this.resaleEnabled) {
           return !categories || categories.length === 0;
         }
@@ -163,10 +158,17 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: [true, 'Code/Stamp is required'],
     trim: true,
-    maxlength: [20, 'Code cannot exceed 20 characters']
+    maxlength: [100, 'Code cannot exceed 100 characters'] // INCREASED from 20
   },
   
-  // Multi-level descriptions system
+  // NEW: Store lowercase version for case-insensitive uniqueness
+  codeLower: {
+    type: String,
+    lowercase: true,
+    trim: true
+    // NOT required - will be auto-generated in pre-save
+  },
+  
   descriptions: {
     universal: {
       type: String,
@@ -200,14 +202,12 @@ const categorySchema = new mongoose.Schema({
     }
   },
   
-  // Shop association
   shopId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Shop',
     required: [true, 'Shop ID is required']
   },
   
-  // Audit fields
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -227,13 +227,13 @@ const categorySchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound indexes for code uniqueness
+// UPDATED: Compound indexes for case-insensitive code uniqueness
 categorySchema.index({ 
   shopId: 1, 
   type: 1, 
   metal: 1, 
-  itemCategory: 1, 
-  code: 1 
+  itemCategoryLower: 1, 
+  codeLower: 1 
 }, { 
   unique: true,
   partialFilterExpression: { 
@@ -246,7 +246,7 @@ categorySchema.index({
   shopId: 1, 
   type: 1, 
   metal: 1, 
-  code: 1 
+  codeLower: 1 
 }, { 
   unique: true,
   partialFilterExpression: { 
@@ -270,9 +270,11 @@ categorySchema.pre('save', function(next) {
     // Trim and clean fields
     if (this.itemCategory) {
       this.itemCategory = this.itemCategory.trim();
+      this.itemCategoryLower = this.itemCategory.toLowerCase(); // Store lowercase version
     }
     if (this.code) {
       this.code = this.code.trim();
+      this.codeLower = this.code.toLowerCase(); // Store lowercase version
     }
     
     // Clean up descriptions
@@ -286,12 +288,10 @@ categorySchema.pre('save', function(next) {
     
     // Type-specific validations and cleanup
     if (this.type === 'NEW') {
-      // Ensure itemCategory is provided for NEW jewelry
       if (!this.itemCategory) {
         throw new Error('Item category is required for NEW jewelry');
       }
       
-      // Ensure wholesalerLabourPerGram is provided
       if (this.wholesalerLabourPerGram === undefined || this.wholesalerLabourPerGram === null) {
         throw new Error('Wholesaler labour per gram is required for NEW jewelry');
       }
@@ -306,6 +306,7 @@ categorySchema.pre('save', function(next) {
     } else if (this.type === 'OLD') {
       // Clear NEW jewelry specific fields
       this.itemCategory = undefined;
+      this.itemCategoryLower = undefined;
       this.purityPercentage = undefined;
       this.sellingPercentage = undefined;
       this.buyingFromWholesalerPercentage = undefined;
@@ -313,15 +314,13 @@ categorySchema.pre('save', function(next) {
       
       // Handle resale categories
       if (!this.resaleEnabled) {
-        // Clear resale categories if resale is disabled
         this.resaleCategories = [];
       } else {
-        // Validate resale categories
         if (!this.resaleCategories || this.resaleCategories.length === 0) {
           throw new Error('At least one resale category is required when resale is enabled');
         }
         
-        // Trim category names and validate uniqueness
+        // Trim category names and validate uniqueness (case-insensitive)
         const categoryNames = new Set();
         this.resaleCategories.forEach(cat => {
           if (cat.itemCategory) {
@@ -333,18 +332,15 @@ categorySchema.pre('save', function(next) {
             categoryNames.add(lowerName);
           }
           
-          // Ensure wholesalerLabourPerGram is provided
           if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null) {
             cat.wholesalerLabourPerGram = 0;
           }
           
-          // Clear polish/repair fields if toggle is disabled
           if (!cat.polishRepairEnabled) {
             cat.polishRepairResalePercentage = undefined;
             cat.polishRepairCostPercentage = undefined;
             cat.polishRepairLabourPerGram = undefined;
           } else {
-            // Ensure polishRepairLabourPerGram is provided when enabled
             if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null) {
               cat.polishRepairLabourPerGram = 0;
             }
@@ -380,7 +376,6 @@ categorySchema.methods.getDescriptionForRole = function(userRole) {
   return '';
 };
 
-// Method to get all descriptions
 categorySchema.methods.getAllDescriptions = function() {
   return {
     universal: this.descriptions.universal || '',
@@ -391,7 +386,6 @@ categorySchema.methods.getAllDescriptions = function() {
   };
 };
 
-// Method to set descriptions
 categorySchema.methods.setDescriptions = function(descriptionsObj) {
   if (!descriptionsObj) return;
   
@@ -402,7 +396,6 @@ categorySchema.methods.setDescriptions = function(descriptionsObj) {
   });
 };
 
-// Static method to find categories by shop and type
 categorySchema.statics.findByShopAndType = function(shopId, type) {
   return this.find({
     shopId: shopId,
@@ -411,7 +404,6 @@ categorySchema.statics.findByShopAndType = function(shopId, type) {
   }).sort({ itemCategory: 1, code: 1 });
 };
 
-// Static method to find categories with filters
 categorySchema.statics.findWithFilters = function(filters) {
   const query = { isActive: true, ...filters };
   
@@ -426,19 +418,19 @@ categorySchema.statics.findWithFilters = function(filters) {
   });
 };
 
-// Static method to check code uniqueness
+// UPDATED: Check code uniqueness (case-insensitive)
 categorySchema.statics.isCodeUnique = async function(shopId, type, metal, itemCategory, code, excludeId = null) {
   const query = {
     shopId: shopId,
     type: type.toUpperCase(),
     metal: metal.toUpperCase(),
-    code: code.trim(),
+    codeLower: code.trim().toLowerCase(), // Use lowercase for comparison
     isActive: true
   };
   
-  // Add itemCategory only for NEW jewelry
+  // Add itemCategory only for NEW jewelry (case-insensitive)
   if (type.toUpperCase() === 'NEW') {
-    query.itemCategory = itemCategory ? itemCategory.trim() : undefined;
+    query.itemCategoryLower = itemCategory ? itemCategory.trim().toLowerCase() : undefined;
   }
   
   if (excludeId) {
@@ -449,7 +441,6 @@ categorySchema.statics.isCodeUnique = async function(shopId, type, metal, itemCa
   return !existingCategory;
 };
 
-// Virtual for category display name
 categorySchema.virtual('displayName').get(function() {
   if (this.type === 'NEW') {
     return `${this.type} ${this.metal} ${this.itemCategory} - ${this.code}`;
@@ -459,16 +450,16 @@ categorySchema.virtual('displayName').get(function() {
   return `${this.type} ${this.metal} - ${this.code}`;
 });
 
-// Virtual to get the effective purity
 categorySchema.virtual('effectivePurity').get(function() {
   return this.type === 'NEW' ? this.purityPercentage : this.truePurityPercentage;
 });
 
-// Transform output
 categorySchema.set('toJSON', {
   virtuals: true,
   transform: function(doc, ret) {
     delete ret.__v;
+    delete ret.codeLower; // Don't expose internal fields
+    delete ret.itemCategoryLower;
     return ret;
   }
 });

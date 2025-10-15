@@ -1,5 +1,3 @@
-
-// SuperAdminDashboard.jsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,43 +36,43 @@ export const SuperAdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
           <Store className="h-8 w-8 text-blue-600 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t('dashboard.shopManagement', 'Shop Management')}
           </h3>
           <p className="text-gray-600 text-sm">
-            {t('dashboard.superAdmin.shopDesc', 'Create and manage jewelry shops')}
+            {t('dashboard.superAdmin.shopDesc', 'Create and manage jewelry shops with subscription control')}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
           <Users className="h-8 w-8 text-green-600 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t('dashboard.userManagement', 'User Management')}
           </h3>
           <p className="text-gray-600 text-sm">
-            {t('dashboard.superAdmin.userDesc', 'Oversee shop administrators')}
+            {t('dashboard.superAdmin.userDesc', 'Oversee shop administrators and credentials')}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
           <TrendingUp className="h-8 w-8 text-purple-600 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {t('dashboard.analytics', 'Platform Analytics')}
+            {t('dashboard.subscriptions', 'Subscriptions')}
           </h3>
           <p className="text-gray-600 text-sm">
-            {t('dashboard.superAdmin.analyticsDesc', 'Monitor platform performance')}
+            {t('dashboard.superAdmin.subscriptionDesc', 'Manage shop subscriptions and renewals')}
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
           <Settings className="h-8 w-8 text-gray-600 mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {t('dashboard.settings', 'Platform Settings')}
           </h3>
           <p className="text-gray-600 text-sm">
-            {t('dashboard.superAdmin.settingsDesc', 'Configure system settings')}
+            {t('dashboard.superAdmin.settingsDesc', 'Configure system-wide settings')}
           </p>
         </div>
       </div>

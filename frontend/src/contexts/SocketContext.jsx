@@ -256,6 +256,26 @@ export const SocketProvider = ({ children }) => {
       console.log('SocketContext: Pong received:', data);
     });
 
+    // Shop deactivation event
+newSocket.on('shop-deactivated', (data) => {
+  console.log('SocketContext: Shop deactivated:', data);
+  
+  // Show alert to user
+  alert(`Your shop has been deactivated: ${data.message}`);
+  
+  // Log out user and redirect
+  window.dispatchEvent(new CustomEvent('shop-deactivated', { 
+    detail: data
+  }));
+  
+  // Force logout
+  setTimeout(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }, 1000);
+});
+
   }, [user?.id, user?._id, user?.shopId, user?.role, user?.username, isAuthenticated, createUserHash]);
 
   const pingSocket = useCallback(() => {

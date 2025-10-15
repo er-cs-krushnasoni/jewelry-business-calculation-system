@@ -28,26 +28,26 @@ const createCategoryValidation = [
     .isIn(['GOLD', 'SILVER'])
     .withMessage('Metal must be either GOLD or SILVER'),
     
-  body('code')
+    body('code')
     .notEmpty()
     .withMessage('Code is required')
-    .isLength({ min: 1, max: 20 })
-    .withMessage('Code must be between 1 and 20 characters')
+    .isLength({ min: 1, max: 100 }) 
+    .withMessage('Code must be between 1 and 100 characters')
     .trim(),
 
   // NEW jewelry specific validations
   body('itemCategory')
-    .custom((value, { req }) => {
-      if (req.body.type === 'NEW') {
-        if (!value || value.trim() === '') {
-          throw new Error('Item category is required for NEW jewelry');
-        }
-        if (value.trim().length < 1 || value.trim().length > 50) {
-          throw new Error('Item category must be between 1 and 50 characters');
-        }
+  .custom((value, { req }) => {
+    if (req.body.type === 'NEW') {
+      if (!value || value.trim() === '') {
+        throw new Error('Item category is required for NEW jewelry');
       }
-      return true;
-    }),
+      if (value.trim().length < 1 || value.trim().length > 100) { // CHANGED from 50 to 100
+        throw new Error('Item category must be between 1 and 100 characters');
+      }
+    }
+    return true;
+  }),
     
   body('purityPercentage')
     .custom((value, { req }) => {
@@ -305,18 +305,18 @@ const updateCategoryValidation = [
     .isIn(['GOLD', 'SILVER'])
     .withMessage('Metal must be either GOLD or SILVER'),
     
-  body('code')
+    body('code')
     .optional()
-    .isLength({ min: 1, max: 20 })
-    .withMessage('Code must be between 1 and 20 characters')
+    .isLength({ min: 1, max: 100 }) 
+    .withMessage('Code must be between 1 and 100 characters')
     .trim(),
 
   // NEW jewelry fields
   body('itemCategory')
-    .optional()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Item category must be between 1 and 50 characters')
-    .trim(),
+  .optional()
+  .isLength({ min: 1, max: 100 }) 
+  .withMessage('Item category must be between 1 and 100 characters')
+  .trim(),
     
   body('purityPercentage')
     .optional()

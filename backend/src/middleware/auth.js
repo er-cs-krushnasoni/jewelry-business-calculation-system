@@ -50,26 +50,29 @@ const authenticate = async (req, res, next) => {
         });
       }
 
-      // For shop users, check if shop is active (but don't populate the whole shop)
-      if (user.shopId) {
-        const Shop = require('../models/Shop');
-        const shop = await Shop.findById(user.shopId);
-        
-        if (!shop || !shop.isActive) {
-          return res.status(401).json({
-            success: false,
-            message: 'Shop account is deactivated'
-          });
-        }
-        
-        // Add shop info to user object for easy access without affecting shopId
-        user.shopInfo = {
-          _id: shop._id,
-          shopName: shop.shopName,
-          shopCode: shop.shopCode,
-          isActive: shop.isActive
-        };
-      }
+      // For shop users, check if shop is active
+if (user.shopId) {
+  const Shop = require('../models/Shop');
+  const shop = await Shop.findById(user.shopId);
+  
+  if (!shop || !shop.isActive) {
+    return res.status(401).json({
+      success: false,
+      message: 'Shop account is deactivated',
+      reason: shop?.deactivation?.reason || 'unknown',
+      deactivatedAt: shop?.deactivation?.deactivatedAt
+    });
+  }
+  
+  // Add shop info to user object
+  user.shopInfo = {
+    _id: shop._id,
+    shopName: shop.shopName,
+    shopCode: shop.shopCode,
+    isActive: shop.isActive,
+    subscriptionStatus: shop.getSubscriptionStatus() // NEW
+  };
+}
 
       // Attach user to request (shopId remains as ObjectId)
       req.user = user;

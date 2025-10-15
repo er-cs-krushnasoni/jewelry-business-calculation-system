@@ -1,0 +1,500 @@
+{
+  "app": {
+    "title": "Jewelry Manager",
+    "version": "Jewelry Manager v1.0",
+    "brand": "Jewelry Manager"
+  },
+  "nav": {
+    "calculator": "Calculator",
+    "shops": "Shop Management",
+    "dashboard": "Dashboard",
+    "userManagement": "User Management",
+    "categories": "Categories",
+    "rates": "Rate Management",
+    "reports": "Reports",
+    "reports_alt": "Rate Tables",
+    "settings": "Settings",
+    "noItems": "No navigation items available"
+  },
+  "header": {
+    "shop": "Shop:",
+    "profile": "Profile Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "user": {
+    "platform": "Platform Admin",
+    "username": "Username",
+    "password": "Password",
+    "role": "Role",
+    "createdAt": "Created"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "subtitle": "Welcome back to Jewelry Manager",
+      "username": "Username",
+      "password": "Password",
+      "signin": "Sign In",
+      "signingin": "Signing In...",
+      "error": "Login failed. Please check your credentials."
+    },
+    "logout": "Logout"
+  },
+  "category": {
+    "management": {
+      "title": "Category Management",
+      "subtitle": "Manage NEW and OLD jewelry categories with descriptions and settings",
+      "addCategory": "Add Category",
+      "createNew": "Create New Category",
+      "edit": "Edit Category",
+      "delete": "Delete Category",
+      "success": {
+        "created": "Category created successfully",
+        "updated": "Category updated successfully",
+        "deleted": "Category deleted successfully"
+      },
+      "error": {
+        "loadFailed": "Failed to load categories",
+        "createFailed": "Failed to create category",
+        "updateFailed": "Failed to update category",
+        "deleteFailed": "Failed to delete category",
+        "confirmDelete": "Are you sure you want to delete category"
+      },
+      "filters": {
+        "title": "Filters",
+        "type": "Type",
+        "metal": "Metal",
+        "itemCategory": "Item Category",
+        "search": "Search codes, categories...",
+        "reset": "Reset",
+        "allTypes": "All Types",
+        "allMetals": "All Metals",
+        "allCategories": "All Categories"
+      },
+      "table": {
+        "codeDetails": "Code & Details",
+        "typeAndMetal": "Type & Metal",
+        "category": "Category",
+        "purity": "Purity %",
+        "keyPercentage": "Key %",
+        "settings": "Settings",
+        "actions": "Actions",
+        "noCategoriesFound": "No categories found",
+        "createFirst": "Create your first category to get started",
+        "noMatches": "No categories match your current filters",
+        "loading": "Loading categories..."
+      },
+      "types": {
+        "new": "NEW",
+        "old": "OLD"
+      },
+      "metals": {
+        "gold": "Gold",
+        "silver": "Silver"
+      },
+      "resale": {
+        "on": "Resale ON",
+        "off": "Resale OFF",
+        "standard": "Standard"
+      }
+    }
+  },
+  "users": {
+    "management": {
+      "title": "User Management",
+      "subtitle": "Manage shop users and their credentials",
+      "addNewUser": "Add New User",
+      "createNew": "Create New User",
+      "yourAccount": "Your Account",
+      "shopUsers": "Shop Users",
+      "shopAdmin": "Shop Admin",
+      "availableRoles": "Available Roles",
+      "success": {
+        "created": "User created successfully",
+        "updated": "Credentials updated successfully",
+        "deleted": "User deleted successfully"
+      },
+      "error": {
+        "loadFailed": "Failed to load users",
+        "createFailed": "Failed to create user",
+        "updateFailed": "Failed to update credentials",
+        "deleteFailed": "Failed to delete user",
+        "allFieldsRequired": "All fields are required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "passwordMismatch": "Passwords do not match",
+        "oldPasswordRequired": "Old password is required to change your password",
+        "usernameOrPassword": "Provide username or password to update",
+        "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone."
+      },
+      "form": {
+        "username": "Username",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "newPassword": "New Password",
+        "oldPassword": "Old Password",
+        "oldPasswordLabel": "Old Password (Required for password change) *",
+        "newPasswordLabel": "New Password (Leave empty to keep current)",
+        "confirmPasswordLabel": "Confirm New Password *",
+        "role": "Role",
+        "passwordMinHint": "(min 6 characters)",
+        "leaveEmpty": "(Leave empty to keep current)",
+        "selectRole": "Select a role",
+        "passwordMatch": "Passwords match",
+        "passwordNotMatch": "Passwords do not match",
+        "required": "Required"
+      },
+      "buttons": {
+        "create": "Create User",
+        "save": "Save",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "saveChanges": "Save Changes",
+        "viewPassword": "View Password",
+        "hide": "Hide",
+        "yes": "Yes, Delete",
+        "createButton": "Create User",
+        "available": "Available",
+        "taken": "Taken"
+      },
+      "table": {
+        "noUsers": "No shop users yet",
+        "createFirst": "Click \"Add New User\" to create your first user",
+        "loading": "Loading users..."
+      },
+      "roles": {
+        "manager": "Manager",
+        "proClient": "Pro Client",
+        "client": "Client",
+        "shopAdmin": "Shop Admin"
+      }
+    }
+  },
+  "rateTable": {
+    "title": "Rate Tables",
+    "subtitle": "Manage and view rate tables",
+    "editTable": "Edit Table",
+    "createTable": "Create Table",
+    "rateTableFormulas": "Manage rate tables with formulas",
+    "viewFormulas": "View rate tables with formulas",
+    "viewOnly": "View rate tables",
+    "success": {
+      "updated": "Table updated successfully"
+    },
+    "error": {
+      "loadFailed": "Failed to load rate tables",
+      "saveFailed": "Failed to save table",
+      "valueGreaterThanZero": "Value per gram must be greater than 0",
+      "percentageGreaterThanZero": "All percentage values must be greater than 0"
+    },
+    "buttons": {
+      "edit": "Edit Table",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "addRow": "Add Row",
+      "addColumn": "Add Column",
+      "saving": "Saving..."
+    },
+    "tabs": {
+      "gold": "Gold Table",
+      "silver": "Silver Table"
+    },
+    "rates": {
+      "currentLive": "Current Live Rates",
+      "goldBuy": "Gold Buy:",
+      "goldSell": "Gold Sell:",
+      "silverBuy": "Silver Buy:",
+      "silverSell": "Silver Sell:",
+      "perGram": "/gram",
+      "perKg": "/kg"
+    },
+    "table": {
+      "rowColumn": "Row / Column",
+      "rounding": "Enable Rounding",
+      "roundDirection": "Round Direction",
+      "roundingType": "Rounding Type",
+      "roundHigh": "Round High",
+      "roundLow": "Round Low",
+      "decimalsOnly": "Decimals Only",
+      "nearest50": "Nearest 5 or 0",
+      "lastDigit0": "Last Digit to 0",
+      "buying": "Buying",
+      "selling": "Selling",
+      "buy": "Buy",
+      "sell": "Sell",
+      "noTableData": "No Table Data",
+      "adminCreateTable": "Click \"Edit Table\" to start creating your rate table",
+      "adminNeeded": "Admin needs to create the rate table"
+    },
+    "formula": {
+      "title": "How Rate Tables Work:",
+      "baseFormula": "Formula: (Live Rate ÷",
+      "goldDivisor": "10",
+      "silverDivisor": "1000",
+      "formulaRest": ") × Value Per Gram × Percentage ÷ 100",
+      "roundingRule": "Column-based rounding rules apply to all cells in that column",
+      "roundingDisplay": "When rounding is enabled, values display as whole numbers (no decimals)",
+      "autoUpdate": "Tables update automatically when live rates change",
+      "adminEdit": "Only admins can edit table structure and formulas",
+      "valuePerGram": "Rate per",
+      "grams": "gram",
+      "gramPlural": "grams"
+    }
+  },
+  "calculator": {
+    "title": "Calculator",
+    "newJewelry": "New Jewelry",
+    "oldJewelry": "Old Jewelry",
+    "new": {
+      "title": "NEW Jewelry Calculator",
+      "buttons": {
+        "resetAll": "Reset All",
+        "calculate": "Calculate",
+        "calculating": "Calculating...",
+        "clear": "Clear"
+      },
+      "steps": {
+        "step1": "Step 1:",
+        "step2": "Step 2:",
+        "step3": "Step 3:",
+        "step4": "Step 4:",
+        "selectMetal": "Select Metal Type",
+        "filterCategory": "Filter by Item Category (Optional)",
+        "selectCode": "Select Code/Stamp",
+        "enterWeight": "Enter Weight (grams)"
+      },
+      "metal": {
+        "gold": "Gold",
+        "silver": "Silver",
+        "sell": "Sell:",
+        "per10g": "/10g",
+        "perKg": "/kg"
+      },
+      "category": {
+        "allCategories": "All Categories",
+        "loading": "Loading categories...",
+        "noAvailable": "No categories available",
+        "notFound": "No categories found",
+        "noMatchFilter": "Try selecting a different item category.",
+        "contactAdmin": "Please contact your administrator to add categories."
+      },
+      "descriptions": {
+        "universal": "Universal Description",
+        "roleSpecific": "Role-Specific Description"
+      },
+      "weight": {
+        "placeholder": "0.00"
+      },
+      "results": {
+        "title": "Calculation Results",
+        "finalAmount": "Final Selling Amount",
+        "for": "for",
+        "of": "of",
+        "roundedFrom": "(Rounded from",
+        "calculatedAt": "Calculated at:"
+      },
+      "sellingRate": {
+        "title": "Total Selling Rate Per Gram",
+        "breakdown": "Selling Rate Breakdown",
+        "ratePerGram": "Rate Per Gram",
+        "purity": "purity",
+        "makingCharges": "Making Charges Per Gram",
+        "ofRate": "of rate",
+        "total": "Total Selling Rate Per Gram",
+        "rate": "rate"
+      },
+      "margin": {
+        "title": "Margin Amount",
+        "ofSelling": "of selling amount",
+        "breakdown": "Margin Breakdown",
+        "purchaseFromWholesaler": "Purchase from Wholesaler Amount",
+        "baseCost": "Base Cost:",
+        "labourCharges": "Labour Charges:",
+        "perGram": "per gram",
+        "actualValue": "Actual Value According to Purity",
+        "formula": "Calculation Formula",
+        "actualValuePurity": "Actual Value (Purity)",
+        "wholesalerMargin": "Wholesaler Margin",
+        "wastage": "Wastage:",
+        "labour": "Labour:",
+        "ourMargin": "Our Margin",
+        "finalSellingAmount": "Final Selling Amount"
+      },
+      "toast": {
+        "selectCategoryWeight": "Please select a category and enter weight",
+        "validWeight": "Please enter a valid weight",
+        "calculationComplete": "Calculation completed",
+        "calculationFailed": "Calculation failed",
+        "categoryNotFound": "Category not found. It may have been deleted.",
+        "categoriesLoadFailed": "Failed to load categories"
+      }
+    },
+    "old": {
+      "title": "OLD Jewelry Calculator",
+      "buttons": {
+        "resetAll": "Reset All",
+        "calculate": "Calculate Value",
+        "calculating": "Calculating...",
+        "clear": "Clear"
+      },
+      "steps": {
+        "step1": "Step 1:",
+        "step2": "Step 2:",
+        "step3": "Step 3:",
+        "step4": "Step 4:",
+        "step5": "Step 5:",
+        "selectMetal": "Select Metal Type",
+        "selectSource": "Select Jewelry Source",
+        "selectCode": "Select Code/Stamp",
+        "selectCategoryType": "Select Category Type",
+        "enterWeight": "Enter Weight (grams)"
+      },
+      "metal": {
+        "gold": "Gold",
+        "silver": "Silver",
+        "buy": "Buy:"
+      },
+      "source": {
+        "own": "Own",
+        "ownDescription": "Shop's own jewelry",
+        "other": "Other",
+        "otherDescription": "Customer's jewelry",
+        "selected": "✓ Selected"
+      },
+      "category": {
+        "loading": "Loading categories...",
+        "noAvailable": "No categories available",
+        "noAvailableDescription": "No {{metal}} OLD jewelry categories found. Please contact your administrator to add categories.",
+        "resaleCategories": "resale categories",
+        "resaleCategory": "resale category",
+        "polishRepair": "+ Polish/Repair",
+        "selected": "✓ Selected"
+      },
+      "descriptions": {
+        "universal": "Universal Description",
+        "roleSpecific": "Role-Specific Description"
+      },
+      "weight": {
+        "placeholder": "0.00"
+      },
+      "results": {
+        "title": "Calculation Results",
+        "source": "Source:",
+        "category": "Category:",
+        "calculatedAt": "Calculated at:"
+      },
+      "scrapValue": {
+        "title": "Scrap Value",
+        "totalValue": "Total Scrap Buying Value",
+        "for": "for",
+        "of": "of",
+        "roundedFrom": "(Rounded from",
+        "marginTitle": "Scrap Margin",
+        "marginPercentage": "of Scrap Value",
+        "marginBreakdown": "Margin Breakdown",
+        "actualValueByPurity": "Actual Value by Purity",
+        "totalScrapValue": "Total Scrap Buying Value",
+        "calculationFormula": "Calculation Formula"
+      },
+      "resale": {
+        "title": "Resale Options",
+        "directResale": "Direct Resale (Ready to Sell)",
+        "directResaleValue": "Direct Resale Value",
+        "directResaleMargin": "Direct Resale Margin",
+        "directResaleMarginPercentage": "of Total Amount",
+        "polishRepair": "Polish/Repair Resale",
+        "finalPolishRepairValue": "Final Polish/Repair Value",
+        "afterWeightLoss": "(after {{percentage}}% weight loss)",
+        "afterPolishRepair": "after polish/repair",
+        "polishRepairNote": "(Resale Value: ₹{{resaleValue}} - Polish Labour: ₹{{labourCost}})",
+        "polishRepairMargin": "Polish/Repair Margin",
+        "polishRepairMarginPercentage": "of Final Value",
+        "notAvailable": "Not Available",
+        "notAvailableMessage": "Polish/Repair resale is not enabled for this category"
+      },
+      "marginBreakdown": {
+        "title": "Margin Breakdown",
+        "wholesalerCost": "Wholesaler Cost",
+        "baseCost": "Base Cost",
+        "labourCharges": "Labour Charges: ₹{{rate}}/g × {{weight}}g",
+        "wholesalerLabour": "Wholesaler Labour: ₹{{rate}}/g × {{weight}}g",
+        "directResaleValue": "Direct Resale Value",
+        "polishRepairResaleValue": "Polish/Repair Resale Value",
+        "polishRepairLabour": "Polish/Repair Labour: ₹{{rate}}/g × {{weight}}g",
+        "finalValue": "Final Value:",
+        "netMargin": "Net Margin After Polish/Repair:",
+        "directResaleMargin": "Direct Resale Margin:"
+      },
+      "weightAdjustment": {
+        "title": "Weight Adjustment",
+        "original": "Original",
+        "loss": "Loss",
+        "effective": "Effective"
+      },
+      "toast": {
+        "selectAllFields": "Please select metal, source, category and enter weight",
+        "selectResaleCategory": "Please select a resale category type",
+        "validWeight": "Please enter a valid weight",
+        "calculationComplete": "Calculation completed",
+        "calculationFailed": "Calculation failed",
+        "categoryNotFound": "Category not found. It may have been deleted.",
+        "categoriesLoadFailed": "Failed to load categories"
+      }
+    }
+  },
+  "common": {
+    "actions": {
+      "add": "Add",
+      "create": "Create",
+      "edit": "Edit",
+      "update": "Update",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close",
+      "retry": "Retry",
+      "back": "Back",
+      "next": "Next",
+      "confirm": "Confirm",
+      "yes": "Yes",
+      "no": "No",
+      "loading": "Loading",
+      "search": "Search",
+      "filter": "Filter",
+      "reset": "Reset",
+      "apply": "Apply"
+    },
+    "status": {
+      "loading": "Loading...",
+      "success": "Success",
+      "error": "Error",
+      "warning": "Warning",
+      "info": "Info"
+    },
+    "messages": {
+      "errorLoadingData": "Error loading data",
+      "tryAgain": "Please try again",
+      "notFound": "Not found",
+      "noData": "No data available",
+      "confirmAction": "Are you sure?",
+      "changes": "Changes have been made"
+    },
+    "units": {
+      "grams": "grams",
+      "gram": "gram",
+      "per10g": "/10g",
+      "perKg": "/kg"
+    },
+    "required": "*"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "redirecting": "Redirecting to Shop Management...",
+    "redirectingCalculator": "Redirecting to Calculator..."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language"
+  }
+}

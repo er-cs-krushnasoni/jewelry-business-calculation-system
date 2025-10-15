@@ -4,6 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import Button from '../ui/Button';
 import RateDisplay from '../rates/RateDisplay';
+import SubscriptionCountdown from '../subscription/SubscriptionCountdown';
+import ProfileCredentialsModal from '../superadmin/ProfileCredentialsModal'; // ADD THIS IMPORT
+import superAdminService from '../../services/superAdminService'; // ADD THIS IMPORT
+import toast from 'react-hot-toast'; // ADD THIS IMPORT
 import { 
   Menu, 
   X, 
@@ -12,15 +16,19 @@ import {
   Users, 
   Settings, 
   BarChart3,
-  Globe
+  Globe,
+  Lock // ADD THIS IMPORT
 } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, getSubscriptionStatus } = useAuth();
   const { language, setLanguage, t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false); // ADD THIS STATE
+
+  const subscriptionStatus = getSubscriptionStatus();
 
   const handleLogout = () => {
     logout();
@@ -38,6 +46,22 @@ const Header = () => {
   const navigateAndClose = (path) => {
     navigate(path);
     closeMobileMenu();
+  };
+
+  // ADD THIS FUNCTION - Handle credentials update
+  const handleUpdateCredentials = async (credentialsData) => {
+    try {
+      const response = await superAdminService.updateOwnCredentials(credentialsData);
+      if (response.data.success) {
+        toast.success(response.data.message);
+        // Optional: You may want to logout and re-login if username changed
+        // Or refresh user data from AuthContext
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to update credentials';
+      toast.error(message);
+      throw error;
+    }
   };
 
   // Navigation items based on user role
@@ -86,12 +110,6 @@ const Header = () => {
           path: '/super-admin/shops',
           icon: Settings,
           current: location.pathname.startsWith('/super-admin/shops')
-        },
-        {
-          name: t('nav.system', 'System Overview'),
-          path: '/super-admin/system',
-          icon: BarChart3,
-          current: location.pathname.startsWith('/super-admin/system')
         }
       );
     }
@@ -111,24 +129,28 @@ const Header = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo and Brand */}
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
                 <Calculator className="h-8 w-8 text-blue-600" />
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-gray-900">
-                  {/* {t('brand.name', 'Jewelry Calculator')} */}
-                  {user.shopName}
+                  {user?.shopName ||  'Jewelry Calculator'}
                 </h1>
-                {/* {user?.shopName && (
-                  <p className="text-sm text-gray-600">{user.shopName}</p>
-                )} */}
               </div>
             </div>
 
-            {/* Rate Display - Desktop */}
-            <div className="hidden md:flex flex-1 justify-center px-4">
-              <RateDisplay className="max-w-4xl" />
+            {/* Rate Display and Subscription - Desktop */}
+            <div className="hidden md:flex flex-1 justify-center items-center gap-4 px-4">
+              <RateDisplay className="max-w-2xl" />
+              
+              {/* Subscription Badge - Only for shop admin and manager */}
+              {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
+                <SubscriptionCountdown 
+                  subscriptionStatus={subscriptionStatus}
+                  compact={true}
+                />
+              )}
             </div>
 
             {/* Desktop Navigation */}
@@ -163,7 +185,7 @@ const Header = () => {
                 <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
 
-              {/* User Info and Logout */}
+              {/* User Info and Actions */}
               <div className="flex items-center space-x-3 border-l border-gray-300 pl-4">
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">{user?.username}</p>
@@ -171,9 +193,24 @@ const Header = () => {
                     {user?.role?.replace('_', ' ')}
                   </p>
                 </div>
+
+                {/* Update Credentials Button - Only for Super Admin */}
+                {user?.role === 'super_admin' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCredentialsModal(true)}
+                    className="flex items-center space-x-2"
+                    title="Update your credentials"
+                  >
+                    <Lock size={16} />
+                  </Button>
+                )}
+
+                {/* Logout Button */}
                 <Button
                   variant="outline"
-                  size="small"
+                  size="sm"
                   onClick={handleLogout}
                   className="flex items-center space-x-2"
                 >
@@ -198,9 +235,19 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Rate Display - Mobile (below header) */}
-          <div className="md:hidden border-t border-gray-200 py-2">
+          {/* Rate Display and Subscription - Mobile (below header) */}
+          <div className="md:hidden border-t border-gray-200 py-2 space-y-2">
             <RateDisplay className="justify-center" />
+            
+            {/* Subscription Badge - Mobile */}
+            {subscriptionStatus && user?.role !== 'super_admin' && (
+              <div className="flex justify-center">
+                <SubscriptionCountdown 
+                  subscriptionStatus={subscriptionStatus}
+                  compact={true}
+                />
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -237,11 +284,11 @@ const Header = () => {
               >
                 <option value="en">English</option>
                 <option value="gu">ગુજરાતી</option>
-                <option value="hi">हिंदी</option>
+                <option value="hi">हिંदी</option>
               </select>
             </div>
 
-            {/* User Info and Logout */}
+            {/* User Info and Actions - Mobile */}
             <div className="border-t border-gray-300 pt-4 pb-3">
               <div className="px-3 mb-3">
                 <p className="text-base font-medium text-gray-900">{user?.username}</p>
@@ -252,6 +299,22 @@ const Header = () => {
                   <p className="text-sm text-blue-600 mt-1">{user.shopName}</p>
                 )}
               </div>
+
+              {/* Update Credentials Button - Mobile, Only for Super Admin */}
+              {user?.role === 'super_admin' && (
+                <button
+                  onClick={() => {
+                    setShowCredentialsModal(true);
+                    closeMobileMenu();
+                  }}
+                  className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors mb-2"
+                >
+                  <Lock className="w-5 h-5 mr-3" />
+                  Update Credentials
+                </button>
+              )}
+
+              {/* Logout Button - Mobile */}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
@@ -262,6 +325,15 @@ const Header = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Credentials Modal - Only for Super Admin */}
+      {showCredentialsModal && user?.role === 'super_admin' && (
+        <ProfileCredentialsModal
+          onClose={() => setShowCredentialsModal(false)}
+          onSubmit={handleUpdateCredentials}
+          currentUsername={user.username}
+        />
       )}
     </>
   );

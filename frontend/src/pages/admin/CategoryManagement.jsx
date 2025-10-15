@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Filter, Search, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import Modal from '../../components/ui/Modal';
+import { LegacyModal } from '../../components/ui/Modal';
 import ExtendedJewelryForm from '../../components/categories/ExtendedJewelryForm';
 import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
@@ -55,11 +55,11 @@ const CategoryManagement = () => {
       if (response.data.success) {
         setCategories(response.data.data);
       } else {
-        throw new Error(response.data.message || 'Failed to load categories');
+        throw new Error(response.data.message || t('category.management.error.loadFailed'));
       }
     } catch (error) {
       console.error('Load categories error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to load categories';
+      const errorMessage = error.response?.data?.message || t('category.management.error.loadFailed');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -87,18 +87,18 @@ const CategoryManagement = () => {
       const response = await api.post('/categories', categoryData);
       
       if (response.data.success) {
-        toast.success('Category created successfully');
+        toast.success(t('category.management.success.created'));
         setShowCreateModal(false);
         loadCategories();
         if (categoryData.type === 'NEW' || !filters.type) {
           loadItemCategories();
         }
       } else {
-        throw new Error(response.data.message || 'Failed to create category');
+        throw new Error(response.data.message || t('category.management.error.createFailed'));
       }
     } catch (error) {
       console.error('Create category error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to create category';
+      const errorMessage = error.response?.data?.message || t('category.management.error.createFailed');
       toast.error(errorMessage);
       throw error; // Re-throw to let form handle it
     }
@@ -109,7 +109,7 @@ const CategoryManagement = () => {
       const response = await api.put(`/categories/${editingCategory._id}`, categoryData);
       
       if (response.data.success) {
-        toast.success('Category updated successfully');
+        toast.success(t('category.management.success.updated'));
         setShowEditModal(false);
         setEditingCategory(null);
         loadCategories();
@@ -117,18 +117,18 @@ const CategoryManagement = () => {
           loadItemCategories();
         }
       } else {
-        throw new Error(response.data.message || 'Failed to update category');
+        throw new Error(response.data.message || t('category.management.error.updateFailed'));
       }
     } catch (error) {
       console.error('Update category error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to update category';
+      const errorMessage = error.response?.data?.message || t('category.management.error.updateFailed');
       toast.error(errorMessage);
       throw error; // Re-throw to let form handle it
     }
   };
 
   const handleDeleteCategory = async (categoryId, categoryName) => {
-    if (!window.confirm(`Are you sure you want to delete category "${categoryName}"?`)) {
+    if (!window.confirm(`${t('category.management.error.confirmDelete')} "${categoryName}"?`)) {
       return;
     }
 
@@ -136,15 +136,15 @@ const CategoryManagement = () => {
       const response = await api.delete(`/categories/${categoryId}`);
       
       if (response.data.success) {
-        toast.success('Category deleted successfully');
+        toast.success(t('category.management.success.deleted'));
         loadCategories();
         loadItemCategories();
       } else {
-        throw new Error(response.data.message || 'Failed to delete category');
+        throw new Error(response.data.message || t('category.management.error.deleteFailed'));
       }
     } catch (error) {
       console.error('Delete category error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to delete category';
+      const errorMessage = error.response?.data?.message || t('category.management.error.deleteFailed');
       toast.error(errorMessage);
     }
   };
@@ -201,7 +201,7 @@ const CategoryManagement = () => {
       <div className="p-6">
         <div className="text-center">
           <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">Loading categories...</p>
+          <p className="mt-4 text-gray-600">{t('category.management.table.loading')}</p>
         </div>
       </div>
     );
@@ -213,10 +213,10 @@ const CategoryManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Category Management
+            {t('category.management.title')}
           </h1>
           <p className="text-gray-600 mt-1">
-            Manage NEW and OLD jewelry categories with descriptions and settings
+            {t('category.management.subtitle')}
           </p>
         </div>
         <Button
@@ -224,7 +224,7 @@ const CategoryManagement = () => {
           className="flex items-center gap-2"
         >
           <Plus size={20} />
-          Add Category
+          {t('category.management.addCategory')}
         </Button>
       </div>
 
@@ -233,14 +233,14 @@ const CategoryManagement = () => {
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-gray-900 flex items-center gap-2">
             <Filter size={18} />
-            Filters
+            {t('category.management.filters.title')}
           </h3>
           <Button
             variant="outline"
             size="sm"
             onClick={resetFilters}
           >
-            Reset
+            {t('category.management.filters.reset')}
           </Button>
         </div>
 
@@ -248,32 +248,32 @@ const CategoryManagement = () => {
           {/* Type Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Type
+              {t('category.management.filters.type')}
             </label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Types</option>
-              <option value="NEW">NEW</option>
-              <option value="OLD">OLD</option>
+              <option value="">{t('category.management.filters.allTypes')}</option>
+              <option value="NEW">{t('category.management.types.new')}</option>
+              <option value="OLD">{t('category.management.types.old')}</option>
             </select>
           </div>
 
           {/* Metal Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Metal
+              {t('category.management.filters.metal')}
             </label>
             <select
               value={filters.metal}
               onChange={(e) => handleFilterChange('metal', e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Metals</option>
-              <option value="GOLD">Gold</option>
-              <option value="SILVER">Silver</option>
+              <option value="">{t('category.management.filters.allMetals')}</option>
+              <option value="GOLD">{t('category.management.metals.gold')}</option>
+              <option value="SILVER">{t('category.management.metals.silver')}</option>
             </select>
           </div>
 
@@ -281,14 +281,14 @@ const CategoryManagement = () => {
           {(filters.type === 'NEW' || !filters.type) && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Category
+                {t('category.management.filters.itemCategory')}
               </label>
               <select
                 value={filters.itemCategory}
                 onChange={(e) => handleFilterChange('itemCategory', e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">All Categories</option>
+                <option value="">{t('category.management.filters.allCategories')}</option>
                 {itemCategories.map(category => (
                   <option key={category} value={category}>
                     {category}
@@ -301,13 +301,13 @@ const CategoryManagement = () => {
           {/* Search Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search
+              {t('common.actions.search')}
             </label>
             <div className="relative">
               <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search codes, categories..."
+                placeholder={t('category.management.filters.search')}
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
                 className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -322,7 +322,7 @@ const CategoryManagement = () => {
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
           <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
           <div>
-            <h4 className="font-medium text-red-800">Error loading categories</h4>
+            <h4 className="font-medium text-red-800">{t('common.messages.errorLoadingData')}</h4>
             <p className="text-red-700">{error}</p>
           </div>
           <Button
@@ -331,7 +331,7 @@ const CategoryManagement = () => {
             onClick={loadCategories}
             className="ml-auto"
           >
-            Retry
+            {t('common.actions.retry')}
           </Button>
         </div>
       )}
@@ -341,7 +341,7 @@ const CategoryManagement = () => {
         {loading ? (
           <div className="p-8 text-center">
             <LoadingSpinner />
-            <p className="mt-2 text-gray-600">Loading...</p>
+            <p className="mt-2 text-gray-600">{t('common.status.loading')}</p>
           </div>
         ) : filteredCategories.length === 0 ? (
           <div className="p-8 text-center">
@@ -349,12 +349,12 @@ const CategoryManagement = () => {
               <AlertCircle size={48} className="mx-auto" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No categories found
+              {t('category.management.table.noCategoriesFound')}
             </h3>
             <p className="text-gray-600 mb-4">
               {categories.length === 0 
-                ? "Create your first category to get started"
-                : "No categories match your current filters"
+                ? t('category.management.table.createFirst')
+                : t('category.management.table.noMatches')
               }
             </p>
             {categories.length === 0 && (
@@ -362,7 +362,7 @@ const CategoryManagement = () => {
                 onClick={() => setShowCreateModal(true)}
                 className="mx-auto"
               >
-                Create First Category
+                {t('category.management.addCategory')}
               </Button>
             )}
           </div>
@@ -372,25 +372,25 @@ const CategoryManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Code & Details
+                    {t('category.management.table.codeDetails')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type & Metal
+                    {t('category.management.table.typeAndMetal')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    {t('category.management.table.category')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Purity %
+                    {t('category.management.table.purity')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Key %
+                    {t('category.management.table.keyPercentage')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Settings
+                    {t('category.management.table.settings')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    {t('category.management.table.actions')}
                   </th>
                 </tr>
               </thead>
@@ -414,14 +414,14 @@ const CategoryManagement = () => {
                             ? 'bg-green-100 text-green-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>
-                          {category.type}
+                          {category.type === 'NEW' ? t('category.management.types.new') : t('category.management.types.old')}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           category.metal === 'GOLD' 
                             ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {category.metal}
+                          {category.metal === 'GOLD' ? t('category.management.metals.gold') : t('category.management.metals.silver')}
                         </span>
                       </div>
                     </td>
@@ -435,7 +435,7 @@ const CategoryManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {category.type === 'NEW' && category.sellingPercentage && (
                         <span className="text-green-600 font-medium">
-                          Sell: {category.sellingPercentage}%
+                           {category.sellingPercentage}%
                         </span>
                       )}
                       {category.type === 'OLD' && (
@@ -455,18 +455,18 @@ const CategoryManagement = () => {
                           {category.resaleEnabled ? (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                               <Eye size={12} className="mr-1" />
-                              Resale ON
+                              {t('category.management.resale.on')}
                             </span>
                           ) : (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                               <EyeOff size={12} className="mr-1" />
-                              Resale OFF
+                              {t('category.management.resale.off')}
                             </span>
                           )}
                         </div>
                       )}
                       {category.type === 'NEW' && (
-                        <span className="text-xs text-gray-500">Standard</span>
+                        <span className="text-xs text-gray-500">{t('category.management.resale.standard')}</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -477,14 +477,14 @@ const CategoryManagement = () => {
                             setShowEditModal(true);
                           }}
                           className="text-blue-600 hover:text-blue-700 p-1 rounded"
-                          title="Edit Category"
+                          title={t('common.actions.edit')}
                         >
                           <Edit size={16} />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(category._id, category.code)}
                           className="text-red-600 hover:text-red-700 p-1 rounded"
-                          title="Delete Category"
+                          title={t('common.actions.delete')}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -499,26 +499,26 @@ const CategoryManagement = () => {
       </div>
 
       {/* Create Category Modal */}
-      <Modal
+      <LegacyModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        title="Create New Category"
+        title={t('category.management.createNew')}
         size="large"
       >
         <ExtendedJewelryForm
           onSubmit={handleCreateCategory}
           onCancel={() => setShowCreateModal(false)}
         />
-      </Modal>
+      </LegacyModal>
 
       {/* Edit Category Modal */}
-      <Modal
+      <LegacyModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
           setEditingCategory(null);
         }}
-        title="Edit Category"
+        title={t('category.management.edit')}
         size="large"
       >
         {editingCategory && (
@@ -532,7 +532,7 @@ const CategoryManagement = () => {
             isEditing
           />
         )}
-      </Modal>
+      </LegacyModal>
     </div>
   );
 };

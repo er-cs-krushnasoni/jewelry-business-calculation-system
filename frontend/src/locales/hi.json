@@ -1,0 +1,442 @@
+{
+    "app": {
+      "title": "ज्वेलरी मैनेजर",
+      "version": "ज्वेलरी मैनेजर v1.0",
+      "brand": "ज्वेलरी मैनेजर"
+    },
+  
+    "nav": {
+      "calculator": "कैलकुलेटर",
+      "shops": "दुकान प्रबंधन",
+      "dashboard": "डैशबोर्ड",
+      "userManagement": "यूजर प्रबंधन",
+      "categories": "कैटेगरी",
+      "rates": "रेट प्रबंधन",
+      "reports": "रिपोर्ट्स",
+      "reports_alt": "रेट टेबल",
+      "settings": "सेटिंग्स",
+      "noItems": "नेविगेशन आइटम उपलब्ध नहीं हैं",
+      "users": "यूजर्स मैनेज करें",
+      "system": "सिस्टम ओवरव्यू"
+    },
+  
+    "header": {
+      "shop": "दुकान:",
+      "profile": "प्रोफाइल सेटिंग्स",
+      "logout": "लॉगआउट",
+      "language": "भाषा"
+    },
+  
+    "user": {
+      "platform": "प्लेटफॉर्म एडमिन",
+      "username": "यूजरनेम",
+      "password": "पासवर्ड",
+      "role": "रोल",
+      "createdAt": "बनाया गया"
+    },
+  
+    "auth": {
+      "login": {
+        "title": "साइन इन",
+        "subtitle": "ज्वेलरी मैनेजर में स्वागत है",
+        "username": "यूजरनेम",
+        "password": "पासवर्ड",
+        "signin": "साइन इन",
+        "signingin": "साइन इन हो रहा है...",
+        "error": "लॉगिन विफल। कृपया अपनी जानकारी जांचें।"
+      },
+      "logout": "लॉगआउट"
+    },
+  
+    "category": {
+      "management": {
+        "title": "कैटेगरी प्रबंधन",
+        "subtitle": "विवरण और सेटिंग्स के साथ नए और पुराने आभूषणों की कैटेगरी मैनेज करें",
+        "addCategory": "कैटेगरी जोड़ें",
+        "createNew": "नई कैटेगरी बनाएं",
+        "edit": "कैटेगरी संपादित करें",
+        "delete": "कैटेगरी हटाएं",
+        "success": {
+          "created": "कैटेगरी सफलतापूर्वक बनाई गई",
+          "updated": "कैटेगरी सफलतापूर्वक अपडेट की गई",
+          "deleted": "कैटेगरी सफलतापूर्वक हटाई गई"
+        },
+        "error": {
+          "loadFailed": "कैटेगरी लोड करने में विफल",
+          "createFailed": "कैटेगरी बनाने में विफल",
+          "updateFailed": "कैटेगरी अपडेट करने में विफल",
+          "deleteFailed": "कैटेगरी हटाने में विफल",
+          "confirmDelete": "क्या आप वाकई कैटेगरी हटाना चाहते हैं"
+        },
+        "filters": {
+          "title": "फ़िल्टर",
+          "type": "प्रकार",
+          "metal": "मेटल",
+          "itemCategory": "आइटम कैटेगरी",
+          "search": "कोड, कैटेगरी खोजें...",
+          "reset": "रीसेट",
+          "allTypes": "सभी प्रकार",
+          "allMetals": "सभी मेटल",
+          "allCategories": "सभी कैटेगरी"
+        },
+        "table": {
+          "codeDetails": "कोड और विवरण",
+          "typeAndMetal": "प्रकार और मेटल",
+          "category": "कैटेगरी",
+          "purity": "शुद्धता %",
+          "keyPercentage": "मुख्य %",
+          "settings": "सेटिंग्स",
+          "actions": "क्रियाएं",
+          "noCategoriesFound": "कोई कैटेगरी नहीं मिली",
+          "createFirst": "शुरू करने के लिए अपनी पहली कैटेगरी बनाएं",
+          "noMatches": "आपके वर्तमान फ़िल्टर से कोई कैटेगरी मेल नहीं खाती",
+          "loading": "कैटेगरी लोड हो रही हैं..."
+        },
+        "types": {
+          "new": "नया",
+          "old": "पुराना"
+        },
+        "metals": {
+          "gold": "सोना",
+          "silver": "चांदी"
+        },
+        "resale": {
+          "on": "रीसेल चालू",
+          "off": "रीसेल बंद",
+          "standard": "स्टैंडर्ड"
+        }
+      }
+    },
+  
+    "users": {
+      "management": {
+        "title": "यूजर प्रबंधन",
+        "subtitle": "दुकान के यूजर्स और उनकी जानकारी मैनेज करें",
+        "addNewUser": "नया यूजर जोड़ें",
+        "createNew": "नया यूजर बनाएं",
+        "yourAccount": "आपका अकाउंट",
+        "shopUsers": "दुकान के यूजर्स",
+        "shopAdmin": "दुकान एडमिन",
+        "availableRoles": "उपलब्ध रोल",
+        "success": {
+          "created": "यूजर सफलतापूर्वक बनाया गया",
+          "updated": "जानकारी सफलतापूर्वक अपडेट की गई",
+          "deleted": "यूजर सफलतापूर्वक हटाया गया"
+        },
+        "error": {
+          "loadFailed": "यूजर्स लोड करने में विफल",
+          "createFailed": "यूजर बनाने में विफल",
+          "updateFailed": "जानकारी अपडेट करने में विफल",
+          "deleteFailed": "यूजर हटाने में विफल",
+          "allFieldsRequired": "सभी फ़ील्ड आवश्यक हैं",
+          "passwordMinLength": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
+          "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+          "oldPasswordRequired": "आपका पासवर्ड बदलने के लिए पुराना पासवर्ड आवश्यक है",
+          "usernameOrPassword": "अपडेट करने के लिए यूजरनेम या पासवर्ड दें",
+          "confirmDelete": "क्या आप वाकई इस यूजर को हटाना चाहते हैं? यह क्रिया वापस नहीं की जा सकती।"
+        },
+        "form": {
+          "username": "यूजरनेम",
+          "password": "पासवर्ड",
+          "confirmPassword": "पासवर्ड कन्फर्म करें",
+          "newPassword": "नया पासवर्ड",
+          "oldPassword": "पुराना पासवर्ड",
+          "oldPasswordLabel": "पुराना पासवर्ड (पासवर्ड बदलने के लिए आवश्यक) *",
+          "newPasswordLabel": "नया पासवर्ड (वर्तमान रखने के लिए खाली छोड़ें)",
+          "confirmPasswordLabel": "नया पासवर्ड कन्फर्म करें *",
+          "role": "रोल",
+          "passwordMinHint": "(कम से कम 6 अक्षर)",
+          "leaveEmpty": "(वर्तमान रखने के लिए खाली छोड़ें)",
+          "selectRole": "रोल चुनें",
+          "passwordMatch": "पासवर्ड मेल खाते हैं",
+          "passwordNotMatch": "पासवर्ड मेल नहीं खाते",
+          "required": "आवश्यक"
+        },
+        "buttons": {
+          "create": "यूजर बनाएं",
+          "save": "सेव करें",
+          "edit": "संपादित करें",
+          "delete": "हटाएं",
+          "cancel": "रद्द करें",
+          "saveChanges": "परिवर्तन सेव करें",
+          "viewPassword": "पासवर्ड देखें",
+          "hide": "छिपाएं",
+          "yes": "हां, हटाएं",
+          "createButton": "यूजर बनाएं",
+          "available": "उपलब्ध",
+          "taken": "लिया गया"
+        },
+        "table": {
+          "noUsers": "अभी तक दुकान के यूजर्स नहीं हैं",
+          "createFirst": "अपना पहला यूजर बनाने के लिए \"नया यूजर जोड़ें\" पर क्लिक करें",
+          "loading": "यूजर्स लोड हो रहे हैं..."
+        },
+        "roles": {
+          "manager": "मैनेजर",
+          "proClient": "प्रो क्लाइंट",
+          "client": "क्लाइंट",
+          "shopAdmin": "दुकान एडमिन"
+        }
+      }
+    },
+  
+    "rateTable": {
+      "title": "रेट टेबल",
+      "subtitle": "रेट टेबल मैनेज करें और देखें",
+      "editTable": "टेबल संपादित करें",
+      "createTable": "टेबल बनाएं",
+      "rateTableFormulas": "फॉर्मूला के साथ रेट टेबल मैनेज करें",
+      "viewFormulas": "फॉर्मूला के साथ रेट टेबल देखें",
+      "viewOnly": "रेट टेबल देखें",
+      "success": {
+        "updated": "टेबल सफलतापूर्वक अपडेट हुआ"
+      },
+      "error": {
+        "loadFailed": "रेट टेबल लोड करने में विफल",
+        "saveFailed": "टेबल सेव करने में विफल",
+        "valueGreaterThanZero": "ग्राम प्रति मूल्य 0 से अधिक होना चाहिए",
+        "percentageGreaterThanZero": "सभी प्रतिशत मूल्य 0 से अधिक होने चाहिए"
+      },
+      "buttons": {
+        "edit": "टेबल संपादित करें",
+        "cancel": "रद्द करें",
+        "save": "परिवर्तन सेव करें",
+        "addRow": "पंक्ति जोड़ें",
+        "addColumn": "कॉलम जोड़ें",
+        "saving": "सेव हो रहा है..."
+      },
+      "tabs": {
+        "gold": "सोने की टेबल",
+        "silver": "चांदी की टेबल"
+      },
+      "rates": {
+        "currentLive": "वर्तमान लाइव रेट",
+        "goldBuy": "सोना खरीद:",
+        "goldSell": "सोना बिक्री:",
+        "silverBuy": "चांदी खरीद:",
+        "silverSell": "चांदी बिक्री:",
+        "perGram": "/ग्राम",
+        "perKg": "/किलो"
+      },
+      "table": {
+        "rowColumn": "पंक्ति / कॉलम",
+        "rounding": "राउंडिंग सक्षम करें",
+        "roundDirection": "राउंड दिशा",
+        "roundingType": "राउंडिंग प्रकार",
+        "roundHigh": "राउंड हाई",
+        "roundLow": "राउंड लो",
+        "decimalsOnly": "केवल दशमलव",
+        "nearest50": "निकटतम 5 या 0",
+        "lastDigit0": "अंतिम अंक 0",
+        "buying": "खरीद",
+        "selling": "बिक्री",
+        "buy": "खरीद",
+        "sell": "बिक्री",
+        "noTableData": "टेबल डेटा नहीं है",
+        "adminCreateTable": "अपनी रेट टेबल बनाने के लिए \"टेबल संपादित करें\" पर क्लिक करें",
+        "adminNeeded": "एडमिन को रेट टेबल बनाने की आवश्यकता है"
+      },
+      "formula": {
+        "title": "रेट टेबल कैसे काम करता है:",
+        "baseFormula": "फॉर्मूला: (लाइव रेट ÷",
+        "goldDivisor": "10",
+        "silverDivisor": "1000",
+        "formulaRest": ") × ग्राम प्रति मूल्य × प्रतिशत ÷ 100",
+        "roundingRule": "कॉलम-आधारित राउंडिंग नियम उस कॉलम की सभी सेल्स पर लागू होते हैं",
+        "roundingDisplay": "जब राउंडिंग सक्षम हो, मूल्य पूर्णांक के रूप में दिखाई देते हैं (दशमलव नहीं)",
+        "autoUpdate": "लाइव रेट बदलने पर टेबल स्वतः अपडेट होती है",
+        "adminEdit": "केवल एडमिन टेबल संरचना और फॉर्मूला संपादित कर सकते हैं",
+        "valuePerGram": "दर प्रति",
+        "grams": "ग्राम",
+        "gramPlural": "ग्राम"
+      }
+    },
+  
+    "common": {
+      "actions": {
+        "add": "जोड़ें",
+        "create": "बनाएं",
+        "edit": "संपादित करें",
+        "update": "अपडेट",
+        "delete": "हटाएं",
+        "save": "सेव करें",
+        "cancel": "रद्द करें",
+        "close": "बंद करें",
+        "retry": "पुनः प्रयास करें",
+        "back": "पीछे",
+        "next": "आगे",
+        "confirm": "पुष्टि करें",
+        "yes": "हां",
+        "no": "नहीं",
+        "loading": "लोड हो रहा है",
+        "search": "खोजें",
+        "filter": "फ़िल्टर",
+        "reset": "रीसेट",
+        "apply": "लागू करें"
+      },
+      "status": {
+        "loading": "लोड हो रहा है...",
+        "success": "सफलता",
+        "error": "त्रुटि",
+        "warning": "चेतावनी",
+        "info": "जानकारी"
+      },
+      "messages": {
+        "errorLoadingData": "डेटा लोड करने में त्रुटि",
+        "tryAgain": "कृपया पुनः प्रयास करें",
+        "notFound": "नहीं मिला",
+        "noData": "डेटा उपलब्ध नहीं है",
+        "confirmAction": "क्या आप सुनिश्चित हैं?",
+        "changes": "परिवर्तन किए गए हैं"
+      }
+    },
+  
+    "dashboard": {
+      "welcome": "वापसी पर स्वागत है",
+      "redirecting": "दुकान प्रबंधन की ओर रीडायरेक्ट हो रहा है...",
+      "redirectingCalculator": "कैलकुलेटर की ओर रीडायरेक्ट हो रहा है..."
+    },
+  
+    "calculator": {
+      "title": "कैलकुलेटर",
+      "newJewelry": "नए आभूषण",
+      "oldJewelry": "पुराने आभूषण",
+      "new": {
+        "title": "नए आभूषण कैलकुलेटर",
+        "step1": "चरण 1: मेटल प्रकार चुनें",
+        "step2": "चरण 2: आइटम कैटेगरी द्वारा फ़िल्टर करें (वैकल्पिक)",
+        "step3": "चरण 3: कोड/स्टैम्प चुनें",
+        "step4": "चरण 4: वजन दर्ज करें (ग्राम)",
+        "gold": "सोना",
+        "silver": "चांदी",
+        "sell": "बिक्री",
+        "allCategories": "सभी कैटेगरी",
+        "selectCodeStamp": "कोड/स्टैम्प चुनें",
+        "enterWeight": "वजन दर्ज करें (ग्राम)",
+        "calculate": "गणना करें",
+        "calculating": "गणना हो रही है...",
+        "clear": "साफ करें",
+        "resetAll": "सभी रीसेट करें",
+        "required": "*",
+        "loadingCategories": "कैटेगरी लोड हो रही हैं...",
+        "noCategoriesAvailable": "कोई कैटेगरी उपलब्ध नहीं है",
+        "noCategoriesFound": "कोई कैटेगरी नहीं मिली",
+        "noCategoriesMessage": "कोई कैटेगरी नहीं मिली। कैटेगरी जोड़ने के लिए कृपया अपने एडमिनिस्ट्रेटर से संपर्क करें।",
+        "noCategoriesForFilter": "इस फ़िल्टर के लिए कोई कैटेगरी नहीं मिली। अलग कैटेगरी चुनने का प्रयास करें।",
+        "universalDescription": "सार्वभौमिक विवरण",
+        "roleSpecificDescription": "रोल-विशिष्ट विवरण",
+        "calculationResults": "गणना परिणाम",
+        "finalSellingAmount": "अंतिम बिक्री राशि",
+        "for": "के लिए",
+        "roundedFrom": "(राउंडेड",
+        "totalSellingRatePerGram": "ग्राम प्रति कुल बिक्री दर",
+        "sellingRateBreakdown": "बिक्री दर विवरण",
+        "ratePerGram": "ग्राम प्रति दर",
+        "purity": "शुद्धता",
+        "makingChargesPerGram": "ग्राम प्रति मेकिंग चार्ज",
+        "ofRate": "दर का",
+        "marginAmount": "मार्जिन राशि",
+        "ofSellingAmount": "बिक्री राशि का",
+        "marginBreakdown": "मार्जिन विवरण",
+        "purchaseFromWholesaler": "थोक से खरीद राशि",
+        "baseCost": "बेस कॉस्ट",
+        "labourCharges": "मजदूरी चार्ज",
+        "actualValueByPurity": "शुद्धता के अनुसार वास्तविक मूल्य",
+        "calculationFormula": "गणना फॉर्मूला",
+        "actualValue": "वास्तविक मूल्य (शुद्धता)",
+        "wholesalerMargin": "थोक मार्जिन",
+        "wastage": "वेस्टेज",
+        "labour": "मजदूरी",
+        "perGram": "प्रति ग्राम",
+        "ourMargin": "हमारा मार्जिन",
+        "calculatedAt": "गणना की गई:"
+      },
+      "old": {
+        "title": "पुराने आभूषण कैलकुलेटर",
+        "step1": "चरण 1: मेटल प्रकार चुनें",
+        "step2": "चरण 2: आभूषण का स्रोत चुनें",
+        "step3": "चरण 3: कोड/स्टैम्प चुनें",
+        "step4": "चरण 4: वजन दर्ज करें (ग्राम)",
+        "step5": "चरण 5: कैटेगरी प्रकार चुनें",
+        "gold": "सोना",
+        "silver": "चांदी",
+        "buy": "खरीद",
+        "own": "अपना",
+        "other": "अन्य",
+        "ownDescription": "दुकान के अपने आभूषण",
+        "otherDescription": "ग्राहक के आभूषण",
+        "selected": "✓ चुना गया",
+        "selectCodeStamp": "कोड/स्टैम्प चुनें",
+        "resaleCategories": "रीसेल कैटेगरी",
+        "category": "कैटेगरी",
+        "polishRepair": "+ पॉलिश/रिपेयर",
+        "enterWeight": "वजन दर्ज करें (ग्राम)",
+        "calculateValue": "मूल्य की गणना करें",
+        "calculating": "गणना हो रही है...",
+        "clear": "साफ करें",
+        "resetAll": "सभी रीसेट करें",
+        "required": "*",
+        "loadingCategories": "कैटेगरी लोड हो रही हैं...",
+        "noCategoriesAvailable": "कोई कैटेगरी उपलब्ध नहीं है",
+        "noCategoriesMessage": "कोई पुराने आभूषण कैटेगरी नहीं मिली। कैटेगरी जोड़ने के लिए कृपया अपने एडमिनिस्ट्रेटर से संपर्क करें।",
+        "universalDescription": "सार्वभौमिक विवरण",
+        "roleSpecificDescription": "रोल-विशिष्ट विवरण",
+        "calculationResults": "गणना परिणाम",
+        "source": "स्रोत",
+        "scrapValue": "स्क्रैप मूल्य",
+        "totalScrapBuyingValue": "कुल स्क्रैप खरीद मूल्य",
+        "for": "के लिए",
+        "roundedFrom": "(राउंडेड",
+        "scrapMargin": "स्क्रैप मार्जिन",
+        "ofScrapValue": "स्क्रैप मूल्य का",
+        "marginBreakdown": "मार्जिन विवरण",
+        "actualValueByPurity": "शुद्धता द्वारा वास्तविक मूल्य",
+        "totalScrapBuyingValue2": "कुल स्क्रैप खरीद मूल्य",
+        "calculationFormula": "गणना फॉर्मूला",
+        "resaleOptions": "रीसेल विकल्प",
+        "directResale": "सीधा रीसेल (बिक्री के लिए तैयार)",
+        "directResaleValue": "सीधा रीसेल मूल्य",
+        "directResaleMargin": "सीधा रीसेल मार्जिन",
+        "ofTotalAmount": "कुल राशि का",
+        "wholesalerCost": "थोक कीमत",
+        "baseCost": "बेस कॉस्ट",
+        "labourCharges": "मजदूरी चार्ज",
+        "polishRepairResale": "पॉलिश/रिपेयर रीसेल",
+        "finalPolishRepairValue": "अंतिम पॉलिश/रिपेयर मूल्य",
+        "afterWeightLoss": "वजन घटाने के बाद",
+        "resaleValue": "रीसेल मूल्य",
+        "polishLabour": "पॉलिश मजदूरी",
+        "weightAdjustment": "वजन समायोजन",
+        "original": "मूल",
+        "loss": "घटाव",
+        "effective": "प्रभावी",
+        "polishRepairMargin": "पॉलिश/रिपेयर मार्जिन",
+        "ofFinalValue": "अंतिम मूल्य का",
+        "wholesalerLabour": "थोक मजदूरी",
+        "polishRepairResaleValue": "पॉलिश/रिपेयर रीसेल मूल्य",
+        "finalValue": "अंतिम मूल्य:",
+        "netMarginAfterPolish": "पॉलिश/रिपेयर के बाद नेट मार्जिन:",
+        "notAvailable": "उपलब्ध नहीं है",
+        "polishRepairNotEnabled": "इस कैटेगरी के लिए पॉलिश/रिपेयर रीसेल सक्षम नहीं है",
+        "calculatedAt": "गणना की गई:"
+      }
+    },
+  
+    "settings": {
+      "title": "सेटिंग्स",
+      "language": "भाषा"
+    },
+  
+    "brand": {
+      "name": "ज्वेलरी कैलकुलेटर"
+    },
+  
+    "login": {
+      "title": "साइन इन",
+      "subtitle": "ज्वेलरी मैनेजर में स्वागत है",
+      "username": "यूजरनेम",
+      "password": "पासवर्ड",
+      "signin": "साइन इन",
+      "signingin": "साइन इन हो रहा है..."
+    }
+  }
