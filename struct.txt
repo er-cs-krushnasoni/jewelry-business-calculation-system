@@ -132,6 +132,7 @@ jewellery-calculation-system
         │   ├── en.json
         │   ├── gu.json
         │   ├── hi.json
+        │   ├── mr.json
         │
         ├── pages
         │   ├── admin

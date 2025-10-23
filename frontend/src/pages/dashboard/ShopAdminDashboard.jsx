@@ -26,10 +26,10 @@ export const ShopAdminDashboard = () => {
       {/* Welcome Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {t('dashboard.welcome', 'Welcome back')}, {user?.username}!
+          {t('dashboard.welcome')}, {user?.username}!
         </h1>
         <p className="text-gray-600">
-          {t('dashboard.admin.subtitle', 'Shop Administrator Dashboard')}
+          {t('dashboard.admin.subtitle')}
         </p>
         {user?.shopName && (
           <p className="text-xl font-medium text-blue-600 mt-2">
@@ -49,45 +49,45 @@ export const ShopAdminDashboard = () => {
       <div className="bg-green-50 border border-green-200 rounded-lg p-6">
         <Calculator className="h-12 w-12 text-green-600 mx-auto mb-4" />
         <p className="text-green-800 text-lg mb-2 text-center">
-          {t('dashboard.redirectingCalculator', 'Redirecting to Calculator...')}
+          {t('dashboard.redirectingCalculator')}
         </p>
         <p className="text-green-700 text-sm text-center">
-          {t('dashboard.admin.access', 'You have full access to all shop features')}
+          {t('dashboard.admin.access')}
         </p>
       </div>
 
       {/* Admin Capabilities */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {t('dashboard.admin.capabilities', 'Your Capabilities')}
+          {t('dashboard.admin.capabilities')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.calc', 'Full jewelry calculations with margins')}
+              {t('dashboard.admin.calc')}
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.users', 'Create and manage shop users')}
+              {t('dashboard.admin.users')}
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.rates', 'Update daily gold/silver rates')}
+              {t('dashboard.admin.rates')}
             </li>
           </ul>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.categories', 'Manage jewelry categories')}
+              {t('dashboard.admin.categories')}
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.settings', 'Configure shop settings')}
+              {t('dashboard.admin.settings')}
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.admin.reports', 'View detailed reports')}
+              {t('dashboard.admin.reports')}
             </li>
           </ul>
         </div>

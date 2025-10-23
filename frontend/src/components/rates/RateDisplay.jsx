@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import { Clock, User, AlertCircle, TrendingUp, TrendingDown, Wifi, WifiOff } from 'lucide-react';
 
 const RateDisplay = ({ className = '' }) => {
   const { user } = useAuth();
   const { isConnected, connectionStatus, lastRateUpdate, isReady } = useSocket();
+  const { t } = useLanguage();
   const [rateInfo, setRateInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,7 +27,7 @@ const RateDisplay = ({ className = '' }) => {
       }
     } catch (err) {
       console.error('Error fetching header rate info:', err);
-      setError('Failed to load rate info');
+      setError(t('rates.display.failedToLoadRateInfo'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +125,7 @@ const RateDisplay = ({ className = '' }) => {
       <div className={`flex items-center space-x-2 text-yellow-600 ${className}`}>
         <AlertCircle size={16} />
         <span className="text-sm font-medium">
-          {error || 'No rates set'}
+          {error || t('rates.display.noRatesSet')}
         </span>
       </div>
     );
@@ -138,12 +140,12 @@ const RateDisplay = ({ className = '' }) => {
         {isConnected ? (
           <div className="flex items-center space-x-1 text-green-600">
             <Wifi size={14} />
-            <span className="text-xs hidden sm:inline">Live</span>
+            <span className="text-xs hidden sm:inline">{t('rates.display.live')}</span>
           </div>
         ) : (
           <div className="flex items-center space-x-1 text-gray-500">
             <WifiOff size={14} />
-            <span className="text-xs hidden sm:inline">Offline</span>
+            <span className="text-xs hidden sm:inline">{t('rates.display.offline')}</span>
           </div>
         )}
       </div>
@@ -152,10 +154,10 @@ const RateDisplay = ({ className = '' }) => {
       <div className="flex items-center space-x-2 text-gray-700">
         <User size={14} />
         <span className="text-sm">
-          Rate updated by <span className="font-medium">{updateInfo.updatedBy}</span>
+          {t('rates.display.rateUpdatedBy')} <span className="font-medium">{updateInfo.updatedBy}</span>
           {lastUpdateFromSocket && (
             <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded animate-pulse">
-              Live Update
+              {t('rates.display.liveUpdate')}
             </span>
           )}
         </span>
@@ -167,7 +169,7 @@ const RateDisplay = ({ className = '' }) => {
           {updateInfo.timestamp}
           {updateInfo.isToday && (
             <span className="ml-1 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded">
-              Today
+              {t('rates.display.today')}
             </span>
           )}
         </span>
@@ -178,7 +180,7 @@ const RateDisplay = ({ className = '' }) => {
         <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1 rounded-full">
           <TrendingUp className="text-yellow-600" size={14} />
           <span className="text-yellow-800 font-medium">
-            Gold: ₹{currentRates.gold.sell}/10g
+            {t('rates.display.gold')} ₹{currentRates.gold.sell}/10g
             {lastUpdateFromSocket && (
               <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             )}
@@ -188,7 +190,7 @@ const RateDisplay = ({ className = '' }) => {
         <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1 rounded-full">
           <TrendingDown className="text-gray-600" size={14} />
           <span className="text-gray-800 font-medium">
-            Silver: ₹{currentRates.silver.sell}/kg
+            {t('rates.display.silver')} ₹{currentRates.silver.sell}/kg
             {lastUpdateFromSocket && (
               <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             )}
@@ -199,26 +201,20 @@ const RateDisplay = ({ className = '' }) => {
       {/* Mobile View - Simplified */}
       <div className="lg:hidden flex items-center space-x-2 text-sm">
         <span className="bg-blue-50 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-          Rates: G₹{currentRates.gold.sell} S₹{currentRates.silver.sell}
+          {t('rates.display.rates')} G₹{currentRates.gold.sell} S₹{currentRates.silver.sell}
           {lastUpdateFromSocket && (
             <span className="ml-1 inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
           )}
         </span>
       </div>
 
-      {/* Real-time Status Tooltip */}
-      {/* {isReady && (
-        <div className="hidden xl:flex items-center text-xs text-green-600">
-          <span className="bg-green-50 px-2 py-1 rounded">Real-time updates active</span>
-        </div>
-      )} */}
-
       {/* Connection Issues Warning */}
       {!isConnected && connectionStatus !== 'disconnected' && (
         <div className="hidden xl:flex items-center text-xs text-yellow-600">
           <span className="bg-yellow-50 px-2 py-1 rounded">
-            {connectionStatus === 'connecting' ? 'Connecting...' : 
-             connectionStatus === 'reconnecting' ? 'Reconnecting...' : 'Connection issues'}
+            {connectionStatus === 'connecting' ? t('rates.display.connecting') : 
+             connectionStatus === 'reconnecting' ? t('rates.display.reconnecting') : 
+             t('rates.display.connectionIssues')}
           </span>
         </div>
       )}

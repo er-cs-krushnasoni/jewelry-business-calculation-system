@@ -551,3 +551,4 @@ const ShopDetailsModal = ({ shop, onClose, onUpdate }) => {
 };
 
 export default ShopDetailsModal;
+

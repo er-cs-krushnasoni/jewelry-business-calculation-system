@@ -56,11 +56,11 @@ const NotFound = () => {
           <h2 className="text-9xl font-bold text-gray-300 mb-4">404</h2>
           
           <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-            {t('error.notFound.title', 'Page Not Found')}
+            {t('error.notFound.title')}
           </h3>
           
           <p className="text-gray-600 mb-8">
-            {t('error.notFound.message', 'The page you are looking for does not exist or has been moved.')}
+            {t('error.notFound.message')}
           </p>
 
           <div className="space-y-4">
@@ -70,12 +70,12 @@ const NotFound = () => {
                 variant="outline"
                 className="w-full sm:w-auto"
               >
-                {t('error.notFound.goBack', 'Go Back')}
+                {t('error.notFound.goBack')}
               </Button>
               
               <Link to={getHomeRoute()}>
                 <Button className="w-full sm:w-auto">
-                  {t('error.notFound.goHome', 'Go to Dashboard')}
+                  {t('error.notFound.goHome')}
                 </Button>
               </Link>
             </div>
@@ -85,7 +85,7 @@ const NotFound = () => {
                 to="/calculator" 
                 className="inline-block text-blue-600 hover:text-blue-500 text-sm"
               >
-                {t('error.notFound.calculator', 'Or go to Calculator')}
+                {t('error.notFound.calculator')}
               </Link>
             )}
           </div>
@@ -94,10 +94,10 @@ const NotFound = () => {
         {/* Additional help */}
         <div className="border-t border-gray-200 pt-8">
           <h4 className="text-sm font-medium text-gray-900 mb-2">
-            {t('error.notFound.needHelp', 'Need help?')}
+            {t('error.notFound.needHelp')}
           </h4>
           <p className="text-sm text-gray-600">
-            {t('error.notFound.helpMessage', 'If you think this is an error, please contact your administrator.')}
+            {t('error.notFound.helpMessage')}
           </p>
         </div>
       </div>

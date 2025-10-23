@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSocket } from '../../contexts/SocketContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { Wifi, WifiOff, AlertCircle, RefreshCw, X } from 'lucide-react';
 import Button from '../ui/Button';
 
@@ -18,6 +19,8 @@ const ConnectionStatus = ({ className = '' }) => {
     pingSocket
   } = useSocket();
   
+  const { t } = useLanguage();
+  
   const [showDetails, setShowDetails] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -27,7 +30,7 @@ const ConnectionStatus = ({ className = '' }) => {
       <div className={`flex items-center space-x-2 ${className}`}>
         <div className="flex items-center space-x-1 text-green-600">
           <Wifi size={14} />
-          <span className="text-xs">Live</span>
+          <span className="text-xs">{t('connection.status.live')}</span>
         </div>
       </div>
     );
@@ -73,6 +76,7 @@ const ConnectionStatus = ({ className = '' }) => {
           <button
             onClick={() => setShowDetails(!showDetails)}
             className="text-gray-400 hover:text-gray-600"
+            aria-label={showDetails ? t('connection.actions.hideDetails') : t('connection.actions.showDetails')}
           >
             {showDetails ? <X size={16} /> : <AlertCircle size={16} />}
           </button>
@@ -87,18 +91,18 @@ const ConnectionStatus = ({ className = '' }) => {
             'bg-gray-400'
           }`}></div>
           <span className="text-xs text-gray-600">
-            {isReady ? 'Real-time updates active' :
-             isConnecting ? 'Establishing connection...' :
-             isReconnecting ? 'Reconnecting to server...' :
-             hasError ? 'Connection failed' :
-             'Offline mode'}
+            {isReady ? t('connection.messages.realtimeActive') :
+             isConnecting ? t('connection.messages.establishingConnection') :
+             isReconnecting ? t('connection.messages.reconnectingToServer') :
+             hasError ? t('connection.messages.connectionFailed') :
+             t('connection.messages.offlineMode')}
           </span>
         </div>
 
         {/* Error Details */}
         {error && (
           <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
-            <strong>Error:</strong> {error}
+            <strong>{t('connection.labels.error')}</strong> {error}
           </div>
         )}
 
@@ -106,14 +110,14 @@ const ConnectionStatus = ({ className = '' }) => {
         {showDetails && (
           <div className="space-y-2 border-t pt-2">
             <div className="text-xs text-gray-600">
-              <strong>Status:</strong> {connectionStatus}
+              <strong>{t('connection.labels.status')}</strong> {connectionStatus}
             </div>
             <div className="text-xs text-gray-600">
-              <strong>Real-time:</strong> {isReady ? 'Active' : 'Inactive'}
+              <strong>{t('connection.labels.realtime')}</strong> {isReady ? t('connection.labels.active') : t('connection.labels.inactive')}
             </div>
             {!isConnected && (
               <div className="text-xs text-gray-600">
-                <strong>Impact:</strong> Rate updates won't appear instantly
+                <strong>{t('connection.labels.impact')}</strong> {t('connection.messages.updatesWontAppear')}
               </div>
             )}
           </div>
@@ -133,7 +137,7 @@ const ConnectionStatus = ({ className = '' }) => {
                 size={12} 
                 className={isRetrying || isConnecting ? 'animate-spin' : ''} 
               />
-              <span>{isRetrying ? 'Retrying...' : 'Retry'}</span>
+              <span>{isRetrying ? t('connection.actions.retrying') : t('connection.actions.retry')}</span>
             </Button>
           </div>
         )}
@@ -145,6 +149,7 @@ const ConnectionStatus = ({ className = '' }) => {
 // Minimal inline connection indicator for header/navbar
 export const ConnectionIndicator = ({ className = '' }) => {
   const { isConnected, isReady, connectionStatus, getStatusColor } = useSocket();
+  const { t } = useLanguage();
   
   return (
     <div className={`flex items-center space-x-1 ${className}`}>
@@ -162,10 +167,10 @@ export const ConnectionIndicator = ({ className = '' }) => {
       }`}></div>
       
       <span className="text-xs text-gray-600 hidden sm:inline">
-        {isReady ? 'Live' : 
-         connectionStatus === 'connecting' ? 'Connecting' :
-         connectionStatus === 'reconnecting' ? 'Reconnecting' :
-         'Offline'}
+        {isReady ? t('connection.status.live') : 
+         connectionStatus === 'connecting' ? t('connection.status.connecting') :
+         connectionStatus === 'reconnecting' ? t('connection.status.reconnecting') :
+         t('connection.status.offline')}
       </span>
     </div>
   );

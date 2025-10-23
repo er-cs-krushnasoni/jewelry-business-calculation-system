@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import api from '../services/api';
 
 const useBlockingStatus = (pollingInterval = 60000) => { // 1 minute default
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [blockingInfo, setBlockingInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,11 +31,11 @@ const useBlockingStatus = (pollingInterval = 60000) => { // 1 minute default
       }
     } catch (err) {
       console.error('Error checking blocking status:', err);
-      setError(err.response?.data?.message || 'Failed to check blocking status');
+      setError(err.response?.data?.message || t('blocking.hook.failedToCheck'));
     } finally {
       if (showLoading) setLoading(false);
     }
-  }, [hasShop]);
+  }, [hasShop, t]);
 
   // Initial load
   useEffect(() => {

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Modal = ({ 
   onClose, 
@@ -11,6 +12,8 @@ const Modal = ({
   closeOnEscape = true,
   className = ''
 }) => {
+  const { t } = useLanguage();
+
   // Handle escape key
   useEffect(() => {
     if (!closeOnEscape) return;
@@ -71,6 +74,7 @@ const Modal = ({
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
+          aria-label={title || t('modal.closeModal')}
         >
           {/* Render children directly - they contain their own structure */}
           {children}
@@ -89,6 +93,8 @@ export const LegacyModal = ({
   size = 'medium',
   ...props 
 }) => {
+  const { t } = useLanguage();
+
   if (!isOpen) return null;
   
   return (
@@ -102,6 +108,7 @@ export const LegacyModal = ({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            aria-label={t('modal.close')}
           >
             <X size={20} />
           </button>

@@ -5,9 +5,9 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import Button from '../ui/Button';
 import RateDisplay from '../rates/RateDisplay';
 import SubscriptionCountdown from '../subscription/SubscriptionCountdown';
-import ProfileCredentialsModal from '../superadmin/ProfileCredentialsModal'; // ADD THIS IMPORT
-import superAdminService from '../../services/superAdminService'; // ADD THIS IMPORT
-import toast from 'react-hot-toast'; // ADD THIS IMPORT
+import ProfileCredentialsModal from '../superadmin/ProfileCredentialsModal';
+import superAdminService from '../../services/superAdminService';
+import toast from 'react-hot-toast';
 import { 
   Menu, 
   X, 
@@ -17,16 +17,16 @@ import {
   Settings, 
   BarChart3,
   Globe,
-  Lock // ADD THIS IMPORT
+  Lock
 } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, getSubscriptionStatus } = useAuth();
-  const { language, setLanguage, t } = useLanguage();
+  const { currentLanguage, setLanguage, t } = useLanguage(); // Changed from 'language' to 'currentLanguage'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showCredentialsModal, setShowCredentialsModal] = useState(false); // ADD THIS STATE
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
 
   const subscriptionStatus = getSubscriptionStatus();
 
@@ -48,14 +48,11 @@ const Header = () => {
     closeMobileMenu();
   };
 
-  // ADD THIS FUNCTION - Handle credentials update
   const handleUpdateCredentials = async (credentialsData) => {
     try {
       const response = await superAdminService.updateOwnCredentials(credentialsData);
       if (response.data.success) {
         toast.success(response.data.message);
-        // Optional: You may want to logout and re-login if username changed
-        // Or refresh user data from AuthContext
       }
     } catch (error) {
       const message = error.response?.data?.message || 'Failed to update credentials';
@@ -71,7 +68,7 @@ const Header = () => {
     // Calculator - available to all shop users
     if (user?.role !== 'super_admin') {
       items.push({
-        name: t('nav.calculator', 'Calculator'),
+        name: t('nav.calculator'),
         path: '/calculator',
         icon: Calculator,
         current: location.pathname === '/calculator'
@@ -82,19 +79,19 @@ const Header = () => {
     if (user?.role === 'admin') {
       items.push(
         {
-          name: t('nav.users', 'Manage Users'),
+          name: t('nav.manageUsers'),
           path: '/admin/users',
           icon: Users,
           current: location.pathname.startsWith('/admin/users')
         },
         {
-          name: t('nav.categories', 'Categories'),
+          name: t('nav.categories'),
           path: '/admin/categories',
           icon: Settings,
           current: location.pathname.startsWith('/admin/categories')
         },
         {
-          name: t('nav.reports', 'Reports'),
+          name: t('nav.reports'),
           path: '/admin/reports',
           icon: BarChart3,
           current: location.pathname.startsWith('/admin/reports')
@@ -106,7 +103,7 @@ const Header = () => {
     if (user?.role === 'super_admin') {
       items.push(
         {
-          name: t('nav.shops', 'Manage Shops'),
+          name: t('nav.manageShops'),
           path: '/super-admin/shops',
           icon: Settings,
           current: location.pathname.startsWith('/super-admin/shops')
@@ -135,7 +132,7 @@ const Header = () => {
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-gray-900">
-                  {user?.shopName ||  'Jewelry Calculator'}
+                  {user?.shopName || t('header.jewelryCalculator')}
                 </h1>
               </div>
             </div>
@@ -174,13 +171,14 @@ const Header = () => {
               {/* Language Selector */}
               <div className="relative">
                 <select
-                  value={language}
+                  value={currentLanguage}
                   onChange={(e) => handleLanguageChange(e.target.value)}
                   className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="en">English</option>
-                  <option value="gu">ગુજરાતી</option>
-                  <option value="hi">हिंदी</option>
+                  <option value="en">{t('header.english')}</option>
+                  <option value="gu">{t('header.gujarati')}</option>
+                  <option value="hi">{t('header.hindi')}</option>
+                  <option value="mr">{t('header.marathi')}</option>
                 </select>
                 <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
@@ -201,7 +199,7 @@ const Header = () => {
                     size="sm"
                     onClick={() => setShowCredentialsModal(true)}
                     className="flex items-center space-x-2"
-                    title="Update your credentials"
+                    title={t('header.updateCredentialsTitle')}
                   >
                     <Lock size={16} />
                   </Button>
@@ -215,7 +213,7 @@ const Header = () => {
                   className="flex items-center space-x-2"
                 >
                   <LogOut size={16} />
-                  <span>{t('auth.logout', 'Logout')}</span>
+                  <span>{t('header.logout')}</span>
                 </Button>
               </div>
             </div>
@@ -275,16 +273,17 @@ const Header = () => {
             {/* Language Selector */}
             <div className="px-3 py-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('settings.language', 'Language')}
+                {t('settings.language')}
               </label>
               <select
-                value={language}
+                value={currentLanguage}
                 onChange={(e) => handleLanguageChange(e.target.value)}
                 className="w-full appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="en">English</option>
-                <option value="gu">ગુજરાતી</option>
-                <option value="hi">हिંदी</option>
+                <option value="en">{t('header.english')}</option>
+                <option value="gu">{t('header.gujarati')}</option>
+                <option value="hi">{t('header.hindi')}</option>
+                <option value="mr">{t('header.marathi')}</option>
               </select>
             </div>
 
@@ -310,7 +309,7 @@ const Header = () => {
                   className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors mb-2"
                 >
                   <Lock className="w-5 h-5 mr-3" />
-                  Update Credentials
+                  {t('header.updateCredentials')}
                 </button>
               )}
 
@@ -320,7 +319,7 @@ const Header = () => {
                 className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-5 h-5 mr-3" />
-                {t('auth.logout', 'Logout')}
+                {t('header.logout')}
               </button>
             </div>
           </div>

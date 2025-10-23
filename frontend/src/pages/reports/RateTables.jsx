@@ -64,7 +64,7 @@ const RateTables = () => {
           calculatedValues: data.calculatedValues
         });
       }
-      toast.success(`${data.metalType.charAt(0).toUpperCase() + data.metalType.slice(1)} ${t('rateTable.table.noTableData')}`);
+      toast.success(`${data.metalType.charAt(0).toUpperCase() + data.metalType.slice(1)} ${t('rateTable.success.tableUpdated')}`);
     });
 
     socket.on('ratesUpdated', (data) => {
@@ -424,7 +424,7 @@ const RateTables = () => {
       {displayTable && (
         <div className={`border rounded-lg p-4 mb-6 ${editMode ? 'bg-yellow-50 border-yellow-200' : canSeeFormulas ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-200'}`}>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t('rateTable.formula.valuePerGram')} {displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.grams') : t('rateTable.formula.gramPlural')}
+            {t('rateTable.formula.valuePerGram')} {displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.gram') : t('rateTable.formula.grams')}
           </label>
           {editMode ? (
             <>
@@ -456,13 +456,13 @@ const RateTables = () => {
             </>
           ) : canSeeFormulas ? (
             <>
-              <p className="text-lg font-semibold text-gray-900">{displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.grams') : t('rateTable.formula.gramPlural')}</p>
+              <p className="text-lg font-semibold text-gray-900">{displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.gram') : t('rateTable.formula.grams')}</p>
               <p className="text-xs text-gray-600 mt-1">
                 {t('rateTable.formula.baseFormula')} {activeTab === 'gold' ? t('rateTable.formula.goldDivisor') : t('rateTable.formula.silverDivisor')} {t('rateTable.formula.formulaRest')}
               </p>
             </>
           ) : (
-            <p className="text-lg font-semibold text-gray-900">{displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.grams') : t('rateTable.formula.gramPlural')}</p>
+            <p className="text-lg font-semibold text-gray-900">{displayTable.valuePerGram} {displayTable.valuePerGram === 1 ? t('rateTable.formula.gram') : t('rateTable.formula.grams')}</p>
           )}
         </div>
       )}

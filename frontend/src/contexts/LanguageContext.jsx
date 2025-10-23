@@ -4,6 +4,7 @@ import { LANGUAGES } from '../constants/languages';
 import guTranslations from '../locales/gu.json';
 import hiTranslations from '../locales/hi.json';
 import enTranslations from '../locales/en.json';
+import mrTranslations from '../locales/mr.json';
 
 const LanguageContext = createContext();
 
@@ -19,6 +20,7 @@ const translations = {
   en: enTranslations,
   gu: guTranslations,
   hi: hiTranslations,
+  mr: mrTranslations
 };
 
 export const LanguageProvider = ({ children }) => {

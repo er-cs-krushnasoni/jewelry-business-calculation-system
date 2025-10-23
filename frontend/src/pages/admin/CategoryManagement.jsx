@@ -36,7 +36,7 @@ const CategoryManagement = () => {
     if (filters.type === 'NEW' || !filters.type) {
       loadItemCategories();
     }
-  }, [filters.type, filters.metal]);
+  }, [filters.type, filters.metal, filters.itemCategory]);
 
   const loadCategories = async () => {
     try {
@@ -427,10 +427,10 @@ const CategoryManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {category.itemCategory || 
-                        (category.type === 'OLD' ? 'OLD Jewelry' : '-')}
+                        (category.type === 'OLD' ? t('category.management.table.oldJewelry') : t('category.management.table.notApplicable'))}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getEffectivePurity(category) ? `${getEffectivePurity(category)}%` : '-'}
+                      {getEffectivePurity(category) ? `${getEffectivePurity(category)}%` : t('category.management.table.notApplicable')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {category.type === 'NEW' && category.sellingPercentage && (
@@ -441,10 +441,10 @@ const CategoryManagement = () => {
                       {category.type === 'OLD' && (
                         <div className="space-y-1">
                           <div className="text-xs text-gray-500">
-                            Own: {category.scrapBuyOwnPercentage}%
+                            {t('category.management.table.ownPercentage')} {category.scrapBuyOwnPercentage}%
                           </div>
                           <div className="text-xs text-gray-500">
-                            Other: {category.scrapBuyOtherPercentage}%
+                            {t('category.management.table.otherPercentage')} {category.scrapBuyOtherPercentage}%
                           </div>
                         </div>
                       )}

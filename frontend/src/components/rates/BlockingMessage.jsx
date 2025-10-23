@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import RateManager from './RateManager';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -15,6 +16,7 @@ const BlockingMessage = ({
 }) => {
   const { user } = useAuth();
   const { systemBlocking, isConnected } = useSocket();
+  const { t } = useLanguage();
   
   const [blockingInfo, setBlockingInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,11 +48,11 @@ const BlockingMessage = ({
       console.error('Error checking blocking status:', error);
       // Use props as fallback
       setCurrentlyBlocked(propIsBlocked);
-      setCurrentMessage(propBlockingMessage || 'System is currently blocked. Please update rates.');
+      setCurrentMessage(propBlockingMessage || t('blocking.header.defaultMessage'));
     } finally {
       setLoading(false);
     }
-  }, [onUnblock, propIsBlocked, propBlockingMessage]);
+  }, [onUnblock, propIsBlocked, propBlockingMessage, t]);
 
   // Handle real-time blocking status updates
   useEffect(() => {
@@ -121,7 +123,7 @@ const BlockingMessage = ({
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">Checking system status...</p>
+          <p className="mt-4 text-gray-600">{t('blocking.loading.checking')}</p>
         </div>
       </div>
     );
@@ -133,11 +135,11 @@ const BlockingMessage = ({
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
           <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">System Ready</h2>
-          <p className="text-gray-600 mb-4">Calculator is now available for use.</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('blocking.ready.title')}</h2>
+          <p className="text-gray-600 mb-4">{t('blocking.ready.message')}</p>
           {onUnblock && (
             <Button onClick={onUnblock} className="w-full">
-              Continue to Calculator
+              {t('blocking.ready.button')}
             </Button>
           )}
         </div>
@@ -153,8 +155,8 @@ const BlockingMessage = ({
           <div className="flex items-center space-x-3 mb-2">
             <AlertTriangle className="text-red-600" size={32} />
             <div>
-              <h1 className="text-2xl font-bold text-red-800">System Blocked</h1>
-              <p className="text-red-600">Calculator is temporarily unavailable</p>
+              <h1 className="text-2xl font-bold text-red-800">{t('blocking.title')}</h1>
+              <p className="text-red-600">{t('blocking.subtitle')}</p>
             </div>
           </div>
           
@@ -164,7 +166,7 @@ const BlockingMessage = ({
               <div className="flex items-center space-x-2">
                 <div className="animate-pulse w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-blue-800 font-medium text-sm">
-                  Blocking status updated in real-time
+                  {t('blocking.realTime.updateIndicator')}
                 </span>
               </div>
             </div>
@@ -177,10 +179,10 @@ const BlockingMessage = ({
           <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Clock className="text-yellow-600" size={20} />
-              <span className="font-semibold text-yellow-800">Daily Rate Update Required</span>
+              <span className="font-semibold text-yellow-800">{t('blocking.header.dailyUpdate')}</span>
             </div>
             <p className="text-yellow-700">
-              {currentMessage || 'Today\'s rates have not been updated. Please update rates to continue using the calculator.'}
+              {currentMessage || t('blocking.header.defaultMessage')}
             </p>
           </div>
 
@@ -190,7 +192,7 @@ const BlockingMessage = ({
               <div className="flex items-center space-x-2">
                 <Users className="text-gray-600" size={16} />
                 <span className="text-gray-700 text-sm">
-                  Real-time updates are currently offline. Status changes may be delayed.
+                  {t('blocking.connection.offline')}
                 </span>
               </div>
             </div>
@@ -201,11 +203,11 @@ const BlockingMessage = ({
             <div>
               <div className="mb-6 text-center">
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  Update Today's Rates
+                  {t('blocking.admin.updateTitle')}
                 </h2>
                 <p className="text-gray-600">
-                  Enter today's gold and silver rates to unblock the calculator for all users.
-                  {isConnected ? ' Updates will be broadcasted instantly.' : ' Updates will sync when connection is restored.'}
+                  {t('blocking.admin.updateDescription')}
+                  {isConnected ? ` ${t('blocking.admin.broadcastInstantly')}` : ` ${t('blocking.admin.syncWhenRestored')}`}
                 </p>
               </div>
               
@@ -220,23 +222,22 @@ const BlockingMessage = ({
             <div className="text-center">
               <div className="mb-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                  Waiting for Rate Update
+                  {t('blocking.nonAdmin.waitingTitle')}
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  Only the Shop Admin or Manager can update today's rates.
-                  Please contact them to resolve this issue.
+                  {t('blocking.nonAdmin.onlyAdminMessage')} {t('blocking.nonAdmin.contactMessage')}
                 </p>
               </div>
 
               {/* Contact Information */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <h3 className="font-semibold text-blue-800 mb-2">What you can do:</h3>
+                <h3 className="font-semibold text-blue-800 mb-2">{t('blocking.nonAdmin.whatYouCanDo')}</h3>
                 <ul className="text-blue-700 text-sm space-y-1">
-                  <li>• Contact your Shop Admin or Manager</li>
-                  <li>• Ask them to update today's gold and silver rates</li>
-                  <li>• The calculator will be available immediately after rates are updated</li>
+                  <li>• {t('blocking.nonAdmin.contactAdmin')}</li>
+                  <li>• {t('blocking.nonAdmin.askUpdate')}</li>
+                  <li>• {t('blocking.nonAdmin.availableAfter')}</li>
                   {isConnected && (
-                    <li>• You'll receive an instant notification when rates are updated</li>
+                    <li>• {t('blocking.nonAdmin.instantNotification')}</li>
                   )}
                 </ul>
               </div>
@@ -254,7 +255,7 @@ const BlockingMessage = ({
                   ) : (
                     <RefreshCw size={16} />
                   )}
-                  <span>{checking ? 'Checking...' : 'Check Status'}</span>
+                  <span>{checking ? t('blocking.nonAdmin.checking') : t('blocking.nonAdmin.checkButton')}</span>
                 </Button>
               )}
 
@@ -265,7 +266,7 @@ const BlockingMessage = ({
                     <div className="flex items-center justify-center space-x-2 text-green-800">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       <span className="text-sm font-medium">
-                        Waiting for real-time rate update...
+                        {t('blocking.connection.waitingUpdate')}
                       </span>
                     </div>
                   </div>
@@ -274,7 +275,7 @@ const BlockingMessage = ({
                     <div className="flex items-center justify-center space-x-2 text-gray-600">
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                       <span className="text-sm">
-                        Offline mode - Please refresh page after rates are updated
+                        {t('blocking.connection.offlineMode')}
                       </span>
                     </div>
                   </div>
@@ -286,25 +287,24 @@ const BlockingMessage = ({
           {/* Last Update Info */}
           {blockingInfo?.rateInfo && (
             <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 mb-2">Last Rate Update</h3>
+              <h3 className="font-semibold text-blue-800 mb-2">{t('blocking.lastUpdate.title')}</h3>
               <p className="text-blue-700 text-sm">
-                Updated by {blockingInfo.rateInfo.updatedBy} ({blockingInfo.rateInfo.role}) 
-                on {blockingInfo.rateInfo.timestamp}
-                {blockingInfo.rateInfo.isToday ? ' (Today)' : ' (Previous day)'}
+                {t('blocking.lastUpdate.updatedBy')} {blockingInfo.rateInfo.updatedBy} ({blockingInfo.rateInfo.role}) {t('blocking.lastUpdate.on')} {blockingInfo.rateInfo.timestamp}
+                {blockingInfo.rateInfo.isToday ? ` ${t('blocking.lastUpdate.today')}` : ` ${t('blocking.lastUpdate.previousDay')}`}
               </p>
             </div>
           )}
 
           {/* System Information */}
           <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <h4 className="font-medium text-gray-800 mb-2">About Daily Rate Updates:</h4>
+            <h4 className="font-medium text-gray-800 mb-2">{t('blocking.systemInfo.title')}</h4>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Rates must be updated daily before 1:00 PM IST</li>
-              <li>• If not updated by 1:00 PM, the calculator is automatically blocked</li>
-              <li>• This ensures all calculations use current market rates</li>
-              <li>• Updates are applied instantly to all shop users</li>
+              <li>• {t('blocking.systemInfo.point1')}</li>
+              <li>• {t('blocking.systemInfo.point2')}</li>
+              <li>• {t('blocking.systemInfo.point3')}</li>
+              <li>• {t('blocking.systemInfo.point4')}</li>
               {isConnected && (
-                <li>• Real-time notifications keep everyone informed</li>
+                <li>• {t('blocking.systemInfo.point5')}</li>
               )}
             </ul>
           </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Info, Eye, EyeOff, ChevronDown, Plus, Check, X, Trash2 } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const ExtendedJewelryForm = ({ 
   initialData = null, 
@@ -7,54 +8,44 @@ const ExtendedJewelryForm = ({
   onCancel, 
   isEditing = false 
 }) => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showDescriptionHelp, setShowDescriptionHelp] = useState(false);
   
-  // Category dropdown states (for NEW jewelry)
   const [availableCategories, setAvailableCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const categoryDropdownRef = useRef(null);
 
-  // Resale category dropdowns (for OLD jewelry)
   const [resaleCategoryDropdowns, setResaleCategoryDropdowns] = useState({});
   const [resaleCategorySearchTerms, setResaleCategorySearchTerms] = useState({});
   const resaleCategoryRefs = useRef({});
 
-  // Form state
   const [formData, setFormData] = useState({
     type: initialData?.type || 'NEW',
     metal: initialData?.metal || '',
     code: initialData?.code || '',
-    
-    // NEW jewelry fields
     itemCategory: initialData?.itemCategory || '',
     purityPercentage: initialData?.purityPercentage || '',
     buyingFromWholesalerPercentage: initialData?.buyingFromWholesalerPercentage || '',
-    wholesalerLabourPerGram: initialData?.wholesalerLabourPerGram || '', // ADDED
+    wholesalerLabourPerGram: initialData?.wholesalerLabourPerGram || '',
     sellingPercentage: initialData?.sellingPercentage || '',
-    
-    // OLD jewelry fields
     truePurityPercentage: initialData?.truePurityPercentage || '',
     scrapBuyOwnPercentage: initialData?.scrapBuyOwnPercentage || '',
     scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage || '',
     resaleEnabled: initialData?.resaleEnabled || false,
-    
-    // OLD jewelry - Array of resale categories with polish/repair toggle
     resaleCategories: initialData?.resaleCategories?.map(cat => ({
       itemCategory: cat.itemCategory || '',
       directResalePercentage: cat.directResalePercentage || '',
       buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || '',
-      wholesalerLabourPerGram: cat.wholesalerLabourPerGram || '', // ADDED
+      wholesalerLabourPerGram: cat.wholesalerLabourPerGram || '',
       polishRepairEnabled: cat.polishRepairEnabled || false,
       polishRepairResalePercentage: cat.polishRepairResalePercentage || '',
       polishRepairCostPercentage: cat.polishRepairCostPercentage || '',
-      polishRepairLabourPerGram: cat.polishRepairLabourPerGram || '' // ADDED
+      polishRepairLabourPerGram: cat.polishRepairLabourPerGram || ''
     })) || [],
-    
-    // Descriptions
     descriptions: {
       universal: initialData?.descriptions?.universal || '',
       admin: initialData?.descriptions?.admin || '',
@@ -64,14 +55,12 @@ const ExtendedJewelryForm = ({
     }
   });
 
-  // Load available categories when metal changes
   useEffect(() => {
     if (formData.metal && (formData.type === 'NEW' || formData.resaleEnabled)) {
       loadAvailableCategories();
     }
   }, [formData.metal, formData.type, formData.resaleEnabled]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target)) {
@@ -113,85 +102,54 @@ const ExtendedJewelryForm = ({
   };
 
   const handleInputChange = (name, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
+      setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
 
   const handleCategorySelect = (category) => {
-    setFormData(prev => ({
-      ...prev,
-      itemCategory: category
-    }));
+    setFormData(prev => ({ ...prev, itemCategory: category }));
     setCategorySearchTerm('');
     setShowCategoryDropdown(false);
-    
     if (errors.itemCategory) {
-      setErrors(prev => ({
-        ...prev,
-        itemCategory: null
-      }));
+      setErrors(prev => ({ ...prev, itemCategory: null }));
     }
   };
 
   const handleCategoryInputChange = (value) => {
-    setFormData(prev => ({
-      ...prev,
-      itemCategory: value
-    }));
+    setFormData(prev => ({ ...prev, itemCategory: value }));
     setCategorySearchTerm(value);
     setShowCategoryDropdown(true);
     if (errors.itemCategory) {
-      setErrors(prev => ({
-        ...prev,
-        itemCategory: null
-      }));
+      setErrors(prev => ({ ...prev, itemCategory: null }));
     }
   };
 
   const getFilteredCategories = (searchTerm = categorySearchTerm) => {
     if (!searchTerm) return availableCategories;
-    
     const searchLower = searchTerm.toLowerCase();
-    return availableCategories.filter(cat => 
-      cat.toLowerCase().includes(searchLower)
-    );
+    return availableCategories.filter(cat => cat.toLowerCase().includes(searchLower));
   };
 
   const isCreatingNewCategory = (categoryValue = formData.itemCategory) => {
     if (!categoryValue.trim()) return false;
-    return !availableCategories.some(
-      cat => cat.toLowerCase() === categoryValue.toLowerCase()
-    );
+    return !availableCategories.some(cat => cat.toLowerCase() === categoryValue.toLowerCase());
   };
 
-  // ========================================
-  // RESALE CATEGORIES MANAGEMENT
-  // ========================================
-  
   const addResaleCategory = () => {
     setFormData(prev => ({
       ...prev,
-      resaleCategories: [
-        ...prev.resaleCategories,
-        {
-          itemCategory: '',
-          directResalePercentage: '',
-          buyingFromWholesalerPercentage: '',
-          wholesalerLabourPerGram: '', // ADDED
-          polishRepairEnabled: false,
-          polishRepairResalePercentage: '',
-          polishRepairCostPercentage: '',
-          polishRepairLabourPerGram: '' // ADDED
-        }
-      ]
+      resaleCategories: [...prev.resaleCategories, {
+        itemCategory: '',
+        directResalePercentage: '',
+        buyingFromWholesalerPercentage: '',
+        wholesalerLabourPerGram: '',
+        polishRepairEnabled: false,
+        polishRepairResalePercentage: '',
+        polishRepairCostPercentage: '',
+        polishRepairLabourPerGram: ''
+      }]
     }));
   };
 
@@ -234,7 +192,6 @@ const ExtendedJewelryForm = ({
       setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }));
     }
     
-    // Clear polish/repair fields when toggle is disabled
     if (field === 'polishRepairEnabled' && !value) {
       setFormData(prev => ({
         ...prev,
@@ -244,21 +201,20 @@ const ExtendedJewelryForm = ({
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
             polishRepairCostPercentage: '',
-            polishRepairLabourPerGram: '' // ADDED
+            polishRepairLabourPerGram: ''
           } : cat
         )
       }));
       
-      // Clear related errors including labour field
       const errorKey1 = `resaleCategories.${index}.polishRepairResalePercentage`;
       const errorKey2 = `resaleCategories.${index}.polishRepairCostPercentage`;
-      const errorKey3 = `resaleCategories.${index}.polishRepairLabourPerGram`; // ADDED
+      const errorKey3 = `resaleCategories.${index}.polishRepairLabourPerGram`;
       if (errors[errorKey1] || errors[errorKey2] || errors[errorKey3]) {
         setErrors(prev => {
           const newErrors = { ...prev };
           delete newErrors[errorKey1];
           delete newErrors[errorKey2];
-          delete newErrors[errorKey3]; // ADDED
+          delete newErrors[errorKey3];
           return newErrors;
         });
       }
@@ -266,10 +222,7 @@ const ExtendedJewelryForm = ({
     
     const errorKey = `resaleCategories.${index}.${field}`;
     if (errors[errorKey]) {
-      setErrors(prev => ({
-        ...prev,
-        [errorKey]: null
-      }));
+      setErrors(prev => ({ ...prev, [errorKey]: null }));
     }
   };
 
@@ -282,16 +235,10 @@ const ExtendedJewelryForm = ({
   const handleDescriptionChange = (role, value) => {
     setFormData(prev => ({
       ...prev,
-      descriptions: {
-        ...prev.descriptions,
-        [role]: value
-      }
+      descriptions: { ...prev.descriptions, [role]: value }
     }));
     if (errors[`descriptions.${role}`]) {
-      setErrors(prev => ({
-        ...prev,
-        [`descriptions.${role}`]: null
-      }));
+      setErrors(prev => ({ ...prev, [`descriptions.${role}`]: null }));
     }
   };
 
@@ -302,7 +249,7 @@ const ExtendedJewelryForm = ({
       itemCategory: '',
       purityPercentage: '',
       sellingPercentage: '',
-      wholesalerLabourPerGram: '', // ADDED
+      wholesalerLabourPerGram: '',
       truePurityPercentage: '',
       scrapBuyOwnPercentage: '',
       scrapBuyOtherPercentage: '',
@@ -310,7 +257,6 @@ const ExtendedJewelryForm = ({
       resaleCategories: [],
       buyingFromWholesalerPercentage: ''
     }));
-    
     setErrors({});
   };
 
@@ -323,11 +269,11 @@ const ExtendedJewelryForm = ({
             itemCategory: '',
             directResalePercentage: '',
             buyingFromWholesalerPercentage: '',
-            wholesalerLabourPerGram: '', // ADDED
+            wholesalerLabourPerGram: '',
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
             polishRepairCostPercentage: '',
-            polishRepairLabourPerGram: '' // ADDED
+            polishRepairLabourPerGram: ''
           }]
         : enabled ? prev.resaleCategories : []
     }));
@@ -344,145 +290,132 @@ const ExtendedJewelryForm = ({
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.type) {
-      newErrors.type = 'Type is required';
-    }
-    if (!formData.metal) {
-      newErrors.metal = 'Metal is required';
-    }
+    if (!formData.type) newErrors.type = t('category.form.typeRequired');
+    if (!formData.metal) newErrors.metal = t('category.form.metalRequired');
     if (!formData.code.trim()) {
-      newErrors.code = 'Code is required';
+      newErrors.code = t('category.form.codeRequired');
     } else if (formData.code.length > 100) {
-      newErrors.code = 'Code cannot exceed 100 characters';
+      newErrors.code = t('category.form.codeMaxLength');
     }
 
-    // NEW jewelry validations
     if (formData.type === 'NEW') {
       if (!formData.itemCategory.trim()) {
-        newErrors.itemCategory = 'Item category is required for NEW jewelry';
+        newErrors.itemCategory = t('category.form.itemCategoryRequired');
       } else if (formData.itemCategory.length > 100) {
-        newErrors.itemCategory = 'Item category cannot exceed 100 characters';
+        newErrors.itemCategory = t('category.form.itemCategoryMaxLength');
       }
       if (!formData.purityPercentage) {
-        newErrors.purityPercentage = 'Purity percentage is required';
+        newErrors.purityPercentage = t('category.form.purityRequired');
       } else {
         const purity = parseFloat(formData.purityPercentage);
         if (isNaN(purity) || purity < 1 || purity > 100) {
-          newErrors.purityPercentage = 'Purity percentage must be between 1 and 100';
+          newErrors.purityPercentage = t('category.form.purityRange');
         }
       }
       if (!formData.buyingFromWholesalerPercentage) {
-        newErrors.buyingFromWholesalerPercentage = 'Buying percentage is required';
+        newErrors.buyingFromWholesalerPercentage = t('category.form.buyingPercentageRequired');
       } else {
         const buying = parseFloat(formData.buyingFromWholesalerPercentage);
         if (isNaN(buying) || buying < 1) {
-          newErrors.buyingFromWholesalerPercentage = 'Buying percentage must be at least 1';
+          newErrors.buyingFromWholesalerPercentage = t('category.form.buyingPercentageMin');
         }
       }
-      // ADDED: Wholesaler Labour Per Gram validation
       if (formData.wholesalerLabourPerGram === '') {
-        newErrors.wholesalerLabourPerGram = 'Wholesaler labour per gram is required';
+        newErrors.wholesalerLabourPerGram = t('category.form.labourRequired');
       } else {
         const labour = parseFloat(formData.wholesalerLabourPerGram);
         if (isNaN(labour) || labour < 0) {
-          newErrors.wholesalerLabourPerGram = 'Wholesaler labour per gram must be 0 or greater';
+          newErrors.wholesalerLabourPerGram = t('category.form.labourMin');
         }
       }
       if (!formData.sellingPercentage) {
-        newErrors.sellingPercentage = 'Selling percentage is required';
+        newErrors.sellingPercentage = t('category.form.sellingPercentageRequired');
       } else {
         const selling = parseFloat(formData.sellingPercentage);
         if (isNaN(selling) || selling < 1) {
-          newErrors.sellingPercentage = 'Selling percentage must be at least 1';
+          newErrors.sellingPercentage = t('category.form.sellingPercentageMin');
         }
       }
     }
 
-    // OLD jewelry validations
     if (formData.type === 'OLD') {
       if (!formData.truePurityPercentage) {
-        newErrors.truePurityPercentage = 'True purity percentage is required';
+        newErrors.truePurityPercentage = t('category.form.truePurityRequired');
       } else {
         const purity = parseFloat(formData.truePurityPercentage);
         if (isNaN(purity) || purity < 1 || purity > 100) {
-          newErrors.truePurityPercentage = 'True purity percentage must be between 1 and 100';
+          newErrors.truePurityPercentage = t('category.form.truePurityRange');
         }
       }
       if (!formData.scrapBuyOwnPercentage) {
-        newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage is required';
+        newErrors.scrapBuyOwnPercentage = t('category.form.scrapBuyOwnRequired');
       } else {
         const scrapOwn = parseFloat(formData.scrapBuyOwnPercentage);
         if (isNaN(scrapOwn) || scrapOwn < 1) {
-          newErrors.scrapBuyOwnPercentage = 'Scrap buy own percentage must be at least 1';
+          newErrors.scrapBuyOwnPercentage = t('category.form.scrapBuyOwnMin');
         }
       }
       if (!formData.scrapBuyOtherPercentage) {
-        newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage is required';
+        newErrors.scrapBuyOtherPercentage = t('category.form.scrapBuyOtherRequired');
       } else {
         const scrapOther = parseFloat(formData.scrapBuyOtherPercentage);
         if (isNaN(scrapOther) || scrapOther < 1) {
-          newErrors.scrapBuyOtherPercentage = 'Scrap buy other percentage must be at least 1';
+          newErrors.scrapBuyOtherPercentage = t('category.form.scrapBuyOtherMin');
         }
       }
 
-      // Validate resale categories if resale enabled
       if (formData.resaleEnabled) {
         if (!formData.resaleCategories || formData.resaleCategories.length === 0) {
-          newErrors.resaleCategories = 'At least one resale category is required when resale is enabled';
+          newErrors.resaleCategories = t('category.form.resaleCategoryRequired');
         } else {
-          // Check for duplicate category names
           const categoryNames = formData.resaleCategories.map(cat => cat.itemCategory.trim().toLowerCase());
           const uniqueNames = new Set(categoryNames.filter(name => name));
           
           if (categoryNames.filter(name => name).length !== uniqueNames.size) {
-            newErrors.resaleCategories = 'Duplicate category names are not allowed';
+            newErrors.resaleCategories = t('category.form.duplicateCategoryNames');
           }
 
-          // Validate each category
           formData.resaleCategories.forEach((cat, index) => {
             if (!cat.itemCategory.trim()) {
-              newErrors[`resaleCategories.${index}.itemCategory`] = 'Category name is required';
+              newErrors[`resaleCategories.${index}.itemCategory`] = t('category.form.categoryNameRequired');
             }
             if (!cat.directResalePercentage) {
-              newErrors[`resaleCategories.${index}.directResalePercentage`] = 'Required';
+              newErrors[`resaleCategories.${index}.directResalePercentage`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.directResalePercentage) < 1) {
-              newErrors[`resaleCategories.${index}.directResalePercentage`] = 'Must be at least 1';
+              newErrors[`resaleCategories.${index}.directResalePercentage`] = t('category.form.directResaleMin');
             }
             if (!cat.buyingFromWholesalerPercentage) {
-              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Required';
+              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.buyingFromWholesalerPercentage) < 1) {
-              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = 'Must be at least 1';
+              newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = t('category.form.directResaleMin');
             }
             
-            // ADDED: Wholesaler Labour Per Gram validation
             if (cat.wholesalerLabourPerGram === '') {
-              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = 'Required';
+              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.wholesalerLabourPerGram) < 0) {
-              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = 'Must be 0 or greater';
+              newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = t('category.form.polishLabourMin');
             }
             
-            // Validate polish/repair fields only if enabled
             if (cat.polishRepairEnabled) {
               if (!cat.polishRepairResalePercentage) {
-                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Required when polish/repair enabled';
+                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = t('category.form.polishResaleRequired');
               } else if (parseFloat(cat.polishRepairResalePercentage) < 1) {
-                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = 'Must be at least 1';
+                newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = t('category.form.polishResaleMin');
               }
               
               if (cat.polishRepairCostPercentage === '') {
-                newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Required when polish/repair enabled';
+                newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = t('category.form.polishCostRequired');
               } else {
                 const cost = parseFloat(cat.polishRepairCostPercentage);
                 if (isNaN(cost) || cost < 0 || cost > 50) {
-                  newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = 'Must be 0-50';
+                  newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = t('category.form.polishCostRange');
                 }
               }
               
-              // ADDED: Polish/Repair Labour Per Gram validation
               if (cat.polishRepairLabourPerGram === '') {
-                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = 'Required when polish/repair enabled';
+                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = t('category.form.polishLabourRequired');
               } else if (parseFloat(cat.polishRepairLabourPerGram) < 0) {
-                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = 'Must be 0 or greater';
+                newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = t('category.form.polishLabourMin');
               }
             }
           });
@@ -497,23 +430,18 @@ const ExtendedJewelryForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
       
-      const submitData = {
-        ...formData,
-        code: formData.code.trim()
-      };
+      const submitData = { ...formData, code: formData.code.trim() };
 
       if (formData.type === 'NEW') {
         submitData.itemCategory = formData.itemCategory.trim();
         submitData.purityPercentage = parseFloat(formData.purityPercentage);
         submitData.buyingFromWholesalerPercentage = parseFloat(formData.buyingFromWholesalerPercentage);
-        submitData.wholesalerLabourPerGram = parseFloat(formData.wholesalerLabourPerGram); // ADDED
+        submitData.wholesalerLabourPerGram = parseFloat(formData.wholesalerLabourPerGram);
         submitData.sellingPercentage = parseFloat(formData.sellingPercentage);
         
         delete submitData.truePurityPercentage;
@@ -532,12 +460,12 @@ const ExtendedJewelryForm = ({
             itemCategory: cat.itemCategory.trim(),
             directResalePercentage: parseFloat(cat.directResalePercentage),
             buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
-            wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram), // ADDED
+            wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
             polishRepairEnabled: Boolean(cat.polishRepairEnabled),
             ...(cat.polishRepairEnabled && {
               polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
               polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
-              polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram) // ADDED
+              polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
             })
           }));
         } else {
@@ -548,7 +476,7 @@ const ExtendedJewelryForm = ({
         delete submitData.purityPercentage;
         delete submitData.sellingPercentage;
         delete submitData.buyingFromWholesalerPercentage;
-        delete submitData.wholesalerLabourPerGram; // ADDED
+        delete submitData.wholesalerLabourPerGram;
       }
 
       await onSubmit(submitData);
@@ -568,7 +496,7 @@ const ExtendedJewelryForm = ({
             .join(', ');
           serverErrors.general = errorMessages;
         } else {
-          serverErrors.general = 'Validation failed';
+          serverErrors.general = t('category.form.validationFailed');
         }
         setErrors(serverErrors);
       } else if (error.response?.data?.message) {
@@ -591,12 +519,12 @@ const ExtendedJewelryForm = ({
       )}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+        <h3 className="text-lg font-medium text-gray-900">{t('category.form.basicInfo')}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Type <span className="text-red-500">*</span>
+              {t('category.form.type')} <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.type}
@@ -606,18 +534,16 @@ const ExtendedJewelryForm = ({
               }`}
               disabled={isEditing}
             >
-              <option value="">Select Type</option>
-              <option value="NEW">NEW</option>
-              <option value="OLD">OLD</option>
+              <option value="">{t('category.form.selectType')}</option>
+              <option value="NEW">{t('category.management.types.new')}</option>
+              <option value="OLD">{t('category.management.types.old')}</option>
             </select>
-            {errors.type && (
-              <p className="text-red-500 text-sm mt-1">{errors.type}</p>
-            )}
+            {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Metal <span className="text-red-500">*</span>
+              {t('category.form.metal')} <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.metal}
@@ -626,40 +552,35 @@ const ExtendedJewelryForm = ({
                 errors.metal ? 'border-red-500' : 'border-gray-300'
               }`}
             >
-              <option value="">Select Metal</option>
-              <option value="GOLD">Gold</option>
-              <option value="SILVER">Silver</option>
+              <option value="">{t('category.form.selectMetal')}</option>
+              <option value="GOLD">{t('category.management.metals.gold')}</option>
+              <option value="SILVER">{t('category.management.metals.silver')}</option>
             </select>
-            {errors.metal && (
-              <p className="text-red-500 text-sm mt-1">{errors.metal}</p>
-            )}
+            {errors.metal && <p className="text-red-500 text-sm mt-1">{errors.metal}</p>}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Code/Stamp <span className="text-red-500">*</span>
+              {t('category.form.codeStamp')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={formData.code}
               onChange={(e) => handleInputChange('code', e.target.value)}
-              placeholder="e.g., ABC123, વિશિષ્ટ123"
+              placeholder={t('category.form.codePlaceholder')}
               maxLength={100}
               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                 errors.code ? 'border-red-500' : 'border-gray-300'
               }`}
             />
-            {errors.code && (
-              <p className="text-red-500 text-sm mt-1">{errors.code}</p>
-            )}
+            {errors.code && <p className="text-red-500 text-sm mt-1">{errors.code}</p>}
           </div>
         </div>
 
-        {/* Item Category - Only for NEW jewelry */}
         {formData.type === 'NEW' && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Item Category <span className="text-red-500">*</span>
+              {t('category.form.itemCategory')} <span className="text-red-500">*</span>
             </label>
             <div className="relative" ref={categoryDropdownRef}>
               <div className="relative">
@@ -668,7 +589,7 @@ const ExtendedJewelryForm = ({
                   value={formData.itemCategory}
                   onChange={(e) => handleCategoryInputChange(e.target.value)}
                   onFocus={() => setShowCategoryDropdown(true)}
-                  placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
+                  placeholder={t('category.form.selectCategoryPlaceholder')}
                   className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.itemCategory ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -686,7 +607,7 @@ const ExtendedJewelryForm = ({
                   {loadingCategories ? (
                     <div className="p-4 text-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                      <p className="text-sm text-gray-500 mt-2">Loading...</p>
+                      <p className="text-sm text-gray-500 mt-2">{t('category.form.loading')}</p>
                     </div>
                   ) : (
                     <>
@@ -699,7 +620,7 @@ const ExtendedJewelryForm = ({
                           <Plus size={16} className="text-blue-600 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-blue-700">
-                              Create new category
+                              {t('category.form.createNewCategory')}
                             </div>
                             <div className="text-xs text-blue-600 truncate">
                               "{formData.itemCategory}"
@@ -723,7 +644,7 @@ const ExtendedJewelryForm = ({
                         ))
                       ) : !showCreateNewOption ? (
                         <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                          No categories found. Type to create new.
+                          {t('category.form.noCategoriesFound')}
                         </div>
                       ) : null}
                     </>
@@ -732,7 +653,7 @@ const ExtendedJewelryForm = ({
               )}
               {!formData.metal && (
                 <p className="text-sm text-gray-500 mt-1">
-                  Please select a metal first
+                  {t('category.form.selectMetalFirst')}
                 </p>
               )}
             </div>
@@ -742,18 +663,17 @@ const ExtendedJewelryForm = ({
           </div>
         )}
 
-        {/* NEW Jewelry Fields */}
         {formData.type === 'NEW' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Purity % <span className="text-red-500">*</span>
+                {t('category.form.purity')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.purityPercentage}
                 onChange={(e) => handleInputChange('purityPercentage', e.target.value)}
-                placeholder="91.6"
+                placeholder={t('category.form.purityPlaceholder')}
                 min="1"
                 max="100"
                 step="0.01"
@@ -768,13 +688,13 @@ const ExtendedJewelryForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Buying from Wholesaler % <span className="text-red-500">*</span>
+                {t('category.form.buyingFromWholesaler')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.buyingFromWholesalerPercentage}
                 onChange={(e) => handleInputChange('buyingFromWholesalerPercentage', e.target.value)}
-                placeholder="85.5"
+                placeholder={t('category.form.buyingFromWholesalerPlaceholder')}
                 min="1"
                 step="0.01"
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -786,23 +706,22 @@ const ExtendedJewelryForm = ({
               )}
             </div>
 
-            {/* ADDED: Wholesaler Labour Per Gram */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Wholesaler Labour Per Gram (₹) <span className="text-red-500">*</span>
+                {t('category.form.wholesalerLabour')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.wholesalerLabourPerGram}
                 onChange={(e) => handleInputChange('wholesalerLabourPerGram', e.target.value)}
-                placeholder="50"
+                placeholder={t('category.form.wholesalerLabourPlaceholder')}
                 min="0"
                 step="0.01"
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.wholesalerLabourPerGram ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+              <p className="text-xs text-gray-500 mt-1">{t('category.form.labourNote')}</p>
               {errors.wholesalerLabourPerGram && (
                 <p className="text-red-500 text-sm mt-1">{errors.wholesalerLabourPerGram}</p>
               )}
@@ -810,13 +729,13 @@ const ExtendedJewelryForm = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Selling % <span className="text-red-500">*</span>
+                {t('category.form.selling')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
                 value={formData.sellingPercentage}
                 onChange={(e) => handleInputChange('sellingPercentage', e.target.value)}
-                placeholder="95.0"
+                placeholder={t('category.form.sellingPlaceholder')}
                 min="1"
                 step="0.01"
                 className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -830,19 +749,18 @@ const ExtendedJewelryForm = ({
           </div>
         )}
 
-        {/* OLD Jewelry Fields */}
         {formData.type === 'OLD' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  True Purity % <span className="text-red-500">*</span>
+                  {t('category.form.truePurity')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={formData.truePurityPercentage}
                   onChange={(e) => handleInputChange('truePurityPercentage', e.target.value)}
-                  placeholder="91.6"
+                  placeholder={t('category.form.truePurityPlaceholder')}
                   min="1"
                   max="100"
                   step="0.01"
@@ -857,13 +775,13 @@ const ExtendedJewelryForm = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scrap Buy Own % <span className="text-red-500">*</span>
+                  {t('category.form.scrapBuyOwn')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={formData.scrapBuyOwnPercentage}
                   onChange={(e) => handleInputChange('scrapBuyOwnPercentage', e.target.value)}
-                  placeholder="85.0"
+                  placeholder={t('category.form.scrapBuyOwnPlaceholder')}
                   min="1"
                   step="0.01"
                   className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -877,13 +795,13 @@ const ExtendedJewelryForm = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Scrap Buy Other % <span className="text-red-500">*</span>
+                  {t('category.form.scrapBuyOther')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   value={formData.scrapBuyOtherPercentage}
                   onChange={(e) => handleInputChange('scrapBuyOtherPercentage', e.target.value)}
-                  placeholder="80.0"
+                  placeholder={t('category.form.scrapBuyOtherPlaceholder')}
                   min="1"
                   step="0.01"
                   className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -896,10 +814,9 @@ const ExtendedJewelryForm = ({
               </div>
             </div>
 
-            {/* Resale Enable Toggle */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Resale Options
+                {t('category.form.resaleOptions')}
               </label>
               <div className="flex items-center space-x-3">
                 <button
@@ -916,27 +833,26 @@ const ExtendedJewelryForm = ({
                   />
                 </button>
                 <span className="text-sm text-gray-700">
-                  {formData.resaleEnabled ? 'Enabled' : 'Disabled'}
+                  {formData.resaleEnabled ? t('category.form.enabled') : t('category.form.disabled')}
                 </span>
               </div>
               <p className="text-sm text-gray-500">
-                When enabled, you must add at least one resale category with direct resale configuration.
+                {t('category.form.resaleNote')}
               </p>
             </div>
 
-            {/* Resale Categories Section */}
             {formData.resaleEnabled && (
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium text-blue-900">
-                    Resale Categories <span className="text-red-500">*</span>
+                    {t('category.form.resaleCategories')} <span className="text-red-500">*</span>
                   </h4>
                 </div>
 
                 {formData.resaleCategories.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    <p className="text-sm">No resale categories added yet.</p>
-                    <p className="text-xs mt-1">Click "Add Category" below to create your first resale category.</p>
+                    <p className="text-sm">{t('category.form.noResaleCategories')}</p>
+                    <p className="text-xs mt-1">{t('category.form.addFirstResaleCategory')}</p>
                   </div>
                 )}
 
@@ -944,24 +860,23 @@ const ExtendedJewelryForm = ({
                   <div key={index} className="bg-white p-4 rounded-lg border border-blue-300 space-y-3">
                     <div className="flex items-center justify-between mb-3">
                       <h5 className="font-medium text-gray-900">
-                        Category #{index + 1}
+                        {t('category.form.categoryNumber', { number: index + 1 })}
                       </h5>
                       {formData.resaleCategories.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeResaleCategory(index)}
                           className="text-red-600 hover:text-red-700 p-1"
-                          title="Remove Category"
+                          title={t('category.form.removeCategory')}
                         >
                           <Trash2 size={16} />
                         </button>
                       )}
                     </div>
 
-                    {/* Category Name with Dropdown */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Category Name <span className="text-red-500">*</span>
+                        {t('category.form.categoryName')} <span className="text-red-500">*</span>
                       </label>
                       <div 
                         className="relative" 
@@ -975,7 +890,7 @@ const ExtendedJewelryForm = ({
                             value={category.itemCategory}
                             onChange={(e) => updateResaleCategory(index, 'itemCategory', e.target.value)}
                             onFocus={() => setResaleCategoryDropdowns(prev => ({ ...prev, [index]: true }))}
-                            placeholder="Select or type category name (Chain, Ring, હાર, चेन)"
+                            placeholder={t('category.form.selectCategoryPlaceholder')}
                             maxLength={100}
                             className={`w-full border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                               errors[`resaleCategories.${index}.itemCategory`] ? 'border-red-500' : 'border-gray-300'
@@ -993,7 +908,7 @@ const ExtendedJewelryForm = ({
                             {loadingCategories ? (
                               <div className="p-4 text-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                                <p className="text-sm text-gray-500 mt-2">Loading...</p>
+                                <p className="text-sm text-gray-500 mt-2">{t('category.form.loading')}</p>
                               </div>
                             ) : (
                               <>
@@ -1006,7 +921,7 @@ const ExtendedJewelryForm = ({
                                     <Plus size={16} className="text-blue-600 flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
                                       <div className="text-sm font-medium text-blue-700">
-                                        Create new category
+                                        {t('category.form.createNewCategory')}
                                       </div>
                                       <div className="text-xs text-blue-600 truncate">
                                         "{category.itemCategory}"
@@ -1030,7 +945,7 @@ const ExtendedJewelryForm = ({
                                   ))
                                 ) : !category.itemCategory.trim() || !isCreatingNewCategory(category.itemCategory) ? (
                                   <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                                    No categories found. Type to create new.
+                                    {t('category.form.noCategoriesFound')}
                                   </div>
                                 ) : null}
                               </>
@@ -1043,17 +958,16 @@ const ExtendedJewelryForm = ({
                       )}
                     </div>
 
-                    {/* Direct Resale and Buying from Wholesaler */}
                     <div className="grid grid-cols-3 gap-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Direct Resale % <span className="text-red-500">*</span>
+                          {t('category.form.directResale')} <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
                           value={category.directResalePercentage}
                           onChange={(e) => updateResaleCategory(index, 'directResalePercentage', e.target.value)}
-                          placeholder="92.0"
+                          placeholder={t('category.form.directResalePlaceholder')}
                           min="1"
                           step="0.01"
                           className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -1067,13 +981,13 @@ const ExtendedJewelryForm = ({
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Buying from Wholesaler % <span className="text-red-500">*</span>
+                          {t('category.form.buyingFromWholesaler')} <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
                           value={category.buyingFromWholesalerPercentage}
                           onChange={(e) => updateResaleCategory(index, 'buyingFromWholesalerPercentage', e.target.value)}
-                          placeholder="85.5"
+                          placeholder={t('category.form.buyingFromWholesalerPlaceholder')}
                           min="1"
                           step="0.01"
                           className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -1085,34 +999,32 @@ const ExtendedJewelryForm = ({
                         )}
                       </div>
 
-                      {/* ADDED: Wholesaler Labour Per Gram */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Wholesaler Labour Per Gram (₹) <span className="text-red-500">*</span>
+                          {t('category.form.wholesalerLabour')} <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="number"
                           value={category.wholesalerLabourPerGram}
                           onChange={(e) => updateResaleCategory(index, 'wholesalerLabourPerGram', e.target.value)}
-                          placeholder="50"
+                          placeholder={t('category.form.wholesalerLabourPlaceholder')}
                           min="0"
                           step="0.01"
                           className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                             errors[`resaleCategories.${index}.wholesalerLabourPerGram`] ? 'border-red-500' : 'border-gray-300'
                           }`}
                         />
-                        <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+                        <p className="text-xs text-gray-500 mt-1">{t('category.form.labourNote')}</p>
                         {errors[`resaleCategories.${index}.wholesalerLabourPerGram`] && (
                           <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.wholesalerLabourPerGram`]}</p>
                         )}
                       </div>
                     </div>
 
-                    {/* Polish/Repair Toggle */}
                     <div className="pt-3 border-t border-gray-200">
                       <div className="flex items-center justify-between mb-3">
                         <label className="text-sm font-medium text-gray-700">
-                          Polish/Repair Resale
+                          {t('category.form.polishRepair')}
                         </label>
                         <button
                           type="button"
@@ -1129,18 +1041,17 @@ const ExtendedJewelryForm = ({
                         </button>
                       </div>
                       
-                      {/* Polish/Repair Fields - Only shown when toggle is enabled */}
                       {category.polishRepairEnabled && (
                         <div className="grid grid-cols-3 gap-3 mt-3">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Polish/Repair Resale % <span className="text-red-500">*</span>
+                              {t('category.form.polishResale')} <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="number"
                               value={category.polishRepairResalePercentage}
                               onChange={(e) => updateResaleCategory(index, 'polishRepairResalePercentage', e.target.value)}
-                              placeholder="90.0"
+                              placeholder={t('category.form.polishResalePlaceholder')}
                               min="1"
                               step="0.01"
                               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -1154,13 +1065,13 @@ const ExtendedJewelryForm = ({
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Polish/Repair Cost % <span className="text-red-500">*</span>
+                              {t('category.form.polishCost')} <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="number"
                               value={category.polishRepairCostPercentage}
                               onChange={(e) => updateResaleCategory(index, 'polishRepairCostPercentage', e.target.value)}
-                              placeholder="5.0"
+                              placeholder={t('category.form.polishCostPlaceholder')}
                               min="0"
                               max="50"
                               step="0.01"
@@ -1173,23 +1084,22 @@ const ExtendedJewelryForm = ({
                             )}
                           </div>
 
-                          {/* ADDED: Polish Repair Labour Per Gram */}
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Polish Repair Labour Per Gram (₹) <span className="text-red-500">*</span>
+                              {t('category.form.polishLabour')} <span className="text-red-500">*</span>
                             </label>
                             <input
                               type="number"
                               value={category.polishRepairLabourPerGram}
                               onChange={(e) => updateResaleCategory(index, 'polishRepairLabourPerGram', e.target.value)}
-                              placeholder="30"
+                              placeholder={t('category.form.polishLabourPlaceholder')}
                               min="0"
                               step="0.01"
                               className={`w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                 errors[`resaleCategories.${index}.polishRepairLabourPerGram`] ? 'border-red-500' : 'border-gray-300'
                               }`}
                             />
-                            <p className="text-xs text-gray-500 mt-1">Can be 0 if no labour charges</p>
+                            <p className="text-xs text-gray-500 mt-1">{t('category.form.labourNote')}</p>
                             {errors[`resaleCategories.${index}.polishRepairLabourPerGram`] && (
                               <p className="text-red-500 text-xs mt-1">{errors[`resaleCategories.${index}.polishRepairLabourPerGram`]}</p>
                             )}
@@ -1199,24 +1109,22 @@ const ExtendedJewelryForm = ({
                       
                       {!category.polishRepairEnabled && (
                         <p className="text-xs text-gray-500 mt-2">
-                          Enable this option to add polish/repair resale configuration
+                          {t('category.form.enablePolishNote')}
                         </p>
                       )}
                     </div>
                   </div>
                 ))}
 
-                {/* Add Category Button */}
                 <button
                   type="button"
                   onClick={addResaleCategory}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   <Plus size={16} />
-                  Add Category
+                  {t('category.form.addCategory')}
                 </button>
 
-                {/* Show resale categories error here */}
                 {errors.resaleCategories && (
                   <p className="text-red-700 text-sm font-medium">{errors.resaleCategories}</p>
                 )}
@@ -1226,17 +1134,16 @@ const ExtendedJewelryForm = ({
         )}
       </div>
 
-      {/* Multi-Level Descriptions */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">Multi-Level Descriptions</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t('category.form.descriptions')}</h3>
           <button
             type="button"
             onClick={() => setShowDescriptionHelp(!showDescriptionHelp)}
             className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
           >
             {showDescriptionHelp ? <EyeOff size={16} /> : <Eye size={16} />}
-            {showDescriptionHelp ? 'Hide Help' : 'Show Help'}
+            {showDescriptionHelp ? t('category.form.hideHelp') : t('category.form.showHelp')}
           </button>
         </div>
 
@@ -1245,11 +1152,11 @@ const ExtendedJewelryForm = ({
             <div className="flex items-start gap-3">
               <Info size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="space-y-2 text-sm text-blue-800">
-                <h4 className="font-medium">Description Priority System:</h4>
+                <h4 className="font-medium">{t('category.form.descriptionHelp.title')}</h4>
                 <ul className="space-y-1">
-                  <li><strong>1. Universal Description:</strong> Shown to all users if no role-specific description exists</li>
-                  <li><strong>2. Role-Based Descriptions:</strong> Override universal description for specific roles</li>
-                  <li><strong>3. Multi-Language Support:</strong> All descriptions support Gujarati, Hindi, English, and symbols</li>
+                  <li><strong>1.</strong> {t('category.form.descriptionHelp.universal')}</li>
+                  <li><strong>2.</strong> {t('category.form.descriptionHelp.roleBased')}</li>
+                  <li><strong>3.</strong> {t('category.form.descriptionHelp.multiLang')}</li>
                 </ul>
               </div>
             </div>
@@ -1257,43 +1164,46 @@ const ExtendedJewelryForm = ({
         )}
 
         <div className="space-y-4">
-          {/* Universal Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Universal Description
-              <span className="text-xs text-gray-500 ml-2">(Fallback for all roles)</span>
+              {t('category.form.universalDescription')}
+              <span className="text-xs text-gray-500 ml-2">{t('category.form.fallbackAllRoles')}</span>
             </label>
             <textarea
               value={formData.descriptions.universal}
               onChange={(e) => handleDescriptionChange('universal', e.target.value)}
-              placeholder="Universal description visible to all users"
+              placeholder={t('category.form.universalPlaceholder')}
               rows={3}
               maxLength={500}
               className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical border-gray-300"
             />
             <p className="text-gray-500 text-sm mt-1 text-right">
-              {formData.descriptions.universal.length}/500
+              {t('category.form.characterCount', { current: formData.descriptions.universal.length, max: 500 })}
             </p>
           </div>
 
-          {/* Role-specific Descriptions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['admin', 'manager', 'proClient', 'client'].map((role) => (
-              <div key={role}>
+            {[
+              { key: 'admin', label: t('category.form.adminOnly') },
+              { key: 'manager', label: t('category.form.managerOnly') },
+              { key: 'proClient', label: t('category.form.proClientOnly') },
+              { key: 'client', label: t('category.form.clientOnly') }
+            ].map(({ key, label }) => (
+              <div key={key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {role.charAt(0).toUpperCase() + role.slice(1).replace('proClient', 'Pro Client')} Only
-                  <span className="text-xs text-gray-500 ml-2">(Overrides Universal)</span>
+                  {label}
+                  <span className="text-xs text-gray-500 ml-2">{t('category.form.overridesUniversal')}</span>
                 </label>
                 <textarea
-                  value={formData.descriptions[role]}
-                  onChange={(e) => handleDescriptionChange(role, e.target.value)}
-placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific description`}
+                  value={formData.descriptions[key]}
+                  onChange={(e) => handleDescriptionChange(key, e.target.value)}
+                  placeholder={t('category.form.roleSpecificPlaceholder', { role: label })}
                   rows={3}
                   maxLength={500}
                   className="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical border-gray-300"
                 />
                 <p className="text-gray-500 text-sm mt-1 text-right">
-                  {formData.descriptions[role].length}/500
+                  {t('category.form.characterCount', { current: formData.descriptions[key].length, max: 500 })}
                 </p>
               </div>
             ))}
@@ -1301,7 +1211,6 @@ placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific descripti
         </div>
       </div>
 
-      {/* Form Actions */}
       <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <button
           type="button"
@@ -1309,7 +1218,7 @@ placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific descripti
           disabled={loading}
           className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          Cancel
+          {t('category.form.cancel')}
         </button>
         <div className="flex flex-col items-end gap-2">
           {errors.resaleCategories && formData.resaleEnabled && (
@@ -1324,8 +1233,8 @@ placeholder={`${role.charAt(0).toUpperCase() + role.slice(1)}-specific descripti
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
             )}
             {loading 
-              ? (isEditing ? 'Updating...' : 'Creating...') 
-              : (isEditing ? 'Update Category' : 'Create Category')
+              ? (isEditing ? t('category.form.updating') : t('category.form.creating')) 
+              : (isEditing ? t('category.form.updateCategory') : t('category.form.createCategory'))
             }
           </button>
         </div>

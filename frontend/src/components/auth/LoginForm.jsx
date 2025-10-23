@@ -151,10 +151,10 @@ const LoginForm = () => {
               <span className="text-white font-bold text-xl">JM</span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {t('login.title', 'Sign In')}
+              {t('auth.login.title')}
             </h2>
             <p className="text-gray-600">
-              {t('login.subtitle', 'Welcome back to Jewelry Manager')}
+              {t('auth.login.subtitle')}
             </p>
           </div>
 
@@ -171,7 +171,7 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                {t('login.username', 'Username')}
+                {t('auth.login.username')}
               </label>
               <div className="relative">
                 <Input
@@ -182,7 +182,7 @@ const LoginForm = () => {
                   autoComplete="username"
                   value={formData.username}
                   onChange={handleInputChange}
-                  placeholder={t('login.username', 'Username')}
+                  placeholder={t('auth.login.username')}
                   className="pl-10"
                   disabled={isSubmitting}
                 />
@@ -192,7 +192,7 @@ const LoginForm = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                {t('login.password', 'Password')}
+                {t('auth.login.password')}
               </label>
               <div className="relative">
                 <Input
@@ -203,7 +203,7 @@ const LoginForm = () => {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder={t('login.password', 'Password')}
+                  placeholder={t('auth.login.password')}
                   className="pl-10 pr-10"
                   disabled={isSubmitting}
                 />
@@ -213,6 +213,7 @@ const LoginForm = () => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isSubmitting}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -234,10 +235,10 @@ const LoginForm = () => {
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <LoadingSpinner size="small" className="mr-2" />
-                    {t('login.signingin', 'Signing In...')}
+                    {t('auth.login.signingin')}
                   </div>
                 ) : (
-                  t('login.signin', 'Sign In')
+                  t('auth.login.signin')
                 )}
               </Button>
             </div>
@@ -245,7 +246,7 @@ const LoginForm = () => {
 
           {/* Footer */}
           <div className="mt-8 text-center text-xs text-gray-500">
-            {t('app.version', 'Jewelry Manager v1.0')}
+            {t('app.version')}
           </div>
         </div>
       </div>

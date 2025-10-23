@@ -14,13 +14,165 @@
     "reports": "Reports",
     "reports_alt": "Rate Tables",
     "settings": "Settings",
-    "noItems": "No navigation items available"
+    "noItems": "No navigation items available",
+    "manageUsers": "Manage Users",
+    "manageShops": "Manage Shops"
+  },
+  "sidebar": {
+    "mobileHeaderTitle": "Jewelry Manager",
+    "closeMenu": "Close menu",
+    "userInfoPanel": "User information",
+    "yourRole": "Your role",
+    "platformAdmin": "Platform Admin",
+    "shopAdmin": "Shop Admin",
+    "version": "Jewelry Manager v1.0",
+    "navigation": "Navigation",
+    "noNavigationItems": "No navigation items available"
+  },
+  "rates": {
+    "display": {
+      "live": "Live",
+      "offline": "Offline",
+      "rateUpdatedBy": "Rate updated by",
+      "liveUpdate": "Live Update",
+      "today": "Today",
+      "gold": "Gold:",
+      "silver": "Silver:",
+      "rates": "Rates:",
+      "connecting": "Connecting...",
+      "reconnecting": "Reconnecting...",
+      "connectionIssues": "Connection issues",
+      "noRatesSet": "No rates set",
+      "failedToLoadRateInfo": "Failed to load rate info"
+    },
+    "setup": {
+      "title": "Rate Setup Required",
+      "initialSetupTitle": "Initial Rate Setup",
+      "initialSetupDescription": "Please set up your daily gold and silver rates to start using the calculator.",
+      "stepOf": "Step {{current}} of {{total}}",
+      "goldRatesSetup": "Gold Rates Setup",
+      "silverRatesSetup": "Silver Rates Setup",
+      "goldRatesDescription": "Set your gold rates per 10 grams. Selling rate must be equal to or higher than buying rate.",
+      "silverRatesDescription": "Set your silver rates per 1 kg. Selling rate must be equal to or higher than buying rate.",
+      "goldBuyingRate": "Gold Buying Rate",
+      "goldSellingRate": "Gold Selling Rate",
+      "silverBuyingRate": "Silver Buying Rate",
+      "silverSellingRate": "Silver Selling Rate",
+      "goldBuyPlaceholder": "e.g., 52000",
+      "goldSellPlaceholder": "e.g., 53000",
+      "silverBuyPlaceholder": "e.g., 75000",
+      "silverSellPlaceholder": "e.g., 78000",
+      "per10gBuying": "₹ per 10 grams (buying price)",
+      "per10gSelling": "₹ per 10 grams (selling price)",
+      "perKgBuying": "₹ per kg (buying price)",
+      "perKgSelling": "₹ per kg (selling price)",
+      "ratePreview": "Rate Preview:",
+      "per10g": "Per 10g:",
+      "perKg": "Per kg:",
+      "per1g": "Per 1g:",
+      "setupSummary": "Setup Summary",
+      "gold": "Gold:",
+      "silver": "Silver:",
+      "buy": "Buy",
+      "sell": "Sell",
+      "previous": "Previous",
+      "cancel": "Cancel",
+      "nextSilverRates": "Next: Silver Rates",
+      "settingUp": "Setting up...",
+      "completeSetup": "Complete Setup",
+      "importantNotes": "Important Notes:",
+      "note1": "Only whole numbers are accepted (no decimal values)",
+      "note2": "Gold rates are per 10 grams, Silver rates are per kg",
+      "note3": "Selling rates must be equal to or higher than buying rates",
+      "note4": "These rates will be used for all calculations in your shop",
+      "note5": "You can update these rates anytime from the rate management section",
+      "errors": {
+        "goldBuyRequired": "Gold buying rate is required",
+        "goldBuyPositive": "Gold buying rate must be a positive number",
+        "goldSellRequired": "Gold selling rate is required",
+        "goldSellPositive": "Gold selling rate must be a positive number",
+        "goldSellHigher": "Gold selling rate must be equal to or higher than buying rate",
+        "silverBuyRequired": "Silver buying rate is required",
+        "silverBuyPositive": "Silver buying rate must be a positive number",
+        "silverSellRequired": "Silver selling rate is required",
+        "silverSellPositive": "Silver selling rate must be a positive number",
+        "silverSellHigher": "Silver selling rate must be equal to or higher than buying rate",
+        "setupFailed": "Failed to set up rates"
+      }
+    },
+    "manager": {
+      "title": "Rate Management",
+      "subtitle": "Update daily gold and silver rates",
+      "accessRestricted": "Access Restricted",
+      "accessRestrictedMessage": "Only Shop Admin and Manager can update rates.",
+      "realTimeActive": "Real-time Active",
+      "offlineMode": "Offline Mode",
+      "loading": "Loading current rates...",
+      "ratesUpdatedRealTime": "Rates updated in real-time by another user",
+      "currentRates": "Current Rates",
+      "liveUpdated": "Live Updated",
+      "updatedBy": "Updated by",
+      "goldRatesTitle": "Gold Rates (₹ per 10 grams)",
+      "silverRatesTitle": "Silver Rates (₹ per kg)",
+      "goldBuyingRate": "Gold Buying Rate",
+      "goldSellingRate": "Gold Selling Rate",
+      "silverBuyingRate": "Silver Buying Rate",
+      "silverSellingRate": "Silver Selling Rate",
+      "goldBuyPlaceholder": "e.g., 52000",
+      "goldSellPlaceholder": "e.g., 53000",
+      "silverBuyPlaceholder": "e.g., 75000",
+      "silverSellPlaceholder": "e.g., 78000",
+      "goldBuyHelperText": "Rate at which gold is purchased (can be equal to selling rate)",
+      "goldSellHelperText": "Rate at which gold is sold (must be equal to or higher than buying rate)",
+      "silverBuyHelperText": "Rate at which silver is purchased (can be equal to selling rate)",
+      "silverSellHelperText": "Rate at which silver is sold (must be equal to or higher than buying rate)",
+      "updateRates": "Update Rates",
+      "updating": "Updating...",
+      "ratesUpdatedSuccessfully": "Rates updated successfully! Real-time update sent to all users.",
+      "importantNotes": "Important Notes:",
+      "note1": "Selling rates must be equal to or higher than buying rates",
+      "note2": "Gold rates are per 10 grams, Silver rates are per kg",
+      "note3": "Only whole numbers are accepted (no decimals)",
+      "note4Connected": "Updates are broadcasted instantly to all users",
+      "note4Disconnected": "Updates will sync when connection is restored",
+      "note5": "Rate changes trigger real-time notifications",
+      "note6Offline": "Currently in offline mode - real-time features unavailable",
+      "realTimeUpdatesActive": "Real-time updates are active. All rate changes will be instantly visible to all shop users.",
+      "errors": {
+        "allFieldsRequired": "All rate fields are required",
+        "goldBuyPositive": "Gold buying rate must be a positive number",
+        "goldSellPositive": "Gold selling rate must be a positive number",
+        "silverBuyPositive": "Silver buying rate must be a positive number",
+        "silverSellPositive": "Silver selling rate must be a positive number",
+        "goldSellHigher": "Gold selling rate must be equal to or higher than buying rate",
+        "silverSellHigher": "Silver selling rate must be equal to or higher than buying rate",
+        "updateFailed": "Failed to update rates",
+        "fetchFailed": "Failed to fetch current rates"
+      },
+      "gold": {
+        "buy": "Buy ₹{{rate}}/10g",
+        "sell": "Sell ₹{{rate}}/10g"
+      },
+      "silver": {
+        "buy": "Buy ₹{{rate}}/kg",
+        "sell": "Sell ₹{{rate}}/kg"
+      }
+    }
   },
   "header": {
     "shop": "Shop:",
     "profile": "Profile Settings",
     "logout": "Logout",
-    "language": "Language"
+    "language": "Language",
+    "jewelryCalculator": "Jewelry Calculator",
+    "username": "Username",
+    "role": "Role",
+    "updateCredentials": "Update Credentials",
+    "updateCredentialsTitle": "Update your credentials",
+    "english": "English",
+    "gujarati": "ગુજરાતી",
+    "hindi": "हिंदी",
+    "marathi": "मराठी"
   },
   "user": {
     "platform": "Platform Admin",
@@ -37,7 +189,17 @@
       "password": "Password",
       "signin": "Sign In",
       "signingin": "Signing In...",
-      "error": "Login failed. Please check your credentials."
+      "error": "Login failed. Please check your credentials.",
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required",
+      "invalidCredentials": "Invalid username or password",
+      "serverError": "Server error. Please try again later.",
+      "networkError": "Network error. Please check your connection.",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "contactSupport": "Contact support",
+      "tryAgain": "Try Again"
     },
     "logout": "Logout"
   },
@@ -83,7 +245,11 @@
         "noCategoriesFound": "No categories found",
         "createFirst": "Create your first category to get started",
         "noMatches": "No categories match your current filters",
-        "loading": "Loading categories..."
+        "loading": "Loading categories...",
+        "oldJewelry": "OLD Jewelry",
+        "notApplicable": "-",
+        "ownPercentage": "Own:",
+        "otherPercentage": "Other:"
       },
       "types": {
         "new": "NEW",
@@ -98,6 +264,115 @@
         "off": "Resale OFF",
         "standard": "Standard"
       }
+    },
+    "form": {
+      "basicInfo": "Basic Information",
+      "type": "Type",
+      "selectType": "Select Type",
+      "metal": "Metal",
+      "selectMetal": "Select Metal",
+      "codeStamp": "Code/Stamp",
+      "codePlaceholder": "e.g., ABC123, વિશિષ્ટ123",
+      "codeRequired": "Code is required",
+      "codeMaxLength": "Code cannot exceed 100 characters",
+      "metalRequired": "Metal is required",
+      "typeRequired": "Type is required",
+      "itemCategory": "Item Category",
+      "itemCategoryRequired": "Item category is required for NEW jewelry",
+      "itemCategoryMaxLength": "Item category cannot exceed 100 characters",
+      "selectCategoryPlaceholder": "Select or type category name (Chain, Ring, હાર, चेन)",
+      "noCategoriesFound": "No categories found. Type to create new.",
+      "selectMetalFirst": "Please select a metal first",
+      "createNewCategory": "Create new category",
+      "loading": "Loading...",
+      "purity": "Purity %",
+      "purityPlaceholder": "91.6",
+      "purityRequired": "Purity percentage is required",
+      "purityRange": "Purity percentage must be between 1 and 100",
+      "buyingFromWholesaler": "Buying from Wholesaler %",
+      "buyingFromWholesalerPlaceholder": "85.5",
+      "buyingPercentageRequired": "Buying percentage is required",
+      "buyingPercentageMin": "Buying percentage must be at least 1",
+      "wholesalerLabour": "Wholesaler Labour Per Gram (₹)",
+      "wholesalerLabourPlaceholder": "50",
+      "labourRequired": "Wholesaler labour per gram is required",
+      "labourMin": "Wholesaler labour per gram must be 0 or greater",
+      "labourNote": "Can be 0 if no labour charges",
+      "selling": "Selling %",
+      "sellingPlaceholder": "95.0",
+      "sellingPercentageRequired": "Selling percentage is required",
+      "sellingPercentageMin": "Selling percentage must be at least 1",
+      "truePurity": "True Purity %",
+      "truePurityPlaceholder": "91.6",
+      "truePurityRequired": "True purity percentage is required",
+      "truePurityRange": "True purity percentage must be between 1 and 100",
+      "scrapBuyOwn": "Scrap Buy Own %",
+      "scrapBuyOwnPlaceholder": "85.0",
+      "scrapBuyOwnRequired": "Scrap buy own percentage is required",
+      "scrapBuyOwnMin": "Scrap buy own percentage must be at least 1",
+      "scrapBuyOther": "Scrap Buy Other %",
+      "scrapBuyOtherPlaceholder": "80.0",
+      "scrapBuyOtherRequired": "Scrap buy other percentage is required",
+      "scrapBuyOtherMin": "Scrap buy other percentage must be at least 1",
+      "resaleOptions": "Resale Options",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "resaleNote": "When enabled, you must add at least one resale category with direct resale configuration.",
+      "resaleCategories": "Resale Categories",
+      "noResaleCategories": "No resale categories added yet.",
+      "addFirstResaleCategory": "Click \"Add Category\" below to create your first resale category.",
+      "categoryNumber": "Category #{{number}}",
+      "removeCategory": "Remove Category",
+      "categoryName": "Category Name",
+      "categoryNameRequired": "Category name is required",
+      "directResale": "Direct Resale %",
+      "directResalePlaceholder": "92.0",
+      "directResaleRequired": "Required",
+      "directResaleMin": "Must be at least 1",
+      "buyingFromWholesalerResale": "Buying from Wholesaler %",
+      "wholesalerLabourResale": "Wholesaler Labour Per Gram (₹)",
+      "polishRepair": "Polish/Repair Resale",
+      "polishResale": "Polish/Repair Resale %",
+      "polishResalePlaceholder": "90.0",
+      "polishResaleRequired": "Required when polish/repair enabled",
+      "polishResaleMin": "Must be at least 1",
+      "polishCost": "Polish/Repair Cost %",
+      "polishCostPlaceholder": "5.0",
+      "polishCostRequired": "Required when polish/repair enabled",
+      "polishCostRange": "Must be 0-50",
+      "polishLabour": "Polish Repair Labour Per Gram (₹)",
+      "polishLabourPlaceholder": "30",
+      "polishLabourRequired": "Required when polish/repair enabled",
+      "polishLabourMin": "Must be 0 or greater",
+      "enablePolishNote": "Enable this option to add polish/repair resale configuration",
+      "addCategory": "Add Category",
+      "resaleCategoryRequired": "At least one resale category is required when resale is enabled",
+      "duplicateCategoryNames": "Duplicate category names are not allowed",
+      "descriptions": "Multi-Level Descriptions",
+      "showHelp": "Show Help",
+      "hideHelp": "Hide Help",
+      "descriptionHelp": {
+        "title": "Description Priority System:",
+        "universal": "Universal Description: Shown to all users if no role-specific description exists",
+        "roleBased": "Role-Based Descriptions: Override universal description for specific roles",
+        "multiLang": "Multi-Language Support: All descriptions support Gujarati, Hindi, English, and symbols"
+      },
+      "universalDescription": "Universal Description",
+      "fallbackAllRoles": "(Fallback for all roles)",
+      "universalPlaceholder": "Universal description visible to all users",
+      "characterCount": "{{current}}/{{max}}",
+      "adminOnly": "Admin Only",
+      "managerOnly": "Manager Only",
+      "proClientOnly": "Pro Client Only",
+      "clientOnly": "Client Only",
+      "overridesUniversal": "(Overrides Universal)",
+      "roleSpecificPlaceholder": "{{role}}-specific description",
+      "cancel": "Cancel",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "updateCategory": "Update Category",
+      "createCategory": "Create Category",
+      "validationFailed": "Validation failed"
     }
   },
   "users": {
@@ -125,7 +400,8 @@
         "passwordMismatch": "Passwords do not match",
         "oldPasswordRequired": "Old password is required to change your password",
         "usernameOrPassword": "Provide username or password to update",
-        "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone."
+        "confirmDelete": "Are you sure you want to delete this user? This action cannot be undone.",
+        "passwordRetrieveFailed": "Failed to retrieve password"
       },
       "form": {
         "username": "Username",
@@ -142,7 +418,11 @@
         "selectRole": "Select a role",
         "passwordMatch": "Passwords match",
         "passwordNotMatch": "Passwords do not match",
-        "required": "Required"
+        "required": "Required",
+        "usernamePlaceholder": "Enter username",
+        "passwordPlaceholder": "Enter password (min 6 characters)",
+        "confirmPasswordPlaceholder": "Re-enter password",
+        "oldPasswordPlaceholder": "Enter your old password"
       },
       "buttons": {
         "create": "Create User",
@@ -161,7 +441,8 @@
       "table": {
         "noUsers": "No shop users yet",
         "createFirst": "Click \"Add New User\" to create your first user",
-        "loading": "Loading users..."
+        "loading": "Loading users...",
+        "created": "Created"
       },
       "roles": {
         "manager": "Manager",
@@ -173,14 +454,15 @@
   },
   "rateTable": {
     "title": "Rate Tables",
-    "subtitle": "Manage and view rate tables",
-    "editTable": "Edit Table",
-    "createTable": "Create Table",
-    "rateTableFormulas": "Manage rate tables with formulas",
+    "subtitle": "Manage rate tables with formulas",
     "viewFormulas": "View rate tables with formulas",
     "viewOnly": "View rate tables",
+    "rateTableFormulas": "Manage rate tables with formulas",
+    "editTable": "Edit Table",
+    "createTable": "Create Table",
     "success": {
-      "updated": "Table updated successfully"
+      "updated": "Table updated successfully",
+      "tableUpdated": "table updated"
     },
     "error": {
       "loadFailed": "Failed to load rate tables",
@@ -194,7 +476,8 @@
       "save": "Save Changes",
       "addRow": "Add Row",
       "addColumn": "Add Column",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "createTable": "Create Table"
     },
     "tabs": {
       "gold": "Gold Table",
@@ -206,8 +489,8 @@
       "goldSell": "Gold Sell:",
       "silverBuy": "Silver Buy:",
       "silverSell": "Silver Sell:",
-      "perGram": "/gram",
-      "perKg": "/kg"
+      "perGram": " /10 gram",
+      "perKg": " /kg"
     },
     "table": {
       "rowColumn": "Row / Column",
@@ -240,14 +523,53 @@
       "valuePerGram": "Rate per",
       "grams": "gram",
       "gramPlural": "grams"
+    },
+    "loading": {
+      "message": "Loading rate tables..."
     }
   },
   "calculator": {
     "title": "Calculator",
+    "jewelryCalculator": "Jewellery Calculator",
+    "subtitle": "Calculate accurate prices based on current gold and silver rates",
+    "offlineMessage": "You're currently offline. Calculations will use the last known rates.",
     "newJewelry": "New Jewelry",
     "oldJewelry": "Old Jewelry",
+    "page": {
+      "loading": "Loading calculator...",
+      "error": "Error",
+      "refreshPage": "Refresh Page",
+      "selectJewelryType": "Select Jewelry Type",
+      "freshStock": "Fresh stock calculations",
+      "scrapResale": "Scrap & resale calculations",
+      "active": "✓ Active"
+    },
+    "currentRates": {
+      "title": "Current Rates",
+      "goldPer10g": "Gold (per 10g)",
+      "silverPerKg": "Silver (per kg)",
+      "buying": "Buying:",
+      "selling": "Selling:",
+      "lastUpdated": "Last updated by {{user}} on {{timestamp}}",
+      "live": "Live",
+      "loadingRates": "Loading rates..."
+    },
+    "realtime": {
+      "active": "Real-time updates active - Rates and calculations will update automatically",
+      "pulseDot": "Real-time connection indicator"
+    },
+    "features": {
+      "title": "Calculator Features",
+      "newJewelry": "NEW Jewelry: Metal filtering, category selection, and smart rounding",
+      "oldJewelry": "OLD Jewelry: Scrap calculations with Own/Other source selection",
+      "multiLanguage": "Multi-language support: Categories and descriptions in Gujarati, Hindi, and English",
+      "roleBased": "Role-based visibility: Different calculation details based on your access level",
+      "realtimeRates": "Real-time rate updates: Calculations automatically use the latest rates",
+      "smartRounding": "Smart rounding: NEW jewelry rounds up, OLD jewelry rounds down to nearest 50"
+    },
     "new": {
       "title": "NEW Jewelry Calculator",
+      "description": "Calculate buying and selling prices for new jewelry with category-based percentages",
       "buttons": {
         "resetAll": "Reset All",
         "calculate": "Calculate",
@@ -255,10 +577,10 @@
         "clear": "Clear"
       },
       "steps": {
-        "step1": "Step 1:",
-        "step2": "Step 2:",
-        "step3": "Step 3:",
-        "step4": "Step 4:",
+        "step1": "Step 1",
+        "step2": "Step 2",
+        "step3": "Step 3",
+        "step4": "Step 4",
         "selectMetal": "Select Metal Type",
         "filterCategory": "Filter by Item Category (Optional)",
         "selectCode": "Select Code/Stamp",
@@ -267,7 +589,7 @@
       "metal": {
         "gold": "Gold",
         "silver": "Silver",
-        "sell": "Sell:",
+        "sell": "Selling %",
         "per10g": "/10g",
         "perKg": "/kg"
       },
@@ -332,6 +654,7 @@
     },
     "old": {
       "title": "OLD Jewelry Calculator",
+      "description": "Calculate scrap values for old jewelry with Own/Other selection",
       "buttons": {
         "resetAll": "Reset All",
         "calculate": "Calculate Value",
@@ -339,11 +662,11 @@
         "clear": "Clear"
       },
       "steps": {
-        "step1": "Step 1:",
-        "step2": "Step 2:",
-        "step3": "Step 3:",
-        "step4": "Step 4:",
-        "step5": "Step 5:",
+        "step1": "Step 1",
+        "step2": "Step 2",
+        "step3": "Step 3",
+        "step4": "Step 4",
+        "step5": "Step 5",
         "selectMetal": "Select Metal Type",
         "selectSource": "Select Jewelry Source",
         "selectCode": "Select Code/Stamp",
@@ -443,6 +766,71 @@
       }
     }
   },
+  "blocking": {
+    "title": "System Blocked",
+    "subtitle": "Calculator is temporarily unavailable",
+    "loading": {
+      "checking": "Checking system status..."
+    },
+    "ready": {
+      "title": "System Ready",
+      "message": "Calculator is now available for use.",
+      "button": "Continue to Calculator"
+    },
+    "header": {
+      "dailyUpdate": "Daily Rate Update Required",
+      "defaultMessage": "Today's rates have not been updated. Please update rates to continue using the calculator."
+    },
+    "realTime": {
+      "updateIndicator": "Blocking status updated in real-time"
+    },
+    "connection": {
+      "offline": "Real-time updates are currently offline. Status changes may be delayed.",
+      "waitingUpdate": "Waiting for real-time rate update...",
+      "offlineMode": "Offline mode - Please refresh page after rates are updated"
+    },
+    "admin": {
+      "updateTitle": "Update Today's Rates",
+      "updateDescription": "Enter today's gold and silver rates to unblock the calculator for all users.",
+      "broadcastInstantly": "Updates will be broadcasted instantly.",
+      "syncWhenRestored": "Updates will sync when connection is restored."
+    },
+    "nonAdmin": {
+      "waitingTitle": "Waiting for Rate Update",
+      "onlyAdminMessage": "Only the Shop Admin or Manager can update today's rates.",
+      "contactMessage": "Please contact them to resolve this issue.",
+      "whatYouCanDo": "What you can do:",
+      "contactAdmin": "Contact your Shop Admin or Manager",
+      "askUpdate": "Ask them to update today's gold and silver rates",
+      "availableAfter": "The calculator will be available immediately after rates are updated",
+      "instantNotification": "You'll receive an instant notification when rates are updated",
+      "checkButton": "Check Status",
+      "checking": "Checking..."
+    },
+    "lastUpdate": {
+      "title": "Last Rate Update",
+      "updatedBy": "Updated by",
+      "on": "on",
+      "today": "(Today)",
+      "previousDay": "(Previous day)"
+    },
+    "systemInfo": {
+      "title": "About Daily Rate Updates:",
+      "point1": "Rates must be updated daily before 1:00 PM IST",
+      "point2": "If not updated by 1:00 PM, the calculator is automatically blocked",
+      "point3": "This ensures all calculations use current market rates",
+      "point4": "Updates are applied instantly to all shop users",
+      "point5": "Real-time notifications keep everyone informed"
+    },
+    "hook": {
+      "checkingStatus": "Checking system status...",
+      "failedToCheck": "Failed to check blocking status"
+    }
+  },
+  "wrapper": {
+      "checkingStatus": "Checking system status...",
+      "loading": "Loading..."
+  },
   "common": {
     "actions": {
       "add": "Add",
@@ -464,6 +852,92 @@
       "filter": "Filter",
       "reset": "Reset",
       "apply": "Apply"
+    },
+    "button": {
+      "loading": "Loading...",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "update": "Update",
+      "close": "Close",
+      "back": "Back",
+      "next": "Next",
+      "confirm": "Confirm",
+      "retry": "Retry"
+    },
+    "category": {
+      "management": {
+        "title": "Category Management",
+        "subtitle": "Manage NEW and OLD jewelry categories with descriptions and settings",
+        "addCategory": "Add Category",
+        "createNew": "Create New Category",
+        "edit": "Edit Category",
+        "delete": "Delete Category",
+        "success": {
+          "created": "Category created successfully",
+          "updated": "Category updated successfully",
+          "deleted": "Category deleted successfully"
+        },
+        "error": {
+          "loadFailed": "Failed to load categories",
+          "createFailed": "Failed to create category",
+          "updateFailed": "Failed to update category",
+          "deleteFailed": "Failed to delete category",
+          "confirmDelete": "Are you sure you want to delete category"
+        },
+        "filters": {
+          "title": "Filters",
+          "type": "Type",
+          "metal": "Metal",
+          "itemCategory": "Item Category",
+          "search": "Search codes, categories...",
+          "reset": "Reset",
+          "allTypes": "All Types",
+          "allMetals": "All Metals",
+          "allCategories": "All Categories"
+        },
+        "table": {
+          "codeDetails": "Code & Details",
+          "typeAndMetal": "Type & Metal",
+          "category": "Category",
+          "purity": "Purity %",
+          "keyPercentage": "Key %",
+          "settings": "Settings",
+          "actions": "Actions",
+          "noCategoriesFound": "No categories found",
+          "createFirst": "Create your first category to get started",
+          "noMatches": "No categories match your current filters",
+          "loading": "Loading categories...",
+          "oldJewelry": "OLD Jewelry",
+          "notApplicable": "-",
+          "ownPercentage": "Own:",
+          "otherPercentage": "Other:"
+        },
+        "types": {
+          "new": "NEW",
+          "old": "OLD"
+        },
+        "metals": {
+          "gold": "Gold",
+          "silver": "Silver"
+        },
+        "resale": {
+          "on": "Resale ON",
+          "off": "Resale OFF",
+          "standard": "Standard"
+        }
+      }
+    },
+    "spinner": {
+      "loading": "Loading...",
+      "pleaseWait": "Please wait..."
+    },
+    "modal": {
+      "close": "Close",
+      "closeModal": "Close modal"
     },
     "status": {
       "loading": "Loading...",
@@ -488,10 +962,85 @@
     },
     "required": "*"
   },
+  "error": {
+    "notFound": {
+      "title": "Page Not Found",
+      "message": "The page you are looking for does not exist or has been moved.",
+      "goBack": "Go Back",
+      "goHome": "Go to Dashboard",
+      "calculator": "Or go to Calculator",
+      "needHelp": "Need help?",
+      "helpMessage": "If you think this is an error, please contact your administrator."
+    },
+    "unauthorized": {
+      "title": "Access Denied",
+      "message": "You don't have permission to access this page. Please contact your administrator if you believe this is an error.",
+      "goBack": "Go Back",
+      "goHome": "Go to Dashboard",
+      "calculator": "Or go to Calculator",
+      "needHelp": "Need help?",
+      "helpMessage": "If you need access to this page, please contact your shop administrator or manager.",
+      "contactAdmin": "Contact Administrator",
+      "reasonTitle": "Why am I seeing this?",
+      "reason1": "Your user role doesn't have access to this page",
+      "reason2": "You may need additional permissions from your administrator",
+      "reason3": "The page you're trying to access is restricted to specific roles"
+    },
+    "generic": {
+      "title": "Something went wrong",
+      "message": "An unexpected error occurred. Please try again.",
+      "retry": "Try Again",
+      "goHome": "Go Home"
+    }
+  },
+  "input": {
+    "required": "*",
+    "passwordShow": "Show password",
+    "passwordHide": "Hide password",
+    "characterCount": "{{current}} / {{max}} characters"
+  },
   "dashboard": {
-    "welcome": "Welcome back",
-    "redirecting": "Redirecting to Shop Management...",
-    "redirectingCalculator": "Redirecting to Calculator..."
+      "welcome": "Welcome back",
+      "redirecting": "Redirecting to Shop Management...",
+      "redirectingCalculator": "Redirecting to Calculator...",
+      "client": {
+        "subtitle": "Client Dashboard",
+        "access": "Basic calculation access",
+        "capabilities": "Your Capabilities",
+        "calc": "Basic jewelry calculations",
+        "prices": "View final selling/buying prices",
+        "simple": "Simple, easy-to-use interface"
+      },
+      "proClient": {
+        "subtitle": "Professional Client Dashboard",
+        "access": "Calculations with margin visibility",
+        "capabilities": "Your Capabilities",
+        "calc": "Jewelry calculations with results",
+        "margins": "View margin per gram and totals",
+        "resale": "Access resale options (when enabled)",
+        "professional": "Professional-level access"
+      },
+      "manager": {
+        "subtitle": "Manager Dashboard",
+        "access": "You have access to calculator and rate management",
+        "capabilities": "Your Capabilities",
+        "calc": "Full jewelry calculations with margins",
+        "rates": "Update daily gold/silver rates",
+        "reports": "View rate tables and reports",
+        "monitor": "Monitor shop operations",
+        "note": "You can manage rates and use the calculator. Contact your shop admin for user management or settings changes."
+      },
+      "admin": {
+        "subtitle": "Shop Administrator Dashboard",
+        "access": "You have full access to all shop features",
+        "capabilities": "Your Capabilities",
+        "calc": "Full jewelry calculations with margins",
+        "users": "Create and manage shop users",
+        "rates": "Update daily gold/silver rates",
+        "categories": "Manage jewelry categories",
+        "settings": "Configure shop settings",
+        "reports": "View detailed reports"
+      }
   },
   "settings": {
     "title": "Settings",

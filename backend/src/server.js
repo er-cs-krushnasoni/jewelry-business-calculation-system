@@ -19,8 +19,10 @@ const io = socketIo(server, {
   cors: {
     origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  },
+  transports: ['websocket', 'polling']
 });
 
 // Initialize Shop Scheduler
@@ -44,10 +46,14 @@ connectDB();
 app.set('io', io);
 
 // Basic middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(cors({
   origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parsing middleware

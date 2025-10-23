@@ -26,10 +26,10 @@ export const ManagerDashboard = () => {
       {/* Welcome Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {t('dashboard.welcome', 'Welcome back')}, {user?.username}!
+          {t('dashboard.welcome')}, {user?.username}!
         </h1>
         <p className="text-gray-600">
-          {t('dashboard.manager.subtitle', 'Manager Dashboard')}
+          {t('dashboard.manager.subtitle')}
         </p>
         {user?.shopName && (
           <p className="text-xl font-medium text-blue-600 mt-2">
@@ -49,37 +49,37 @@ export const ManagerDashboard = () => {
       <div className="bg-green-50 border border-green-200 rounded-lg p-6">
         <Calculator className="h-12 w-12 text-green-600 mx-auto mb-4" />
         <p className="text-green-800 text-lg mb-2 text-center">
-          {t('dashboard.redirectingCalculator', 'Redirecting to Calculator...')}
+          {t('dashboard.redirectingCalculator')}
         </p>
         <p className="text-green-700 text-sm text-center">
-          {t('dashboard.manager.access', 'You have access to calculator and rate management')}
+          {t('dashboard.manager.access')}
         </p>
       </div>
 
       {/* Manager Capabilities */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          {t('dashboard.manager.capabilities', 'Your Capabilities')}
+          {t('dashboard.manager.capabilities')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center gap-2">
               <Calculator className="w-4 h-4 text-green-500" />
-              {t('dashboard.manager.calc', 'Full jewelry calculations with margins')}
+              {t('dashboard.manager.calc')}
             </li>
             <li className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-green-500" />
-              {t('dashboard.manager.rates', 'Update daily gold/silver rates')}
+              {t('dashboard.manager.rates')}
             </li>
           </ul>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.manager.reports', 'View rate tables and reports')}
+              {t('dashboard.manager.reports')}
             </li>
             <li className="flex items-center gap-2">
               <span className="text-green-500">✓</span>
-              {t('dashboard.manager.monitor', 'Monitor shop operations')}
+              {t('dashboard.manager.monitor')}
             </li>
           </ul>
         </div>
@@ -88,7 +88,7 @@ export const ManagerDashboard = () => {
       {/* Important Notice */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-800 text-center">
-          <strong>Note:</strong> You can manage rates and use the calculator. Contact your shop admin for user management or settings changes.
+          <strong>{t('common.note', 'Note')}:</strong> {t('dashboard.manager.note')}
         </p>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { InlineSpinner } from './LoadingSpinner';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Button = ({
   children,
@@ -11,8 +12,11 @@ const Button = ({
   fullWidth = false,
   className = '',
   onClick,
+  translateKey = null, // Optional translation key for button text
   ...props
 }) => {
+  const { t } = useLanguage();
+
   // Base styles
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
@@ -65,6 +69,9 @@ const Button = ({
     }
   };
 
+  // Determine button content
+  const buttonContent = translateKey ? t(translateKey) : children;
+
   return (
     <button
       type={type}
@@ -79,7 +86,7 @@ const Button = ({
           className="mr-2 text-current" 
         />
       )}
-      {children}
+      {buttonContent}
     </button>
   );
 };

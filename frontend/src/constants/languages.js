@@ -20,6 +20,13 @@ export const LANGUAGES = [
       nativeName: 'हिन्दी',
       flag: '🇮🇳',
       isRTL: false
+    },
+    {
+      code: 'mr',
+      name: 'Marathi',
+      nativeName: 'मराठी',
+      flag: '🇮🇳',
+      isRTL: false
     }
   ];
   

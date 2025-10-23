@@ -1,30 +1,182 @@
 {
   "app": {
-    "title": "જ્વેલરી મેનેજર",
-    "version": "જ્વેલરી મેનેજર v1.0",
-    "brand": "જ્વેલરી મેનેજર"
+    "title": "Jewelry Manager",
+    "version": "Jewelry Manager v1.0",
+    "brand": "Jewelry Manager"
   },
   "nav": {
     "calculator": "કેલ્ક્યુલેટર",
-    "shops": "દુકાન વ્યવસ્થાપન",
+    "shops": "દુકાન મેનેજમેન્ટ",
     "dashboard": "ડેશબોર્ડ",
-    "userManagement": "વપરાશકર્તા વ્યવસ્થાપન",
+    "userManagement": "યુઝર  મેનેજમેન્ટ",
     "categories": "કેટેગરી",
-    "rates": "ભાવ વ્યવસ્થાપન",
+    "rates": "ભાવ મેનેજમેન્ટ",
     "reports": "રિપોર્ટ્સ",
-    "reports_alt": "ભાવ કોષ્ટકો",
+    "reports_alt": "ભાવ પત્રક",
     "settings": "સેટિંગ્સ",
-    "noItems": "કોઈ નેવિગેશન આઇટમ ઉપલબ્ધ નથી"
+    "noItems": "આઇટમ્સ ઉપલબ્ધ નથી",
+    "manageUsers": "યુઝર મેનેજ કરો",
+    "manageShops": "દુકાનો મેનેજ કરો"
+  },
+  "sidebar": {
+    "mobileHeaderTitle": "Jewelry Manager",
+    "closeMenu": "મેનૂ બંધ કરો",
+    "userInfoPanel": "યુઝર  માહિતી",
+    "yourRole": "તમારી ભૂમિકા",
+    "platformAdmin": "પ્લેટફોર્મ એડમિન",
+    "shopAdmin": "દુકાન એડમિન",
+    "version": "Jewelry Manager v1.0",
+    "navigation": "નેવિગેશન",
+    "noNavigationItems": "આઇટમ્સ ઉપલબ્ધ નથી"
+  },
+  "rates": {
+    "display": {
+      "live": "લાઇવ",
+      "offline": "ઓફલાઇન",
+      "rateUpdatedBy": "ભાવ અપડેટ કર્યો",
+      "liveUpdate": "લાઇવ અપડેટ",
+      "today": "આજે",
+      "gold": "સોનું:",
+      "silver": "ચાંદી:",
+      "rates": "ભાવ:",
+      "connecting": "કનેક્ટ થઈ રહ્યું છે...",
+      "reconnecting": "ફરીથી કનેક્ટ થઈ રહ્યું છે...",
+      "connectionIssues": "કનેક્શન સમસ્યાઓ",
+      "noRatesSet": "કોઈ ભાવ સેટ નથી",
+      "failedToLoadRateInfo": "ભાવ માહિતી લોડ કરવામાં નિષ્ફળ"
+    },
+    "setup": {
+      "title": "ભાવ સેટઅપ જરૂરી",
+      "initialSetupTitle": "ભાવ સેટઅપ",
+      "initialSetupDescription": "કેલ્ક્યુલેટર વાપરવા માટે કૃપા કરીને તમારો આજનો સોના અને ચાંદીનો ભાવ સેટ કરો.",
+      "stepOf": "પગલું {{current}} / {{total}}",
+      "goldRatesSetup": "સોનાના ભાવ સેટઅપ",
+      "silverRatesSetup": "ચાંદીના ભાવ સેટઅપ",
+      "goldRatesDescription": "પ્રતિ 10 ગ્રામનો સોનાનો ભાવ સેટ કરો. વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ.",
+      "silverRatesDescription": "પ્રતિ 1 કિલો ચાંદીનો ભાવ સેટ કરો. વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ.",
+      "goldBuyingRate": "સોનું ખરીદી ભાવ",
+      "goldSellingRate": "સોનું વેચાણ ભાવ",
+      "silverBuyingRate": "ચાંદી ખરીદી ભાવ",
+      "silverSellingRate": "ચાંદી વેચાણ ભાવ",
+      "goldBuyPlaceholder": "દા.ત., 52000",
+      "goldSellPlaceholder": "દા.ત., 53000",
+      "silverBuyPlaceholder": "દા.ત., 75000",
+      "silverSellPlaceholder": "દા.ત., 78000",
+      "per10gBuying": "₹પ્રતિ 10 ગ્રામ (ખરીદી કિંમત)",
+      "per10gSelling": "₹પ્રતિ 10 ગ્રામ (વેચાણ કિંમત)",
+      "perKgBuying": "₹પ્રતિ કિલો (ખરીદી કિંમત)",
+      "perKgSelling": "₹પ્રતિ કિલો (વેચાણ કિંમત)",
+      "ratePreview": "ભાવ :",
+      "per10g": "10 ગ્રામ દીઠ:",
+      "perKg": "કિલો દીઠ:",
+      "per1g": "1 ગ્રામ દીઠ:",
+      "setupSummary": "સેટઅપ વિગત",
+      "gold": "સોનું:",
+      "silver": "ચાંદી:",
+      "buy": "ખરીદી",
+      "sell": "વેચાણ",
+      "previous": "પાછળ",
+      "cancel": "રદ કરો",
+      "nextSilverRates": "આગળ: ચાંદીના ભાવ",
+      "settingUp": "સેટ કરી રહ્યું છે...",
+      "completeSetup": "સેટઅપ પૂર્ણ કરો",
+      "importantNotes": "મહત્વપૂર્ણ નોંધ:",
+      "note1": "ફક્ત પૂર્ણાંક સંખ્યાઓ સ્વીકાર્ય છે (દશાંશ મૂલ્યો નહીં)",
+      "note2": "સોનાના ભાવ 10 ગ્રામ દીઠ, ચાંદીના ભાવ કિલો દીઠ",
+      "note3": "વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવા જોઈએ",
+      "note4": "આ ભાવો તમારી દુકાનમાં બધી ગણતરીઓ માટે વપરાશે",
+      "note5": "તમે ભાવ મેનેજમેન્ટ વિભાગમાંથી આ ભાવો કોઈપણ સમયે અપડેટ કરી શકો છો",
+      "errors": {
+        "goldBuyRequired": "સોનું ખરીદી ભાવ જરૂરી છે",
+        "goldBuyPositive": "સોનું ખરીદી ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "goldSellRequired": "સોનું વેચાણ ભાવ જરૂરી છે",
+        "goldSellPositive": "સોનું વેચાણ ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "goldSellHigher": "સોનું વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ",
+        "silverBuyRequired": "ચાંદી ખરીદી ભાવ જરૂરી છે",
+        "silverBuyPositive": "ચાંદી ખરીદી ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "silverSellRequired": "ચાંદી વેચાણ ભાવ જરૂરી છે",
+        "silverSellPositive": "ચાંદી વેચાણ ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "silverSellHigher": "ચાંદી વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ",
+        "setupFailed": "ભાવ સેટ કરવામાં નિષ્ફળ"
+      }
+    },
+    "manager": {
+      "title": "ભાવ મેનેજમેન્ટ",
+      "subtitle": "દૈનિક સોના અને ચાંદીના ભાવ અપડેટ કરો",
+      "accessRestricted": "પ્રવેશ પ્રતિબંધિત",
+      "accessRestrictedMessage": "ફક્ત દુકાન એડમિન અને મેનેજર ભાવ અપડેટ કરી શકે છે.",
+      "realTimeActive": "લાઈવ",
+      "offlineMode": "ઓફલાઇન મોડ",
+      "loading": "વર્તમાન ભાવ લોડ થઈ રહ્યા છે...",
+      "ratesUpdatedRealTime": "અન્ય યુઝર દ્વારા લાઈવમાં ભાવ અપડેટ થયા",
+      "currentRates": "વર્તમાન ભાવ",
+      "liveUpdated": "લાઇવ અપડેટ",
+      "updatedBy": "દ્વારા અપડેટ",
+      "goldRatesTitle": "સોનાના ભાવ (₹ 10 ગ્રામ દીઠ)",
+      "silverRatesTitle": "ચાંદીના ભાવ (₹ કિલો દીઠ)",
+      "goldBuyingRate": "સોનું ખરીદી ભાવ",
+      "goldSellingRate": "સોનું વેચાણ ભાવ",
+      "silverBuyingRate": "ચાંદી ખરીદી ભાવ",
+      "silverSellingRate": "ચાંદી વેચાણ ભાવ",
+      "goldBuyPlaceholder": "દા.ત., 52000",
+      "goldSellPlaceholder": "દા.ત., 53000",
+      "silverBuyPlaceholder": "દા.ત., 75000",
+      "silverSellPlaceholder": "દા.ત., 78000",
+      "goldBuyHelperText": "સોનું ખરીદવાનો ભાવ (વેચાણ ભાવ સમાન હોઈ શકે)",
+      "goldSellHelperText": "સોનું વેચવાનો ભાવ (ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ)",
+      "silverBuyHelperText": "ચાંદી ખરીદવાનો ભાવ (વેચાણ ભાવ સમાન હોઈ શકે)",
+      "silverSellHelperText": "ચાંદી વેચવાનો ભાવ (ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ)",
+      "updateRates": "ભાવ અપડેટ કરો",
+      "updating": "અપડેટ થઈ રહ્યું છે...",
+      "ratesUpdatedSuccessfully": "ભાવ સફળતાપૂર્વક અપડેટ થયા! લાઈવ અપડેટ બધા યુઝરને મોકલ્યું.",
+      "importantNotes": "મહત્વપૂર્ણ નોંધ:",
+      "note1": "વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવા જોઈએ",
+      "note2": "સોનાના ભાવ 10 ગ્રામ દીઠ, ચાંદીના ભાવ કિલો દીઠ",
+      "note3": "ફક્ત પૂર્ણાંક સંખ્યાઓ સ્વીકાર્ય છે (દશાંશ નહીં)",
+      "note4Connected": "અપડેટ્સ તરત બધા યુઝરોને પ્રસારિત થાય છે",
+      "note4Disconnected": "કનેક્શન પુનઃસ્થાપિત થાય ત્યારે અપડેટ્સ થશે",
+      "note5": "ભાવ ફેરફારો લાઈવ સૂચનાઓને ટ્રિગર કરે છે",
+      "note6Offline": "હાલમાં ઓફલાઇન મોડમાં - લાઈવ સુવિધાઓ અનુપલબ્ધ",
+      "realTimeUpdatesActive": "લાઈવ અપડેટ્સ સક્રિય છે. બધા ભાવ ફેરફારો તરત બધા દુકાન યુઝર ઓને દેખાશે.",
+      "errors": {
+        "allFieldsRequired": "બધા ભાવ ફીલ્ડ જરૂરી છે",
+        "goldBuyPositive": "સોનું ખરીદી ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "goldSellPositive": "સોનું વેચાણ ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "silverBuyPositive": "ચાંદી ખરીદી ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "silverSellPositive": "ચાંદી વેચાણ ભાવ હકારાત્મક સંખ્યા હોવો જોઈએ",
+        "goldSellHigher": "સોનું વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ",
+        "silverSellHigher": "ચાંદી વેચાણ ભાવ ખરીદી ભાવ કરતાં સમાન અથવા વધારે હોવો જોઈએ",
+        "updateFailed": "ભાવ અપડેટ કરવામાં નિષ્ફળ",
+        "fetchFailed": "વર્તમાન ભાવ મેળવવામાં નિષ્ફળ"
+      },
+      "gold": {
+        "buy": "ખરીદી ₹{{rate}}/10ગ્રામ",
+        "sell": "વેચાણ ₹{{rate}}/10ગ્રામ"
+      },
+      "silver": {
+        "buy": "ખરીદી ₹{{rate}}/કિલો",
+        "sell": "વેચાણ ₹{{rate}}/કિલો"
+      }
+    }
   },
   "header": {
     "shop": "દુકાન:",
     "profile": "પ્રોફાઇલ સેટિંગ્સ",
     "logout": "લૉગઆઉટ",
-    "language": "ભાષા"
+    "language": "ભાષા",
+    "jewelryCalculator": "કેલ્ક્યુલેટર",
+    "username": "યુઝર નામ",
+    "role": "ભૂમિકા",
+    "updateCredentials": "યુઝરની વિગત અપડેટ કરો",
+    "updateCredentialsTitle": "તમારી વિગતો અપડેટ કરો",
+    "english": "English",
+    "gujarati": "ગુજરાતી",
+    "hindi": "हिंदी",
+    "marathi": "मराठी"
   },
   "user": {
     "platform": "પ્લેટફોર્મ એડમિન",
-    "username": "વપરાશકર્તા નામ",
+    "username": "યુઝરનેમ",
     "password": "પાસવર્ડ",
     "role": "ભૂમિકા",
     "createdAt": "બનાવ્યું"
@@ -32,26 +184,36 @@
   "auth": {
     "login": {
       "title": "સાઇન ઇન",
-      "subtitle": "જ્વેલરી મેનેજરમાં પાછા સ્વાગત છે",
-      "username": "વપરાશકર્તા નામ",
+      "subtitle": "Jewelry Manager માં ફરીથી સ્વાગત છે",
+      "username": "યુઝરનેમ",
       "password": "પાસવર્ડ",
       "signin": "સાઇન ઇન",
       "signingin": "સાઇન ઇન થઈ રહ્યું છે...",
-      "error": "લૉગિન નિષ્ફળ. કૃપા કરીને તમારી માહિતી તપાસો."
+      "error": "લૉગિન નિષ્ફળ. કૃપા કરીને તમારી વિગત તપાસો.",
+      "usernameRequired": "યુઝર નેમ જરૂરી છે",
+      "passwordRequired": "પાસવર્ડ જરૂરી છે",
+      "invalidCredentials": "અમાન્ય યુઝર નેમ અથવા પાસવર્ડ",
+      "serverError": "સર્વર ભૂલ. કૃપા કરીને પછીથી ફરી પ્રયાસ કરો.",
+      "networkError": "નેટવર્ક ભૂલ. કૃપા કરીને તમારું કનેક્શન તપાસો.",
+      "rememberMe": "મને યાદ રાખો",
+      "forgotPassword": "પાસવર્ડ ભૂલી ગયા?",
+      "noAccount": "એકાઉન્ટ નથી?",
+      "contactSupport": "સપોર્ટનો સંપર્ક કરો",
+      "tryAgain": "ફરી પ્રયાસ કરો"
     },
     "logout": "લૉગઆઉટ"
   },
   "category": {
     "management": {
-      "title": "કેટેગરી વ્યવસ્થાપન",
-      "subtitle": "વર્ણન અને સેટિંગ્સ સાથે નવા અને જૂના દાગીનાની કેટેગરી મેનેજ કરો",
+      "title": "કટેગરી મેનેજમેન્ટ",
+      "subtitle": "વર્ણન અને સેટિંગ્સ સાથે નવી અને જૂની જ્વેલરી કેટેગરી મેનેજ કરો",
       "addCategory": "કેટેગરી ઉમેરો",
       "createNew": "નવી કેટેગરી બનાવો",
       "edit": "કેટેગરી સંપાદિત કરો",
       "delete": "કેટેગરી કાઢી નાખો",
       "success": {
         "created": "કેટેગરી સફળતાપૂર્વક બનાવી",
-        "updated": "કેટેગરી સફળતાપૂર્વક અપડેટ કરી",
+        "updated": "કેટેગરી સફળતાપૂર્વક અપડેટ થઈ",
         "deleted": "કેટેગરી સફળતાપૂર્વક કાઢી નાખી"
       },
       "error": {
@@ -64,7 +226,7 @@
       "filters": {
         "title": "ફિલ્ટર્સ",
         "type": "પ્રકાર",
-        "metal": "ધાતુ",
+        "metal": "સોનું/ચાંદી",
         "itemCategory": "વસ્તુ કેટેગરી",
         "search": "કોડ, કેટેગરી શોધો...",
         "reset": "રીસેટ",
@@ -77,13 +239,17 @@
         "typeAndMetal": "પ્રકાર અને ધાતુ",
         "category": "કેટેગરી",
         "purity": "શુદ્ધતા %",
-        "keyPercentage": "કી %",
+        "keyPercentage": "મુખ્ય %",
         "settings": "સેટિંગ્સ",
         "actions": "ક્રિયાઓ",
         "noCategoriesFound": "કોઈ કેટેગરી મળી નથી",
-        "createFirst": "શરૂ કરવા માટે તમારી પ્રથમ કેટેગરી બનાવો",
-        "noMatches": "તમારા વર્તમાન ફિલ્ટર્સ સાથે કોઈ કેટેગરી મેળ ખાતી નથી",
-        "loading": "કેટેગરી લોડ થઈ રહી છે..."
+        "createFirst": "પ્રારંભ કરવા તમારી પ્રથમ કેટેગરી બનાવો",
+        "noMatches": "તમારા વર્તમાન ફિલ્ટર્સ સાથે કોઈ કેટેગરી મળી નથી",
+        "loading": "કેટેગરી લોડ થઈ રહી છે...",
+        "oldJewelry": "જૂના આભૂષણ",
+        "notApplicable": "-",
+        "ownPercentage": "પોતાની:",
+        "otherPercentage": "અન્ય:"
       },
       "types": {
         "new": "નવું",
@@ -94,58 +260,172 @@
         "silver": "ચાંદી"
       },
       "resale": {
-        "on": "રિસેલ ચાલુ",
-        "off": "રિસેલ બંધ",
+        "on": "પુનઃવેચાણ ચાલુ",
+        "off": "પુનઃવેચાણ બંધ",
         "standard": "સ્ટાન્ડર્ડ"
       }
+    },
+    "form": {
+      "basicInfo": "માહિતી",
+      "type": "પ્રકાર",
+      "selectType": "પ્રકાર પસંદ કરો",
+      "metal": "ધાતુ",
+      "selectMetal": "ધાતુ પસંદ કરો",
+      "codeStamp": "કોડ/સ્ટેમ્પ",
+      "codePlaceholder": "દા.ત., ABC123, વિશિષ્ટ123",
+      "codeRequired": "કોડ જરૂરી છે",
+      "codeMaxLength": "કોડ 100 અક્ષરો કરતાં વધુ ન હોઈ શકે",
+      "metalRequired": "ધાતુ જરૂરી છે",
+      "typeRequired": "પ્રકાર જરૂરી છે",
+      "itemCategory": "વસ્તુ કેટેગરી",
+      "itemCategoryRequired": "નવા આભૂષણ માટે વસ્તુ કેટેગરી જરૂરી છે",
+      "itemCategoryMaxLength": "વસ્તુ કેટેગરી 100 અક્ષરો કરતાં વધુ ન હોઈ શકે",
+      "selectCategoryPlaceholder": "કેટેગરી નામ પસંદ કરો અથવા ટાઇપ કરો (સાંકળ, વીંટી, હાર, चेन)",
+      "noCategoriesFound": "કોઈ કેટેગરી મળી નથી. નવી બનાવવા ટાઇપ કરો.",
+      "selectMetalFirst": "કૃપા કરીને પહેલા ધાતુ પસંદ કરો",
+      "createNewCategory": "નવી કેટેગરી બનાવો",
+      "loading": "લોડ થઈ રહ્યું છે...",
+      "purity": "શુદ્ધતા %",
+      "purityPlaceholder": "91.6",
+      "purityRequired": "શુદ્ધતા ટકા જરૂરી છે",
+      "purityRange": "શુદ્ધતા ટકા 1 અને 100 વચ્ચે હોવો જોઈએ",
+      "buyingFromWholesaler": "વેપારી પાસેથી ખરીદી %",
+      "buyingFromWholesalerPlaceholder": "85.5",
+      "buyingPercentageRequired": "ખરીદી ટકા જરૂરી છે",
+      "buyingPercentageMin": "ખરીદી ટકા ઓછામાં ઓછો 1 હોવો જોઈએ",
+      "wholesalerLabour": "વેપારી મજૂરી ગ્રામ દીઠ (₹)",
+      "wholesalerLabourPlaceholder": "50",
+      "labourRequired": "વેપારી મજૂરી ગ્રામ દીઠ જરૂરી છે",
+      "labourMin": "વેપારી મજૂરી ગ્રામ દીઠ 0 અથવા વધારે હોવી જોઈએ",
+      "labourNote": "જો મજૂરી ચાર્જ નથી તો 0 હોઈ સેટ કરો",
+      "selling": "વેચાણ %",
+      "sellingPlaceholder": "95.0",
+      "sellingPercentageRequired": "વેચાણ ટકા જરૂરી છે",
+      "sellingPercentageMin": "વેચાણ ટકા ઓછામાં ઓછો 1 હોવો જોઈએ",
+      "truePurity": "સાચી શુદ્ધતા %",
+      "truePurityPlaceholder": "91.6",
+      "truePurityRequired": "સાચી શુદ્ધતા ટકા જરૂરી છે",
+      "truePurityRange": "સાચી શુદ્ધતા ટકા 1 અને 100 વચ્ચે હોવો જોઈએ",
+      "scrapBuyOwn": "ભંગાર ખરીદી પોતાની %",
+      "scrapBuyOwnPlaceholder": "85.0",
+      "scrapBuyOwnRequired": "ભંગાર ખરીદી પોતાની ટકા જરૂરી છે",
+      "scrapBuyOwnMin": "ભંગાર ખરીદી પોતાની ટકા ઓછામાં ઓછો 1 હોવો જોઈએ",
+      "scrapBuyOther": "ભંગાર ખરીદી અન્ય %",
+      "scrapBuyOtherPlaceholder": "80.0",
+      "scrapBuyOtherRequired": "ભંગાર ખરીદી અન્ય ટકા જરૂરી છે",
+      "scrapBuyOtherMin": "ભંગાર ખરીદી અન્ય ટકા ઓછામાં ઓછો 1 હોવો જોઈએ",
+      "resaleOptions": "પુનઃવેચાણ વિકલ્પો",
+      "enabled": "સક્રિય",
+      "disabled": "નિષ્ક્રિય",
+      "resaleNote": "જ્યારે સક્રિય હોય, તમારે સીધા પુનઃવેચાણ કન્ફિગરેશન સાથે ઓછામાં ઓછી એક પુનઃવેચાણ કેટેગરી ઉમેરવી જોઈએ.",
+      "resaleCategories": "પુનઃવેચાણ કેટેગરી",
+      "noResaleCategories": "હજુ સુધી કોઈ પુનઃવેચાણ કેટેગરી ઉમેરી નથી.",
+      "addFirstResaleCategory": "તમારી પ્રથમ પુનઃવેચાણ કેટેગરી બનાવવા નીચે \"કેટેગરી ઉમેરો\" પર ક્લિક કરો.",
+      "categoryNumber": "કેટેગરી #{{number}}",
+      "removeCategory": "કેટેગરી દૂર કરો",
+      "categoryName": "કેટેગરી નામ",
+      "categoryNameRequired": "કેટેગરી નામ જરૂરી છે",
+      "directResale": "સીધું પુનઃવેચાણ કરી શકાય તેની ખરીદી %",
+      "directResalePlaceholder": "92.0",
+      "directResaleRequired": "જરૂરી",
+      "directResaleMin": "ઓછામાં ઓછું 1 હોવું જોઈએ",
+      "buyingFromWholesalerResale": "વેપારી પાસેથી ખરીદી %",
+      "wholesalerLabourResale": "વેપારી મજૂરી ગ્રામ દીઠ (₹)",
+      "polishRepair": "પોલિશ/રિપેર કરી પુનઃવેચાણ કરી શકાય",
+      "polishResale": "પોલિશ/રિપેર કરી પુનઃવેચાણ કરી શકાય તેવાની ખરીદી",
+      "polishResalePlaceholder": "90.0",
+      "polishResaleRequired": "પોલિશ/રિપેર સક્રિય હોય ત્યારે જરૂરી",
+      "polishResaleMin": "ઓછામાં ઓછું 1 હોવું જોઈએ",
+      "polishCost": "પોલિશ/રિપેર ઘટ %",
+      "polishCostPlaceholder": "5.0",
+      "polishCostRequired": "પોલિશ/રિપેર સક્રિય હોય ત્યારે જરૂરી",
+      "polishCostRange": "0-50 હોવું જોઈએ",
+      "polishLabour": "પોલિશ રિપેર મજૂરી ગ્રામ દીઠ (₹)",
+      "polishLabourPlaceholder": "30",
+      "polishLabourRequired": "પોલિશ/રિપેર સક્રિય હોય ત્યારે જરૂરી",
+      "polishLabourMin": "0 અથવા વધારે હોવું જોઈએ",
+      "enablePolishNote": "પોલિશ/રિપેર પુનઃવેચાણ કન્ફિગરેશન ઉમેરવા આ વિકલ્પ સક્રિય કરો",
+      "addCategory": "કેટેગરી ઉમેરો",
+      "resaleCategoryRequired": "પુનઃવેચાણ સક્રિય હોય ત્યારે ઓછામાં ઓછી એક પુનઃવેચાણ કેટેગરી જરૂરી છે",
+      "duplicateCategoryNames": "ડુપ્લિકેટ કેટેગરી નામોને મંજૂરી નથી",
+      "descriptions": "બહુ-સ્તરીય વર્ણનો",
+      "showHelp": "મદદ બતાવો",
+      "hideHelp": "મદદ છુપાવો",
+      "descriptionHelp": {
+        "title": "વર્ણન પ્રાથમિકતા સિસ્ટમ:",
+        "universal": "સાર્વત્રિક વર્ણન: જો કોઈ ભૂમિકા-વિશિષ્ટ વર્ણન ન હોય તો બધા યુઝર ઓને બતાવવામાં આવે છે",
+        "roleBased": "ભૂમિકા-આધારિત વર્ણનો: વિશિષ્ટ ભૂમિકાઓ માટે સાર્વત્રિક વર્ણનને બદલે બતાવશે",
+        "multiLang": "બહુ-ભાષા સપોર્ટ: બધા વર્ણનો ગુજરાતી, હિન્દી, અંગ્રેજી સપોર્ટ કરે છે"
+      },
+      "universalDescription": "સાર્વત્રિક વર્ણન",
+      "fallbackAllRoles": "(બધી ભૂમિકાઓ માટે ફૉલબેક)",
+      "universalPlaceholder": "બધા યુઝર ઓને દેખાતું સાર્વત્રિક વર્ણન",
+      "characterCount": "{{current}}/{{max}}",
+      "adminOnly": "ફક્ત એડમિન",
+      "managerOnly": "ફક્ત મેનેજર",
+      "proClientOnly": "ફક્ત પ્રો ક્લાયન્ટ",
+      "clientOnly": "ફક્ત ક્લાયન્ટ",
+      "overridesUniversal": "(સાર્વત્રિકને ઓવરરાઇડ કરે છે)",
+      "roleSpecificPlaceholder": "{{role}}-વિશિષ્ટ વર્ણન",
+      "cancel": "રદ કરો",
+      "updating": "અપડેટ થઈ રહ્યું છે...",
+      "creating": "બનાવી રહ્યું છે...",
+      "updateCategory": "કેટેગરી અપડેટ કરો",
+      "createCategory": "કેટેગરી બનાવો",
+      "validationFailed": "માન્યતા નિષ્ફળ"
     }
   },
   "users": {
     "management": {
-      "title": "વપરાશકર્તા વ્યવસ્થાપન",
-      "subtitle": "દુકાનના વપરાશકર્તાઓ અને તેમની માહિતી મેનેજ કરો",
-      "addNewUser": "નવો વપરાશકર્તા ઉમેરો",
-      "createNew": "નવો વપરાશકર્તા બનાવો",
+      "title": "યુઝર  મેનેજમેન્ટ",
+      "subtitle": "દુકાન યુઝરઓ અને તેમની વિગતો મેનેજ કરો",
+      "addNewUser": "નવો યુઝર ઉમેરો",
+      "createNew": "નવો યુઝર બનાવો",
       "yourAccount": "તમારું એકાઉન્ટ",
-      "shopUsers": "દુકાનના વપરાશકર્તાઓ",
+      "shopUsers": "દુકાનના યુઝરો",
       "shopAdmin": "દુકાન એડમિન",
       "availableRoles": "ઉપલબ્ધ ભૂમિકાઓ",
       "success": {
-        "created": "વપરાશકર્તા સફળતાપૂર્વક બનાવ્યો",
-        "updated": "માહિતી સફળતાપૂર્વક અપડેટ કરી",
-        "deleted": "વપરાશકર્તા સફળતાપૂર્વક કાઢી નાખ્યો"
+        "created": "યુઝર સફળતાપૂર્વક બનાવ્યો",
+        "updated": "વિગત સફળતાપૂર્વક અપડેટ થઇ",
+        "deleted": "યુઝર સફળતાપૂર્વક કાઢી નાખ્યો"
       },
       "error": {
-        "loadFailed": "વપરાશકર્તાઓ લોડ કરવામાં નિષ્ફળ",
-        "createFailed": "વપરાશકર્તા બનાવવામાં નિષ્ફળ",
-        "updateFailed": "માહિતી અપડેટ કરવામાં નિષ્ફળ",
-        "deleteFailed": "વપરાશકર્તા કાઢી નાખવામાં નિષ્ફળ",
+        "loadFailed": "યુઝરઓ લોડ કરવામાં નિષ્ફળ",
+        "createFailed": "યુઝર બનાવવામાં નિષ્ફળ",
+        "updateFailed": "પ્રમાણપત્રો અપડેટ કરવામાં નિષ્ફળ",
+        "deleteFailed": "યુઝર કાઢી નાખવામાં નિષ્ફળ",
         "allFieldsRequired": "બધા ફીલ્ડ જરૂરી છે",
         "passwordMinLength": "પાસવર્ડ ઓછામાં ઓછો 6 અક્ષરોનો હોવો જોઈએ",
         "passwordMismatch": "પાસવર્ડ મેળ ખાતા નથી",
         "oldPasswordRequired": "તમારો પાસવર્ડ બદલવા માટે જૂનો પાસવર્ડ જરૂરી છે",
-        "usernameOrPassword": "અપડેટ કરવા માટે વપરાશકર્તા નામ અથવા પાસવર્ડ આપો",
-        "confirmDelete": "શું તમે ખરેખર આ વપરાશકર્તાને કાઢી નાખવા માંગો છો? આ ક્રિયા પાછી લેવાય તેમ નથી."
+        "usernameOrPassword": "અપડેટ કરવા યુઝર નામ અથવા પાસવર્ડ આપો",
+        "confirmDelete": "શું તમે ખરેખર આ યુઝર ને કાઢી નાખવા માંગો છો? ",
+        "passwordRetrieveFailed": "પાસવર્ડ પુનઃપ્રાપ્ત કરવામાં નિષ્ફળ"
       },
       "form": {
-        "username": "વપરાશકર્તા નામ",
+        "username": "યુઝર નામ",
         "password": "પાસવર્ડ",
         "confirmPassword": "પાસવર્ડની પુષ્ટિ કરો",
         "newPassword": "નવો પાસવર્ડ",
         "oldPassword": "જૂનો પાસવર્ડ",
         "oldPasswordLabel": "જૂનો પાસવર્ડ (પાસવર્ડ બદલવા માટે જરૂરી) *",
-        "newPasswordLabel": "નવો પાસવર્ડ (વર્તમાન રાખવા માટે ખાલી છોડો)",
+        "newPasswordLabel": "નવો પાસવર્ડ (વર્તમાન રાખવા ખાલી છોડો)",
         "confirmPasswordLabel": "નવા પાસવર્ડની પુષ્ટિ કરો *",
         "role": "ભૂમિકા",
         "passwordMinHint": "(ઓછામાં ઓછા 6 અક્ષરો)",
-        "leaveEmpty": "(વર્તમાન રાખવા માટે ખાલી છોડો)",
+        "leaveEmpty": "(વર્તમાન રાખવા ખાલી છોડો)",
         "selectRole": "ભૂમિકા પસંદ કરો",
         "passwordMatch": "પાસવર્ડ મેળ ખાય છે",
         "passwordNotMatch": "પાસવર્ડ મેળ ખાતા નથી",
-        "required": "જરૂરી"
+        "required": "જરૂરી",
+        "usernamePlaceholder": "યુઝર નામ દાખલ કરો",
+        "passwordPlaceholder": "પાસવર્ડ દાખલ કરો (ઓછામાં ઓછા 6 અક્ષરો)",
+        "confirmPasswordPlaceholder": "પાસવર્ડ ફરીથી દાખલ કરો",
+        "oldPasswordPlaceholder": "તમારો જૂનો પાસવર્ડ દાખલ કરો"
       },
       "buttons": {
-        "create": "વપરાશકર્તા બનાવો",
+        "create": "યુઝર  બનાવો",
         "save": "સાચવો",
         "edit": "સંપાદિત કરો",
         "delete": "કાઢી નાખો",
@@ -154,47 +434,50 @@
         "viewPassword": "પાસવર્ડ જુઓ",
         "hide": "છુપાવો",
         "yes": "હા, કાઢી નાખો",
-        "createButton": "વપરાશકર્તા બનાવો",
+        "createButton": "યુઝર બનાવો",
         "available": "ઉપલબ્ધ",
-        "taken": "લેવામાં આવ્યું"
+        "taken": "લીધેલું"
       },
       "table": {
-        "noUsers": "હજુ સુધી કોઈ દુકાનના વપરાશકર્તાઓ નથી",
-        "createFirst": "તમારો પ્રથમ વપરાશકર્તા બનાવવા માટે \"નવો વપરાશકર્તા ઉમેરો\" પર ક્લિક કરો",
-        "loading": "વપરાશકર્તાઓ લોડ થઈ રહ્યા છે..."
+        "noUsers": "હજુ સુધી કોઈ દુકાન યુઝરઓ નથી",
+        "createFirst": "તમારો પ્રથમ યુઝર બનાવવા \"નવો યુઝર  ઉમેરો\" પર ક્લિક કરો",
+        "loading": "યુઝર ઓ લોડ થઈ રહ્યા છે...",
+        "created": "બનાવ્યું"
       },
       "roles": {
         "manager": "મેનેજર",
-        "proClient": "પ્રો ક્લાયંટ",
-        "client": "ક્લાયંટ",
+        "proClient": "પ્રો ક્લાયન્ટ",
+        "client": "ક્લાયન્ટ",
         "shopAdmin": "દુકાન એડમિન"
       }
     }
   },
   "rateTable": {
-    "title": "ભાવ કોષ્ટકો",
-    "subtitle": "ભાવ કોષ્ટકો મેનેજ કરો અને જુઓ",
+    "title": "ભાવ પત્રક",
+    "subtitle": "સૂત્રો સાથે ભાવ પત્રક મેનેજ કરો",
+    "viewFormulas": "સૂત્રો સાથે ભાવ પત્રક જુઓ",
+    "viewOnly": "ભાવ પત્રક જુઓ",
+    "rateTableFormulas": "સૂત્રો સાથે ભાવ પત્રક મેનેજ કરો",
     "editTable": "કોષ્ટક સંપાદિત કરો",
     "createTable": "કોષ્ટક બનાવો",
-    "rateTableFormulas": "ફોર્મ્યુલા સાથે ભાવ કોષ્ટકો મેનેજ કરો",
-    "viewFormulas": "ફોર્મ્યુલા સાથે ભાવ કોષ્ટકો જુઓ",
-    "viewOnly": "ભાવ કોષ્ટકો જુઓ",
     "success": {
-      "updated": "કોષ્ટક સફળતાપૂર્વક અપડેટ થયું"
+      "updated": "કોષ્ટક સફળતાપૂર્વક અપડેટ થયું",
+      "tableUpdated": "કોષ્ટક અપડેટ થયું"
     },
     "error": {
-      "loadFailed": "ભાવ કોષ્ટકો લોડ કરવામાં નિષ્ફળ",
+      "loadFailed": "ભાવ પત્રક લોડ કરવામાં નિષ્ફળ",
       "saveFailed": "કોષ્ટક સાચવવામાં નિષ્ફળ",
-      "valueGreaterThanZero": "ગ્રામ દીઠ મૂલ્ય 0 કરતાં વધુ હોવું જોઈએ",
-      "percentageGreaterThanZero": "બધા ટકાવારી મૂલ્યો 0 કરતાં વધુ હોવા જોઈએ"
+      "valueGreaterThanZero": "ગ્રામ દીઠ મૂલ્ય 0 કરતાં વધારે હોવું જોઈએ",
+      "percentageGreaterThanZero": "બધા ટકા મૂલ્યો 0 કરતાં વધારે હોવા જોઈએ"
     },
     "buttons": {
       "edit": "કોષ્ટક સંપાદિત કરો",
       "cancel": "રદ કરો",
       "save": "ફેરફારો સાચવો",
-      "addRow": "પંક્તિ ઉમેરો",
-      "addColumn": "કૉલમ ઉમેરો",
-      "saving": "સાચવી રહ્યું છે..."
+      "addRow": "આડી લીટી ઉમેરો",
+      "addColumn": "ઊભી લીટી ઉમેરો",
+      "saving": "સાચવી રહ્યું છે...",
+      "createTable": "કોષ્ટક બનાવો"
     },
     "tabs": {
       "gold": "સોનાનું કોષ્ટક",
@@ -206,12 +489,12 @@
       "goldSell": "સોનું વેચાણ:",
       "silverBuy": "ચાંદી ખરીદી:",
       "silverSell": "ચાંદી વેચાણ:",
-      "perGram": "/ગ્રામ",
+      "perGram": "/10ગ્રામ",
       "perKg": "/કિલો"
     },
     "table": {
-      "rowColumn": "પંક્તિ / કૉલમ",
-      "rounding": "રાઉન્ડિંગ સક્ષમ કરો",
+      "rowColumn": " ",
+      "rounding": "રાઉન્ડિંગ સક્રિય કરો",
       "roundDirection": "રાઉન્ડ દિશા",
       "roundingType": "રાઉન્ડિંગ પ્રકાર",
       "roundHigh": "ઉચ્ચ રાઉન્ડ",
@@ -224,42 +507,82 @@
       "buy": "ખરીદી",
       "sell": "વેચાણ",
       "noTableData": "કોષ્ટક ડેટા નથી",
-      "adminCreateTable": "તમારું ભાવ કોષ્ટક બનાવવા માટે \"કોષ્ટક સંપાદિત કરો\" પર ક્લિક કરો",
-      "adminNeeded": "એડમિનને ભાવ કોષ્ટક બનાવવાની જરૂર છે"
+      "adminCreateTable": "તમારું ભાવ કોષ્ટક બનાવવાનું શરૂ કરવા \"કોષ્ટક સંપાદિત કરો\" પર ક્લિક કરો",
+      "adminNeeded": "એડમિને ભાવ કોષ્ટક બનાવવાની જરૂર છે"
     },
     "formula": {
-      "title": "ભાવ કોષ્ટકો કેવી રીતે કામ કરે છે:",
-      "baseFormula": "ફોર્મ્યુલા: (લાઇવ ભાવ ÷",
+      "title": "ભાવ પત્રક કેવી રીતે કાર્ય કરે છે:",
+      "baseFormula": "સૂત્ર: (લાઇવ ભાવ ÷",
       "goldDivisor": "10",
       "silverDivisor": "1000",
-      "formulaRest": ") × ગ્રામ દીઠ મૂલ્ય × ટકાવારી ÷ 100",
-      "roundingRule": "કૉલમ-આધારિત રાઉન્ડિંગ નિયમો તે કૉલમમાં બધા કોષો પર લાગુ પડે છે",
-      "roundingDisplay": "જ્યારે રાઉન્ડિંગ સક્ષમ હોય, ત્યારે મૂલ્યો પૂર્ણ સંખ્યાઓ તરીકે પ્રદર્શિત થાય છે (દશાંશ નહીં)",
-      "autoUpdate": "લાઇવ ભાવ બદલાય ત્યારે કોષ્ટકો આપમેળે અપડેટ થાય છે",
-      "adminEdit": "ફક્ત એડમિન જ કોષ્ટક માળખું અને ફોર્મ્યુલા સંપાદિત કરી શકે છે",
-      "valuePerGram": "દર પ્રતિ",
+      "formulaRest": ") × ગ્રામ દીઠ મૂલ્ય × ટકા ÷ 100",
+      "roundingRule": "ઊભી લીટી-આધારિત રાઉન્ડિંગ નિયમો તે ઊભી લીટીની બધી કિમતોને લાગુ પડે છે",
+      "roundingDisplay": "જ્યારે રાઉન્ડિંગ સક્રિય હોય, મૂલ્યો પૂર્ણ સંખ્યાઓ તરીકે પ્રદર્શિત થાય છે (દશાંશ નહીં)",
+      "autoUpdate": "જ્યારે લાઇવ ભાવ બદલાય ત્યારે પત્રક આપમેળે અપડેટ થાય છે",
+      "adminEdit": "ફક્ત એડમિન કોષ્ટક બંધારણ અને સૂત્રો સંપાદિત કરી શકે છે",
+      "valuePerGram": "દીઠ ભાવ",
       "grams": "ગ્રામ",
-      "gramPlural": "ગ્રામ"
+      "gramPlural": "ગ્રામ",
+      "gram":"ગ્રામ"
+    },
+    "loading": {
+      "message": "ભાવ પત્રક લોડ થઈ રહ્યા છે..."
     }
   },
   "calculator": {
     "title": "કેલ્ક્યુલેટર",
-    "newJewelry": "નવા દાગીના",
-    "oldJewelry": "જૂના દાગીના",
+    "jewelryCalculator": "આભૂષણ કેલ્ક્યુલેટર",
+    "subtitle": "વર્તમાન સોના અને ચાંદીના ભાવ આધારિત ચોક્કસ કિંમતોની ગણતરી કરો",
+    "offlineMessage": "તમે હાલમાં ઓફલાઇન છો. ગણતરીઓ છેલ્લા જાણીતા ભાવોનો ઉપયોગ કરશે.",
+    "newJewelry": "નવા આભૂષણ",
+    "oldJewelry": "જૂના આભૂષણ",
+    "page": {
+      "loading": "કેલ્ક્યુલેટર લોડ થઈ રહ્યું છે...",
+      "error": "ભૂલ",
+      "refreshPage": "રિફ્રેશ કરો",
+      "selectJewelryType": "આભૂષણ પ્રકાર પસંદ કરો",
+      "freshStock": "નવા વેંચાણની ગણતરીઓ",
+      "scrapResale": "ભંગાર જૂનાની ખરીદીની ગણતરીઓ",
+      "active": "✓ સક્રિય"
+    },
+    "currentRates": {
+      "title": "વર્તમાન ભાવ",
+      "goldPer10g": "સોનું (10 ગ્રામ દીઠ)",
+      "silverPerKg": "ચાંદી (કિલો દીઠ)",
+      "buying": "ખરીદી:",
+      "selling": "વેચાણ:",
+      "lastUpdated": "{{user}} દ્વારા {{timestamp}} પર છેલ્લે અપડેટ થયું",
+      "live": "લાઇવ",
+      "loadingRates": "ભાવ લોડ થઈ રહ્યા છે..."
+    },
+    "realtime": {
+      "active": "લાઈવ અપડેટ્સ સક્રિય - ભાવ અને ગણતરીઓ આપમેળે અપડેટ થશે",
+      "pulseDot": "લાઈવ કનેક્શન સૂચક"
+    },
+    "features": {
+      "title": "કેલ્ક્યુલેટર સુવિધાઓ",
+      "newJewelry": "નવા આભૂષણ: ધાતુ ફિલ્ટરિંગ, કેટેગરી પસંદગી અને સ્માર્ટ રાઉન્ડિંગ",
+      "oldJewelry": "જૂના આભૂષણ: પોતાની/અન્ય સ્ત્રોત પસંદગી સાથે ભંગાર ગણતરીઓ",
+      "multiLanguage": "બહુ-ભાષા સપોર્ટ: ગુજરાતી, હિન્દી અને અંગ્રેજીમાં કેટેગરી અને વર્ણનો",
+      "roleBased": "ભૂમિકા-આધારિત દૃશ્યતા: તમારી પ્રવેશ સ્તર આધારિત વિવિધ ગણતરી વિગતો",
+      "realtimeRates": "લાઈવ ભાવ અપડેટ્સ: ગણતરીઓ આપમેળે નવીનતમ ભાવોનો ઉપયોગ કરે છે",
+      "smartRounding": "સ્માર્ટ રાઉન્ડિંગ: નવા આભૂષણ ઉપર રાઉન્ડ કરે છે, જૂના આભૂષણ નજીકના 50 સુધી નીચે રાઉન્ડ કરે છે"
+    },
     "new": {
-      "title": "નવા દાગીના કેલ્ક્યુલેટર",
+      "title": "નવા આભૂષણ કેલ્ક્યુલેટર",
+      "description": "કેટેગરી-આધારિત ટકાવારી સાથે નવા આભૂષણ માટે ખરીદી અને વેચાણ કિંમતોની ગણતરી કરો",
       "buttons": {
         "resetAll": "બધું રીસેટ કરો",
         "calculate": "ગણતરી કરો",
-        "calculating": "ગણતરી થઈ રહી છે...",
+        "calculating": "ગણતરી કરી રહ્યું છે...",
         "clear": "સાફ કરો"
       },
       "steps": {
-        "step1": "પગલું 1:",
-        "step2": "પગલું 2:",
-        "step3": "પગલું 3:",
-        "step4": "પગલું 4:",
-        "selectMetal": "ધાતુનો પ્રકાર પસંદ કરો",
+        "step1": "પગલું 1",
+        "step2": "પગલું 2",
+        "step3": "પગલું 3",
+        "step4": "પગલું 4",
+        "selectMetal": "ધાતુ પ્રકાર પસંદ કરો",
         "filterCategory": "વસ્તુ કેટેગરી દ્વારા ફિલ્ટર કરો (વૈકલ્પિક)",
         "selectCode": "કોડ/સ્ટેમ્પ પસંદ કરો",
         "enterWeight": "વજન દાખલ કરો (ગ્રામ)"
@@ -267,7 +590,7 @@
       "metal": {
         "gold": "સોનું",
         "silver": "ચાંદી",
-        "sell": "વેચાણ:",
+        "sell": "વેચાણ %",
         "per10g": "/10ગ્રામ",
         "perKg": "/કિલો"
       },
@@ -276,8 +599,8 @@
         "loading": "કેટેગરી લોડ થઈ રહી છે...",
         "noAvailable": "કોઈ કેટેગરી ઉપલબ્ધ નથી",
         "notFound": "કોઈ કેટેગરી મળી નથી",
-        "noMatchFilter": "અલગ વસ્તુ કેટેગરી પસંદ કરવાનો પ્રયાસ કરો.",
-        "contactAdmin": "કૃપા કરીને કેટેગરી ઉમેરવા માટે તમારા એડમિનનો સંપર્ક કરો."
+        "noMatchFilter": "બીજી વસ્તુ કેટેગરી પસંદ કરવાનો પ્રયાસ કરો.",
+        "contactAdmin": "કેટેગરી ઉમેરવા કૃપા કરીને તમારા એડમિનિસ્ટ્રેટરનો સંપર્ક કરો."
       },
       "descriptions": {
         "universal": "સાર્વત્રિક વર્ણન",
@@ -287,36 +610,36 @@
         "placeholder": "0.00"
       },
       "results": {
-        "title": "ગણતરીના પરિણામો",
+        "title": "ગણતરી પરિણામો",
         "finalAmount": "અંતિમ વેચાણ રકમ",
         "for": "માટે",
-        "of": "ના",
-        "roundedFrom": "(રાઉન્ડ કર્યું",
-        "calculatedAt": "પર ગણતરી:"
+        "of": "નું",
+        "roundedFrom": "(થી રાઉન્ડ કર્યું",
+        "calculatedAt": "પર ગણતરી કરી:"
       },
       "sellingRate": {
-        "title": "ગ્રામ દીઠ કુલ વેચાણ દર",
-        "breakdown": "વેચાણ દર વિભાજન",
-        "ratePerGram": "ગ્રામ દીઠ દર",
+        "title": "કુલ વેચાણ ભાવ ગ્રામ દીઠ",
+        "breakdown": "વેચાણ ભાવ વિભાજન",
+        "ratePerGram": "ગ્રામ દીઠ ભાવ",
         "purity": "શુદ્ધતા",
-        "makingCharges": "ગ્રામ દીઠ બનાવટ ચાર્જ",
-        "ofRate": "દરનો",
-        "total": "ગ્રામ દીઠ કુલ વેચાણ દર",
-        "rate": "દર"
+        "makingCharges": "બનાવટ ચાર્જ ગ્રામ દીઠ",
+        "ofRate": "ભાવનું",
+        "total": "કુલ વેચાણ ભાવ ગ્રામ દીઠ",
+        "rate": "ભાવ"
       },
       "margin": {
-        "title": "માર્જિન રકમ",
-        "ofSelling": "વેચાણ રકમનો",
-        "breakdown": "માર્જિન વિભાજન",
-        "purchaseFromWholesaler": "જથ્થાબંધ વેપારી પાસેથી ખરીદી રકમ",
-        "baseCost": "મૂળ કિંમત:",
-        "labourCharges": "મજૂરી ચાર્જ:",
+        "title": "પ્રોફિટ રકમ",
+        "ofSelling": "વેચાણ રકમનું",
+        "breakdown": "પ્રોફિટ વિગત",
+        "purchaseFromWholesaler": " વેપારી પાસેથી ખરીદી રકમ",
+        "baseCost": "મૂળ કિંમત :",
+        "labourCharges": "મજૂરી :",
         "perGram": "ગ્રામ દીઠ",
-        "actualValue": "શુદ્ધતા અનુસાર વાસ્તવિક મૂલ્ય",
-        "formula": "ગણતરી ફોર્મ્યુલા",
+        "actualValue": "શુદ્ધતા અનુસાર કિંમત",
+        "formula": "ગણતરી સૂત્ર",
         "actualValuePurity": "વાસ્તવિક મૂલ્ય (શુદ્ધતા)",
-        "wholesalerMargin": "જથ્થાબંધ વેપારી માર્જિન",
-        "wastage": "બગાડ:",
+        "wholesalerMargin": " વેપારી માર્જિન",
+        "wastage": "વેસ્ટેજ:",
         "labour": "મજૂરી:",
         "ourMargin": "આપણું માર્જિન",
         "finalSellingAmount": "અંતિમ વેચાણ રકમ"
@@ -324,28 +647,29 @@
       "toast": {
         "selectCategoryWeight": "કૃપા કરીને કેટેગરી પસંદ કરો અને વજન દાખલ કરો",
         "validWeight": "કૃપા કરીને માન્ય વજન દાખલ કરો",
-        "calculationComplete": "ગણતરી પૂર્ણ",
+        "calculationComplete": "ગણતરી પૂર્ણ થઈ",
         "calculationFailed": "ગણતરી નિષ્ફળ",
         "categoryNotFound": "કેટેગરી મળી નથી. તે કદાચ કાઢી નાખવામાં આવી હશે.",
         "categoriesLoadFailed": "કેટેગરી લોડ કરવામાં નિષ્ફળ"
       }
     },
     "old": {
-      "title": "જૂના દાગીના કેલ્ક્યુલેટર",
+      "title": "જૂના આભૂષણ કેલ્ક્યુલેટર",
+      "description": "પોતાની/અન્ય પસંદગી સાથે જૂના આભૂષણ માટે ભંગાર મૂલ્યોની ગણતરી કરો",
       "buttons": {
         "resetAll": "બધું રીસેટ કરો",
-        "calculate": "મૂલ્ય ગણો",
-        "calculating": "ગણતરી થઈ રહી છે...",
+        "calculate": "મૂલ્યની ગણતરી કરો",
+        "calculating": "ગણતરી કરી રહ્યું છે...",
         "clear": "સાફ કરો"
       },
       "steps": {
-        "step1": "પગલું 1:",
-        "step2": "પગલું 2:",
-        "step3": "પગલું 3:",
-        "step4": "પગલું 4:",
-        "step5": "પગલું 5:",
-        "selectMetal": "ધાતુનો પ્રકાર પસંદ કરો",
-        "selectSource": "દાગીનાનો સ્રોત પસંદ કરો",
+        "step1": "પગલું 1",
+        "step2": "પગલું 2",
+        "step3": "પગલું 3",
+        "step4": "પગલું 4",
+        "step5": "પગલું 5",
+        "selectMetal": "ધાતુ પ્રકાર પસંદ કરો",
+        "selectSource": "આભૂષણ સ્ત્રોત પસંદ કરો",
         "selectCode": "કોડ/સ્ટેમ્પ પસંદ કરો",
         "selectCategoryType": "કેટેગરી પ્રકાર પસંદ કરો",
         "enterWeight": "વજન દાખલ કરો (ગ્રામ)"
@@ -356,17 +680,18 @@
         "buy": "ખરીદી:"
       },
       "source": {
-        "own": "પોતાનું",
-        "ownDescription": "દુકાનના પોતાના દાગીના",
+        "own": "પોતાની",
+        "ownDescription": "દુકાનના પોતાના આભૂષણ",
         "other": "અન્ય",
-        "otherDescription": "ગ્રાહકના દાગીના",
+        "otherDescription": "ગ્રાહકના આભૂષણ",
         "selected": "✓ પસંદ કર્યું"
       },
       "category": {
         "loading": "કેટેગરી લોડ થઈ રહી છે...",
         "noAvailable": "કોઈ કેટેગરી ઉપલબ્ધ નથી",
-        "noAvailableDescription": "કોઈ {metal} જૂના દાગીનાની કેટેગરી મળી નથી. કૃપા કરીને કેટેગરી ઉમેરવા માટે તમારા એડમિનનો સંપર્ક કરો.",
-        "resaleCategories": "રિસેલ {count, plural, one {કેટેગરી} other {કેટેગરી}}",
+        "noAvailableDescription": "કોઈ {{metal}} જૂના આભૂષણ કેટેગરી મળી નથી. કેટેગરી ઉમેરવા કૃપા કરીને તમારા એડમિનિસ્ટ્રેટરનો સંપર્ક કરો.",
+        "resaleCategories": "પુનઃવેચાણ કેટેગરી",
+        "resaleCategory": "પુનઃવેચાણ કેટેગરી",
         "polishRepair": "+ પોલિશ/રિપેર",
         "selected": "✓ પસંદ કર્યું"
       },
@@ -378,76 +703,141 @@
         "placeholder": "0.00"
       },
       "results": {
-        "title": "ગણતરીના પરિણામો",
-        "source": "સ્રોત:",
+        "title": "ગણતરી પરિણામો",
+        "source": "સ્ત્રોત:",
         "category": "કેટેગરી:",
-        "calculatedAt": "પર ગણતરી:"
+        "calculatedAt": "પર ગણતરી કરી:"
       },
       "scrapValue": {
-        "title": "સ્ક્રેપ મૂલ્ય",
-        "totalValue": "કુલ સ્ક્રેપ ખરીદી મૂલ્ય",
+        "title": "ભંગાર મૂલ્ય",
+        "totalValue": "કુલ ભંગાર ખરીદી મૂલ્ય",
         "for": "માટે",
-        "of": "ના",
-        "roundedFrom": "(રાઉન્ડ કર્યું",
-        "marginTitle": "સ્ક્રેપ માર્જિન",
-        "marginPercentage": "સ્ક્રેપ મૂલ્યનો {percentage}%",
-        "marginBreakdown": "માર્જિન વિભાજન",
-        "actualValueByPurity": "શુદ્ધતા પ્રમાણે વાસ્તવિક મૂલ્ય ({purity}%)",
-        "totalScrapValue": "કુલ સ્ક્રેપ ખરીદી મૂલ્ય ({percentage}%)",
-        "calculationFormula": "ગણતરી ફોર્મ્યુલા"
+        "of": "નું",
+        "roundedFrom": "(થી રાઉન્ડ કર્યું",
+        "marginTitle": "ભંગાર માર્જિન",
+        "marginPercentage": "આપવાની રકમના",
+        "marginBreakdown": "પ્રોફિટ વિગત",
+        "actualValueByPurity": "શુદ્ધતા દ્વારા વાસ્તવિક મૂલ્ય",
+        "totalScrapValue": "કુલ ભંગાર ખરીદી મૂલ્ય",
+        "calculationFormula": "ગણતરી"
       },
       "resale": {
-        "title": "રિસેલ વિકલ્પો",
-        "directResale": "સીધો રિસેલ (વેચાણ માટે તૈયાર)",
-        "directResaleValue": "સીધો રિસેલ મૂલ્ય",
-        "directResaleMargin": "સીધો રિસેલ માર્જિન",
-        "directResaleMarginPercentage": "કુલ રકમનો {percentage}%",
-        "polishRepair": "પોલિશ/રિપેર રિસેલ",
-        "finalPolishRepairValue": "અંતિમ પોલિશ/રિપેર મૂલ્ય",
-        "afterWeightLoss": "({percentage}% વજન ઘટાડા પછી)",
+        "title": "પુનઃવેચાણ વિકલ્પો",
+        "directResale": "સીધું પુનઃવેચાણ કરી શકાય તેવું હોય તો",
+        "directResaleValue": "સીધા પુનઃવેચાણ કરી શકાય તો તેની કિંમત",
+        "directResaleMargin": "વેપારી કરતાં ફાયદો",
+        "directResaleMarginPercentage": "કુલ રકમનું",
+        "polishRepair": "પોલિશ/રિપેર કરી પુનઃવેચાણ કરી શકાય તેવું હોય તો",
+        "finalPolishRepairValue": "પોલિશ/રિપેર કરી વેચી શકાય તો મૂલ્ય",
+        "afterWeightLoss": "({{percentage}}% વજન ઘટ પછી)",
         "afterPolishRepair": "પોલિશ/રિપેર પછી",
-        "polishRepairNote": "(રિસેલ મૂલ્ય: ₹{resaleValue} - પોલિશ મજૂરી: ₹{labourCost})",
-        "polishRepairMargin": "પોલિશ/રિપેર માર્જિન",
-        "polishRepairMarginPercentage": "અંતિમ મૂલ્યનો {percentage}%",
+        "polishRepairNote": "(પુનઃવેચાણ મૂલ્ય: ₹{{resaleValue}} - પોલિશ મજૂરી: ₹{{labourCost}})",
+        "polishRepairMargin": "પોલિશ/રિપેર કર્યા પછી પ્રોફિટ",
+        "polishRepairMarginPercentage": "આપવાની રકમના",
         "notAvailable": "ઉપલબ્ધ નથી",
-        "notAvailableMessage": "આ કેટેગરી માટે પોલિશ/રિપેર રિસેલ સક્ષમ નથી"
+        "notAvailableMessage": "આ કેટેગરી માટે પોલિશ/રિપેર પુનઃવેચાણ સક્રિય નથી"
       },
       "marginBreakdown": {
-        "title": "માર્જિન વિભાજન",
-        "wholesalerCost": "જથ્થાબંધ વેપારી કિંમત",
-        "baseCost": "મૂળ કિંમત ({percentage}%)",
-        "labourCharges": "મજૂરી ચાર્જ: ₹{rate}/ગ્રામ × {weight}ગ્રામ",
-        "wholesalerLabour": "જથ્થાબંધ વેપારી મજૂરી: ₹{rate}/ગ્રામ × {weight}ગ્રામ",
-        "directResaleValue": "સીધો રિસેલ મૂલ્ય ({percentage}%)",
-        "polishRepairResaleValue": "પોલિશ/રિપેર રિસેલ મૂલ્ય ({percentage}%)",
-        "polishRepairLabour": "પોલિશ/રિપેર મજૂરી: ₹{rate}/ગ્રામ × {weight}ગ્રામ",
+        "title": "પ્રોફિટ વિગત",
+        "wholesalerCost": " વેપારી કિંમત",
+        "baseCost": "ટચથી કિંમત",
+        "labourCharges": "વેપારી મજૂરી: ₹{{rate}}/ગ્રામ × {{weight}}ગ્રામ",
+        "wholesalerLabour": " વેપારી મજૂરી: ₹{{rate}}/ગ્રામ × {{weight}}ગ્રામ",
+        "directResaleValue": "સીધા પુનઃવેચાણ કરી શકાય તો કિંમત",
+        "polishRepairResaleValue": "પોલિશ/રિપેર કરી પુનઃવેચાણ કરી શકાય તો કિંમત",
+        "polishRepairLabour": "પોલિશ/રિપેર મજૂરી: ₹{{rate}}/ગ્રામ × {{weight}}ગ્રામ",
         "finalValue": "અંતિમ મૂલ્ય:",
-        "netMargin": "પોલિશ/રિપેર પછી ચોખ્ખો માર્જિન:",
-        "directResaleMargin": "સીધો રિસેલ માર્જિન:"
+        "netMargin": "પોલિશ/રિપેર કરાવ્યા પછી વેપારી કરતાં ફાયદો:",
+        "directResaleMargin": "સીધા પુનઃવેચાણ કરી શકાય તો વેપારી કરતાં ફાયદો:"
       },
       "weightAdjustment": {
-        "title": "વજન ગોઠવણી",
+        "title": "વજનની હિસાબ",
         "original": "મૂળ",
-        "loss": "ઘટાડો",
-        "effective": "અસરકારક"
+        "loss": "ઘટ",
+        "effective": "ઘટ પછી"
       },
       "toast": {
-        "selectAllFields": "કૃપા કરીને ધાતુ, સ્રોત, કેટેગરી પસંદ કરો અને વજન દાખલ કરો",
-        "selectResaleCategory": "કૃપા કરીને રિસેલ કેટેગરી પ્રકાર પસંદ કરો",
+        "selectAllFields": "કૃપા કરીને ધાતુ, સ્ત્રોત, કેટેગરી પસંદ કરો અને વજન દાખલ કરો",
+        "selectResaleCategory": "કૃપા કરીને પુનઃવેચાણ કેટેગરી પ્રકાર પસંદ કરો",
         "validWeight": "કૃપા કરીને માન્ય વજન દાખલ કરો",
-        "calculationComplete": "ગણતરી પૂર્ણ",
+        "calculationComplete": "ગણતરી પૂર્ણ થઈ",
         "calculationFailed": "ગણતરી નિષ્ફળ",
         "categoryNotFound": "કેટેગરી મળી નથી. તે કદાચ કાઢી નાખવામાં આવી હશે.",
         "categoriesLoadFailed": "કેટેગરી લોડ કરવામાં નિષ્ફળ"
       }
     }
   },
+  "blocking": {
+    "title": "સિસ્ટમ બ્લૉક થયેલ",
+    "subtitle": "કેલ્ક્યુલેટર અસ્થાયી રૂપે અનુપલબ્ધ છે",
+    "loading": {
+      "checking": "સિસ્ટમ સ્થિતિ તપાસી રહ્યું છે..."
+    },
+    "ready": {
+      "title": "સિસ્ટમ તૈયાર",
+      "message": "કેલ્ક્યુલેટર હવે ઉપયોગ માટે ઉપલબ્ધ છે.",
+      "button": "કેલ્ક્યુલેટર પર આગળ વધો"
+    },
+    "header": {
+      "dailyUpdate": "દૈનિક ભાવ અપડેટ જરૂરી",
+      "defaultMessage": "આજના ભાવ અપડેટ કરવામાં આવ્યા નથી. કેલ્ક્યુલેટર ઉપયોગ કરવાનું ચાલુ રાખવા કૃપા કરીને ભાવ અપડેટ કરો."
+    },
+    "realTime": {
+      "updateIndicator": "બ્લૉકિંગ સ્થિતિ લાઈવમાં અપડેટ થઈ"
+    },
+    "connection": {
+      "offline": "લાઈવ અપડેટ્સ હાલમાં ઓફલાઇન છે. સ્થિતિ ફેરફારો વિલંબિત થઈ શકે છે.",
+      "waitingUpdate": "લાઈવ ભાવ અપડેટની રાહ જોઈ રહ્યું છે...",
+      "offlineMode": "ઓફલાઇન મોડ - ભાવ અપડેટ થયા પછી કૃપા કરીને રિફ્રેશ કરો"
+    },
+    "admin": {
+      "updateTitle": "આજના ભાવ અપડેટ કરો",
+      "updateDescription": "બધા યુઝર ઓ માટે કેલ્ક્યુલેટર અનબ્લૉક કરવા આજના સોના અને ચાંદીના ભાવ દાખલ કરો.",
+      "broadcastInstantly": "અપડેટ્સ તરત લાઈવ કરવામાં આવશે.",
+      "syncWhenRestored": "કનેક્શન પુનઃસ્થાપિત થાય ત્યારે અપડેટ્સ સમન્વયિત થશે."
+    },
+    "nonAdmin": {
+      "waitingTitle": "ભાવ અપડેટની રાહ જોઈ રહ્યું છે",
+      "onlyAdminMessage": "ફક્ત દુકાન એડમિન અથવા મેનેજર આજના ભાવ અપડેટ કરી શકે છે.",
+      "contactMessage": "આ સમસ્યા ઉકેલવા માટે કૃપા કરીને એડમીનનો સંપર્ક કરો.",
+      "whatYouCanDo": "તમે શું કરી શકો:",
+      "contactAdmin": "તમારા દુકાન એડમિન અથવા મેનેજરનો સંપર્ક કરો",
+      "askUpdate": "તેમને આજના સોના અને ચાંદીના ભાવ અપડેટ કરવા કહો",
+      "availableAfter": "ભાવ અપડેટ થયા પછી તરત કેલ્ક્યુલેટર ઉપલબ્ધ થશે",
+      "instantNotification": "ભાવ અપડેટ થાય ત્યારે તમને તરત સૂચના મળશે",
+      "checkButton": "સ્થિતિ તપાસો",
+      "checking": "તપાસી રહ્યું છે..."
+    },
+    "lastUpdate": {
+      "title": "છેલ્લા ભાવ અપડેટ",
+      "updatedBy": "દ્વારા અપડેટ",
+      "on": "પર",
+      "today": "(આજે)",
+      "previousDay": "(પાછલો દિવસ)"
+    },
+    "systemInfo": {
+      "title": "દૈનિક ભાવ અપડેટ્સ વિશે:",
+      "point1": "ભાવ દરરોજ બપોરે 1:00 વાગ્યા IST પહેલાં અપડેટ કરવા જરૂરી છે",
+      "point2": "જો બપોરે 1:00 વાગ્યા સુધી અપડેટ ન થાય, તો કેલ્ક્યુલેટર આપમેળે બ્લૉક થઈ જાય છે",
+      "point3": "આ સુનિશ્ચિત કરે છે કે બધી ગણતરીઓ વર્તમાન બજાર ભાવોનો ઉપયોગ કરે",
+      "point4": "અપડેટ્સ તરત બધા દુકાન યુઝર ઓને લાગુ થાય છે",
+      "point5": "લાઈવ સૂચનાઓ દરેકને માહિતગાર રાખે છે"
+    },
+    "hook": {
+      "checkingStatus": "સિસ્ટમ સ્થિતિ તપાસી રહ્યું છે...",
+      "failedToCheck": "બ્લૉકિંગ સ્થિતિ તપાસવામાં નિષ્ફળ"
+    }
+  },
+  "wrapper": {
+    "checkingStatus": "સિસ્ટમ સ્થિતિ તપાસી રહ્યું છે...",
+    "loading": "લોડ થઈ રહ્યું છે..."
+  },
   "common": {
     "actions": {
       "add": "ઉમેરો",
       "create": "બનાવો",
       "edit": "સંપાદિત કરો",
-      "update": "અપડેટ",
+      "update": "અપડેટ કરો",
       "delete": "કાઢી નાખો",
       "save": "સાચવો",
       "cancel": "રદ કરો",
@@ -458,11 +848,97 @@
       "confirm": "પુષ્ટિ કરો",
       "yes": "હા",
       "no": "ના",
-      "loading": "લોડ થઈ રહ્યું છે",
+      "loading": "લોડિંગ",
       "search": "શોધો",
       "filter": "ફિલ્ટર",
       "reset": "રીસેટ",
       "apply": "લાગુ કરો"
+    },
+    "button": {
+      "loading": "લોડ થઈ રહ્યું છે...",
+      "submit": "સબમિટ કરો",
+      "cancel": "રદ કરો",
+      "save": "સાચવો",
+      "delete": "કાઢી નાખો",
+      "edit": "સંપાદિત કરો",
+      "create": "બનાવો",
+      "update": "અપડેટ કરો",
+      "close": "બંધ કરો",
+      "back": "પાછળ",
+      "next": "આગળ",
+      "confirm": "પુષ્ટિ કરો",
+      "retry": "ફરી પ્રયાસ કરો"
+    },
+    "category": {
+      "management": {
+        "title": "કેટેગરી મેનેજમેન્ટ",
+        "subtitle": "વર્ણન અને સેટિંગ્સ સાથે નવી અને જૂની આભૂષણ કેટેગરી મેનેજ કરો",
+        "addCategory": "કેટેગરી ઉમેરો",
+        "createNew": "નવી કેટેગરી બનાવો",
+        "edit": "કેટેગરી સંપાદિત કરો",
+        "delete": "કેટેગરી કાઢી નાખો",
+        "success": {
+          "created": "કેટેગરી સફળતાપૂર્વક બનાવી",
+          "updated": "કેટેગરી સફળતાપૂર્વક અપડેટ થઈ",
+          "deleted": "કેટેગરી સફળતાપૂર્વક કાઢી નાખી"
+        },
+        "error": {
+          "loadFailed": "કેટેગરી લોડ કરવામાં નિષ્ફળ",
+          "createFailed": "કેટેગરી બનાવવામાં નિષ્ફળ",
+          "updateFailed": "કેટેગરી અપડેટ કરવામાં નિષ્ફળ",
+          "deleteFailed": "કેટેગરી કાઢી નાખવામાં નિષ્ફળ",
+          "confirmDelete": "શું તમે ખરેખર કેટેગરી કાઢી નાખવા માંગો છો"
+        },
+        "filters": {
+          "title": "ફિલ્ટર્સ",
+          "type": "પ્રકાર",
+          "metal": "ધાતુ",
+          "itemCategory": "વસ્તુ કેટેગરી",
+          "search": "કોડ, કેટેગરી શોધો...",
+          "reset": "રીસેટ",
+          "allTypes": "બધા પ્રકારો",
+          "allMetals": "બધી ધાતુઓ",
+          "allCategories": "બધી કેટેગરી"
+        },
+        "table": {
+          "codeDetails": "કોડ અને વિગતો",
+          "typeAndMetal": "પ્રકાર અને ધાતુ",
+          "category": "કેટેગરી",
+          "purity": "શુદ્ધતા %",
+          "keyPercentage": "મુખ્ય %",
+          "settings": "સેટિંગ્સ",
+          "actions": "ક્રિયાઓ",
+          "noCategoriesFound": "કોઈ કેટેગરી મળી નથી",
+          "createFirst": "પ્રારંભ કરવા તમારી પ્રથમ કેટેગરી બનાવો",
+          "noMatches": "તમારા વર્તમાન ફિલ્ટર્સ સાથે કોઈ કેટેગરી મેળ ખાતી નથી",
+          "loading": "કેટેગરી લોડ થઈ રહી છે...",
+          "oldJewelry": "જૂના આભૂષણ",
+          "notApplicable": "-",
+          "ownPercentage": "પોતાની:",
+          "otherPercentage": "અન્ય:"
+        },
+        "types": {
+          "new": "નવું",
+          "old": "જૂનું"
+        },
+        "metals": {
+          "gold": "સોનું",
+          "silver": "ચાંદી"
+        },
+        "resale": {
+          "on": "પુનઃવેચાણ ચાલુ",
+          "off": "પુનઃવેચાણ બંધ",
+          "standard": "સ્ટાન્ડર્ડ"
+        }
+      }
+    },
+    "spinner": {
+      "loading": "લોડ થઈ રહ્યું છે...",
+      "pleaseWait": "કૃપા કરીને રાહ જુઓ..."
+    },
+    "modal": {
+      "close": "બંધ કરો",
+      "closeModal": "મોડલ બંધ કરો"
     },
     "status": {
       "loading": "લોડ થઈ રહ્યું છે...",
@@ -487,10 +963,85 @@
     },
     "required": "*"
   },
+  "error": {
+    "notFound": {
+      "title": "પૃષ્ઠ મળ્યું નથી",
+      "message": "તમે જે પૃષ્ઠ શોધી રહ્યા છો તે અસ્તિત્વમાં નથી અથવા ખસેડવામાં આવ્યું છે.",
+      "goBack": "પાછા જાઓ",
+      "goHome": "ડેશબોર્ડ પર જાઓ",
+      "calculator": "અથવા કેલ્ક્યુલેટર પર જાઓ",
+      "needHelp": "મદદ જોઈએ છે?",
+      "helpMessage": "જો તમને લાગે કે આ એક ભૂલ છે, તો કૃપા કરીને તમારા એડમિનિસ્ટ્રેટરનો સંપર્ક કરો."
+    },
+    "unauthorized": {
+      "title": "પ્રવેશ નકાર્યો",
+      "message": "આ પૃષ્ઠને એક્સેસ કરવાની તમારી પાસે પરવાનગી નથી. જો તમને લાગે કે આ એક ભૂલ છે, તો કૃપા કરીને તમારા એડમિનિસ્ટ્રેટરનો સંપર્ક કરો.",
+      "goBack": "પાછા જાઓ",
+      "goHome": "ડેશબોર્ડ પર જાઓ",
+      "calculator": "અથવા કેલ્ક્યુલેટર પર જાઓ",
+      "needHelp": "મદદ જોઈએ છે?",
+      "helpMessage": "જો તમને આ પૃષ્ઠની પ્રવેશ જરૂર હોય, તો કૃપા કરીને તમારા દુકાન એડમિનિસ્ટ્રેટર અથવા મેનેજરનો સંપર્ક કરો.",
+      "contactAdmin": "એડમિનિસ્ટ્રેટરનો સંપર્ક કરો",
+      "reasonTitle": "હું આ કેમ જોઈ રહ્યો છું?",
+      "reason1": "તમારી યુઝર ભૂમિકાને આ પૃષ્ઠની પ્રવેશ નથી",
+      "reason2": "તમારા એડમિનિસ્ટ્રેટર પાસેથી તમને વધારાની પરવાનગીઓની જરૂર હોઈ શકે છે",
+      "reason3": "તમે જે પૃષ્ઠને એક્સેસ કરવાનો પ્રયાસ કરી રહ્યા છો તે વિશિષ્ટ ભૂમિકાઓ સુધી મર્યાદિત છે"
+    },
+    "generic": {
+      "title": "કંઈક ખોટું થયું",
+      "message": "અનપેક્ષિત ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.",
+      "retry": "ફરી પ્રયાસ કરો",
+      "goHome": "હોમ પર જાઓ"
+    }
+  },
+  "input": {
+    "required": "*",
+    "passwordShow": "પાસવર્ડ બતાવો",
+    "passwordHide": "પાસવર્ડ છુપાવો",
+    "characterCount": "{{current}} / {{max}} અક્ષરો"
+  },
   "dashboard": {
-    "welcome": "પાછા સ્વાગત છે",
-    "redirecting": "દુકાન વ્યવસ્થાપન પર રીડાયરેક્ટ થઈ રહ્યું છે...",
-    "redirectingCalculator": "કેલ્ક્યુલેટર પર રીડાયરેક્ટ થઈ રહ્યું છે..."
+    "welcome": "ફરીથી સ્વાગત છે",
+    "redirecting": "દુકાન મેનેજમેન્ટ તરફ રીડાયરેક્ટ કરી રહ્યું છે...",
+    "redirectingCalculator": "કેલ્ક્યુલેટર તરફ રીડાયરેક્ટ કરી રહ્યું છે...",
+    "client": {
+      "subtitle": "ક્લાયન્ટ ડેશબોર્ડ",
+      "access": "મૂળભૂત ગણતરી પ્રવેશ",
+      "capabilities": "તમારી ક્ષમતાઓ",
+      "calc": "મૂળભૂત આભૂષણ ગણતરીઓ",
+      "prices": "અંતિમ વેચાણ/ખરીદી કિંમતો જુઓ",
+      "simple": "સરળ, ઉપયોગમાં સરળ ઇન્ટરફેસ"
+    },
+    "proClient": {
+      "subtitle": "વ્યાવસાયિક ક્લાયન્ટ ડેશબોર્ડ",
+      "access": "માર્જિન દૃશ્યતા સાથે ગણતરીઓ",
+      "capabilities": "તમારી ક્ષમતાઓ",
+      "calc": "પરિણામો સાથે આભૂષણ ગણતરીઓ",
+      "margins": "ગ્રામ દીઠ માર્જિન અને કુલ જુઓ",
+      "resale": "પુનઃવેચાણ વિકલ્પોની પ્રવેશ (જ્યારે સક્રિય હોય)",
+      "professional": "વ્યાવસાયિક-સ્તરની પ્રવેશ"
+    },
+    "manager": {
+      "subtitle": "મેનેજર ડેશબોર્ડ",
+      "access": "તમને કેલ્ક્યુલેટર અને ભાવ મેનેજમેન્ટની પ્રવેશ છે",
+      "capabilities": "તમારી ક્ષમતાઓ",
+      "calc": "માર્જિન સાથે સંપૂર્ણ આભૂષણ ગણતરીઓ",
+      "rates": "દૈનિક સોના/ચાંદીના ભાવ અપડેટ કરો",
+      "reports": "ભાવ પત્રક અને રિપોર્ટ્સ જુઓ",
+      "monitor": "દુકાન કામગીરીનું નિરીક્ષણ કરો",
+      "note": "તમે ભાવ મેનેજ કરી શકો અને કેલ્ક્યુલેટર ઉપયોગ કરી શકો છો. યુઝર મેનેજમેન્ટ અથવા સેટિંગ્સ ફેરફારો માટે તમારા દુકાન એડમિનનો સંપર્ક કરો."
+    },
+    "admin": {
+      "subtitle": "દુકાન એડમિનિસ્ટ્રેટર ડેશબોર્ડ",
+      "access": "તમને બધી દુકાન સુવિધાઓની સંપૂર્ણ પ્રવેશ છે",
+      "capabilities": "તમારી ક્ષમતાઓ",
+      "calc": "માર્જિન સાથે સંપૂર્ણ આભૂષણ ગણતરીઓ",
+      "users": "દુકાન યુઝર ઓ બનાવો અને મેનેજ કરો",
+      "rates": "દૈનિક સોના/ચાંદીના ભાવ અપડેટ કરો",
+      "categories": "આભૂષણ કેટેગરી મેનેજ કરો",
+      "settings": "દુકાન સેટિંગ્સ ગોઠવો",
+      "reports": "વિગતવાર રિપોર્ટ્સ જુઓ"
+    }
   },
   "settings": {
     "title": "સેટિંગ્સ",

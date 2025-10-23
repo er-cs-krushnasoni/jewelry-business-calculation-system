@@ -41,7 +41,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   // Calculator (all shop users except super admin)
   if (user.role !== 'super_admin') {
     navigationItems.push({
-      name: t('nav.calculator', 'Calculator'),
+      name: t('nav.calculator'),
       href: '/calculator',
       icon: Calculator,
       roles: ['admin', 'manager', 'pro_client', 'client']
@@ -49,82 +49,72 @@ const Sidebar = ({ isOpen, onClose }) => {
   }
 
   // Super Admin Navigation
-if (isSuperAdmin && isSuperAdmin()) {
-  navigationItems.push(
-    {
-      name: t('nav.shops', 'Shop Management'),
-      href: '/super-admin/shops',
-      icon: Store,
-      roles: ['super_admin']
-    }
-  );
-}
-  
+  if (isSuperAdmin && isSuperAdmin()) {
+    navigationItems.push(
+      {
+        name: t('nav.shops'),
+        href: '/super-admin/shops',
+        icon: Store,
+        roles: ['super_admin']
+      }
+    );
+  }
+
   // Shop Admin Navigation
   if (isShopAdmin && isShopAdmin()) {
     navigationItems.push(
       {
-        name: t('nav.userManagement', 'User Management'),
+        name: t('nav.userManagement'),
         href: '/admin/users',
         icon: Users,
         roles: ['admin']
       },
       {
-        name: t('nav.categories', 'Categories'),
+        name: t('nav.categories'),
         href: '/admin/categories',
         icon: Tag,
         roles: ['admin']
       },
       {
-        name: t('nav.rates', 'Rate Management'),
+        name: t('nav.rates'),
         href: '/admin/rates',
         icon: TrendingUp,
         roles: ['admin']
       },
       {
-        name: t('nav.reports', 'Rate Tables'),
+        name: t('nav.reports_alt'),
         href: '/reports',
         icon: BarChart3,
         roles: ['admin', 'manager', 'pro_client', 'client']
       }
     );
   }
-  
+
   // Manager Navigation
   if (isManager && isManager()) {
     navigationItems.push(
       {
-        name: t('nav.rates', 'Rate Management'),
+        name: t('nav.rates'),
         href: '/manager/rates',
         icon: TrendingUp,
         roles: ['manager']
       },
       {
-        name: t('nav.reports', 'Rate Tables'),
+        name: t('nav.reports_alt'),
         href: '/reports',
         icon: BarChart3,
         roles: ['admin', 'manager', 'pro_client', 'client']
       }
     );
   }
-  
+
   // Pro Client and Client - Add Reports
   if (user.role === 'pro_client' || user.role === 'client') {
     navigationItems.push({
-      name: t('nav.reports', 'Rate Tables'),
+      name: t('nav.reports_alt'),
       href: '/reports',
       icon: BarChart3,
       roles: ['admin', 'manager', 'pro_client', 'client']
-    });
-  }
-  
-  // Settings (Super Admin and Shop Admin only)
-  if (canManageUsers && canManageUsers()) {
-    navigationItems.push({
-      name: t('nav.settings', 'Settings'),
-      href: isSuperAdmin() ? '/super-admin/settings' : '/admin/settings',
-      icon: Settings,
-      roles: ['super_admin', 'admin']
     });
   }
 
@@ -149,6 +139,13 @@ if (isSuperAdmin && isSuperAdmin()) {
     </NavLink>
   );
 
+  const getRoleDisplayName = () => {
+    if (isSuperAdmin && isSuperAdmin()) {
+      return t('sidebar.shopAdmin');
+    }
+    return user?.shopName || t('user.platform');
+  };
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -156,6 +153,9 @@ if (isSuperAdmin && isSuperAdmin()) {
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
           onClick={onClose}
+          role="button"
+          tabIndex={-1}
+          aria-label={t('sidebar.closeMenu')}
         />
       )}
 
@@ -172,12 +172,13 @@ if (isSuperAdmin && isSuperAdmin()) {
               <span className="text-white font-bold text-sm">JM</span>
             </div>
             <span className="font-bold text-gray-900">
-              {t('app.title', 'Jewelry Manager')}
+              {t('app.title')}
             </span>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+            aria-label={t('sidebar.closeMenu')}
           >
             <X size={20} />
           </button>
@@ -188,9 +189,9 @@ if (isSuperAdmin && isSuperAdmin()) {
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
               {isSuperAdmin && isSuperAdmin() ? (
-                <Crown size={20} className="text-yellow-600" />
+                <Crown size={20} className="text-yellow-600" title={t('sidebar.shopAdmin')} />
               ) : isShopAdmin && isShopAdmin() ? (
-                <User size={20} className="text-red-600" />
+                <User size={20} className="text-red-600" title={t('users.management.shopAdmin')} />
               ) : (
                 <User size={20} className="text-gray-600" />
               )}
@@ -200,14 +201,14 @@ if (isSuperAdmin && isSuperAdmin()) {
                 {user?.username}
               </div>
               <div className="text-xs text-gray-500 truncate">
-                {user?.shopName || t('user.platform', 'Platform Admin')}
+                {getRoleDisplayName()}
               </div>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+        <nav className="p-4 space-y-2 flex-1 overflow-y-auto" aria-label={t('sidebar.navigation')}>
           {filteredNavigation.length > 0 ? (
             filteredNavigation.map((item, index) => (
               <NavItem key={index} item={item} onClick={onClose} />
@@ -216,7 +217,7 @@ if (isSuperAdmin && isSuperAdmin()) {
             <div className="text-center text-gray-500 py-8">
               <Calculator size={48} className="mx-auto mb-4 opacity-50" />
               <p className="text-sm">
-                {t('nav.noItems', 'No navigation items available')}
+                {t('nav.noItems')}
               </p>
             </div>
           )}
@@ -225,7 +226,7 @@ if (isSuperAdmin && isSuperAdmin()) {
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <div className="text-xs text-gray-500 text-center">
-            {t('app.version', 'Jewelry Manager v1.0')}
+            {t('app.version')}
           </div>
         </div>
       </div>

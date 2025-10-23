@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSocket } from '../../contexts/SocketContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import BlockingMessage from '../../components/rates/BlockingMessage';
@@ -11,6 +12,7 @@ import { Calculator, AlertTriangle, Sparkles } from 'lucide-react';
 const CalculatorPage = () => {
   const { user } = useAuth();
   const { systemBlocking, isConnected } = useSocket();
+  const { t } = useLanguage();
   
   const [loading, setLoading] = useState(true);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -93,7 +95,7 @@ const CalculatorPage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">Loading calculator...</p>
+          <p className="mt-4 text-gray-600">{t('calculator.page.loading')}</p>
         </div>
       </div>
     );
@@ -106,13 +108,13 @@ const CalculatorPage = () => {
           <div className="text-red-500 mb-4">
             <AlertTriangle size={48} className="mx-auto" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('calculator.page.error')}</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg"
           >
-            Refresh Page
+            {t('calculator.page.refreshPage')}
           </button>
         </div>
       </div>
@@ -136,17 +138,17 @@ const CalculatorPage = () => {
         <div className="flex items-center justify-center space-x-3 mb-4">
           <Calculator className="h-8 w-8 text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-900">
-            Jewellery Calculator
+            {t('calculator.jewelryCalculator')}
           </h1>
         </div>
         <p className="text-gray-600">
-          Calculate accurate prices based on current gold and silver rates
+          {t('calculator.subtitle')}
         </p>
         
         {!isConnected && (
           <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-yellow-800 text-sm">
-              You're currently offline. Calculations will use the last known rates.
+              {t('calculator.offlineMessage')}
             </p>
           </div>
         )}
@@ -154,33 +156,33 @@ const CalculatorPage = () => {
 
       {rates && (
         <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Current Rates</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('calculator.currentRates.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <h3 className="font-medium text-yellow-600 flex items-center gap-2">
                 <Sparkles size={16} />
-                Gold (per 10g)
+                {t('calculator.currentRates.goldPer10g')}
               </h3>
               <div className="flex justify-between">
-                <span className="text-gray-600">Buying:</span>
+                <span className="text-gray-600">{t('calculator.currentRates.buying')}</span>
                 <span className="font-semibold">₹{rates.goldBuy}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Selling:</span>
+                <span className="text-gray-600">{t('calculator.currentRates.selling')}</span>
                 <span className="font-semibold">₹{rates.goldSell}</span>
               </div>
             </div>
             <div className="space-y-2">
               <h3 className="font-medium text-gray-400 flex items-center gap-2">
                 <Sparkles size={16} />
-                Silver (per kg)
+                {t('calculator.currentRates.silverPerKg')}
               </h3>
               <div className="flex justify-between">
-                <span className="text-gray-600">Buying:</span>
+                <span className="text-gray-600">{t('calculator.currentRates.buying')}</span>
                 <span className="font-semibold">₹{rates.silverBuy}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Selling:</span>
+                <span className="text-gray-600">{t('calculator.currentRates.selling')}</span>
                 <span className="font-semibold">₹{rates.silverSell}</span>
               </div>
             </div>
@@ -189,10 +191,13 @@ const CalculatorPage = () => {
           {rates.updateInfo && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-600">
-                Last updated by {rates.updateInfo.updatedBy} on {rates.updateInfo.timestamp}
+                {t('calculator.currentRates.lastUpdated', {
+                  user: rates.updateInfo.updatedBy,
+                  timestamp: rates.updateInfo.timestamp
+                })}
                 {isConnected && (
                   <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                    Live
+                    {t('calculator.currentRates.live')}
                   </span>
                 )}
               </p>
@@ -203,7 +208,7 @@ const CalculatorPage = () => {
 
       <div className="mb-6 bg-white rounded-lg shadow p-4">
         <label className="block text-sm font-medium text-gray-700 mb-3">
-          Select Jewelry Type
+          {t('calculator.page.selectJewelryType')}
         </label>
         <div className="grid grid-cols-2 gap-4">
           <button
@@ -219,14 +224,14 @@ const CalculatorPage = () => {
               <div className={`text-lg font-semibold ${
                 calculatorType === 'new' ? 'text-green-700' : 'text-gray-700'
               }`}>
-                NEW Jewelry
+                {t('calculator.newJewelry')}
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                Fresh stock calculations
+                {t('calculator.page.freshStock')}
               </div>
               {calculatorType === 'new' && (
                 <div className="mt-2 text-xs text-green-600 font-medium">
-                  ✓ Active
+                  {t('calculator.page.active')}
                 </div>
               )}
             </div>
@@ -245,14 +250,14 @@ const CalculatorPage = () => {
               <div className={`text-lg font-semibold ${
                 calculatorType === 'old' ? 'text-orange-700' : 'text-gray-700'
               }`}>
-                OLD Jewelry
+                {t('calculator.oldJewelry')}
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                Scrap & resale calculations
+                {t('calculator.page.scrapResale')}
               </div>
               {calculatorType === 'old' && (
                 <div className="mt-2 text-xs text-orange-600 font-medium">
-                  ✓ Active
+                  {t('calculator.page.active')}
                 </div>
               )}
             </div>
@@ -263,12 +268,12 @@ const CalculatorPage = () => {
       <div className="bg-white rounded-lg shadow">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">
-            {calculatorType === 'new' ? 'NEW Jewelry Calculator' : 'OLD Jewelry Calculator'}
+            {calculatorType === 'new' ? t('calculator.new.title') : t('calculator.old.title')}
           </h2>
           <p className="text-gray-600 text-sm mt-1">
             {calculatorType === 'new' 
-              ? 'Calculate buying and selling prices for new jewelry with category-based percentages'
-              : 'Calculate scrap values for old jewelry with Own/Other selection'
+              ? t('calculator.new.description')
+              : t('calculator.old.description')
             }
           </p>
         </div>
@@ -282,7 +287,7 @@ const CalculatorPage = () => {
           ) : (
             <div className="text-center py-8">
               <LoadingSpinner size="medium" />
-              <p className="mt-2 text-gray-600">Loading rates...</p>
+              <p className="mt-2 text-gray-600">{t('calculator.currentRates.loadingRates')}</p>
             </div>
           )}
         </div>
@@ -293,38 +298,38 @@ const CalculatorPage = () => {
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-800 font-medium text-sm">
-              Real-time updates active - Rates and calculations will update automatically
+              {t('calculator.realtime.active')}
             </span>
           </div>
         </div>
       )}
 
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">Calculator Features</h3>
+        <h3 className="font-semibold text-blue-900 mb-3">{t('calculator.features.title')}</h3>
         <ul className="space-y-2 text-sm text-blue-800">
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>NEW Jewelry: Metal filtering, category selection, and smart rounding</span>
+            <span>{t('calculator.features.newJewelry')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>OLD Jewelry: Scrap calculations with Own/Other source selection</span>
+            <span>{t('calculator.features.oldJewelry')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Multi-language support: Categories and descriptions in Gujarati, Hindi, and English</span>
+            <span>{t('calculator.features.multiLanguage')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Role-based visibility: Different calculation details based on your access level</span>
+            <span>{t('calculator.features.roleBased')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Real-time rate updates: Calculations automatically use the latest rates</span>
+            <span>{t('calculator.features.realtimeRates')}</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-blue-600 mt-0.5">✓</span>
-            <span>Smart rounding: NEW jewelry rounds up, OLD jewelry rounds down to nearest 50</span>
+            <span>{t('calculator.features.smartRounding')}</span>
           </li>
         </ul>
       </div>

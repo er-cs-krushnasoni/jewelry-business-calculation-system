@@ -1,11 +1,15 @@
 import React from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const LoadingSpinner = ({ 
   size = 'md', 
   color = 'blue', 
   text = '', 
+  translateKey = null,
   className = '' 
 }) => {
+  const { t } = useLanguage();
+
   // Size configurations
   const sizes = {
     xs: 'w-3 h-3',
@@ -28,6 +32,9 @@ const LoadingSpinner = ({
 
   const spinnerSize = sizes[size] || sizes.md;
   const spinnerColor = colors[color] || colors.blue;
+
+  // Determine text to display
+  const displayText = translateKey ? t(translateKey) : text;
 
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
@@ -54,9 +61,9 @@ const LoadingSpinner = ({
       </svg>
       
       {/* Optional text */}
-      {text && (
+      {displayText && (
         <p className={`mt-2 text-sm ${spinnerColor} animate-pulse`}>
-          {text}
+          {displayText}
         </p>
       )}
     </div>
@@ -107,11 +114,14 @@ export const InlineSpinner = ({ size = 'sm', className = '' }) => {
 };
 
 // Full page loading spinner
-export const FullPageSpinner = ({ text = 'Loading...' }) => {
+export const FullPageSpinner = ({ text = '', translateKey = 'spinner.loading' }) => {
+  const { t } = useLanguage();
+  const displayText = text || t(translateKey);
+
   return (
     <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
       <div className="text-center">
-        <LoadingSpinner size="xl" text={text} />
+        <LoadingSpinner size="xl" text={displayText} />
       </div>
     </div>
   );

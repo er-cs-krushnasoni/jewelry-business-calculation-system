@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import api from '../../services/api';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
@@ -15,6 +16,7 @@ const RateSetupModal = ({
   canClose = false // Whether user can close without setting rates
 }) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [rates, setRates] = useState({
     goldBuy: '',
     goldSell: '',
@@ -61,19 +63,19 @@ const RateSetupModal = ({
       const goldSell = parseInt(rates.goldSell);
       
       if (!rates.goldBuy) {
-        errors.push('Gold buying rate is required');
+        errors.push(t('rates.setup.errors.goldBuyRequired'));
       } else if (isNaN(goldBuy) || goldBuy < 1) {
-        errors.push('Gold buying rate must be a positive number');
+        errors.push(t('rates.setup.errors.goldBuyPositive'));
       }
       
       if (!rates.goldSell) {
-        errors.push('Gold selling rate is required');
+        errors.push(t('rates.setup.errors.goldSellRequired'));
       } else if (isNaN(goldSell) || goldSell < 1) {
-        errors.push('Gold selling rate must be a positive number');
+        errors.push(t('rates.setup.errors.goldSellPositive'));
       }
       
       if (!isNaN(goldBuy) && !isNaN(goldSell) && goldSell < goldBuy) {
-        errors.push('Gold selling rate must be equal to or higher than buying rate');
+        errors.push(t('rates.setup.errors.goldSellHigher'));
       }
     }
     
@@ -83,19 +85,19 @@ const RateSetupModal = ({
       const silverSell = parseInt(rates.silverSell);
       
       if (!rates.silverBuy) {
-        errors.push('Silver buying rate is required');
+        errors.push(t('rates.setup.errors.silverBuyRequired'));
       } else if (isNaN(silverBuy) || silverBuy < 1) {
-        errors.push('Silver buying rate must be a positive number');
+        errors.push(t('rates.setup.errors.silverBuyPositive'));
       }
       
       if (!rates.silverSell) {
-        errors.push('Silver selling rate is required');
+        errors.push(t('rates.setup.errors.silverSellRequired'));
       } else if (isNaN(silverSell) || silverSell < 1) {
-        errors.push('Silver selling rate must be a positive number');
+        errors.push(t('rates.setup.errors.silverSellPositive'));
       }
       
       if (!isNaN(silverBuy) && !isNaN(silverSell) && silverSell < silverBuy) {
-        errors.push('Silver selling rate must be equal to or higher than buying rate');
+        errors.push(t('rates.setup.errors.silverSellHigher'));
       }
     }
     
@@ -155,7 +157,7 @@ const RateSetupModal = ({
         onClose();
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to set up rates');
+      setError(err.response?.data?.message || t('rates.setup.errors.setupFailed'));
     } finally {
       setSaving(false);
     }
@@ -165,7 +167,7 @@ const RateSetupModal = ({
     <Modal
       isOpen={isOpen}
       onClose={canClose ? onClose : () => {}} // Prevent closing if canClose is false
-      title="Rate Setup Required"
+      title={t('rates.setup.title')}
       size="large"
       showCloseButton={canClose}
     >
@@ -186,7 +188,7 @@ const RateSetupModal = ({
             </div>
           </div>
           <div className="text-sm text-gray-500">
-            Step {step} of 2
+            {t('rates.setup.stepOf', { current: step, total: 2 })}
           </div>
         </div>
 
@@ -194,9 +196,9 @@ const RateSetupModal = ({
         <div className="text-center">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
             <AlertCircle className="mx-auto text-yellow-600 mb-2" size={32} />
-            <h3 className="text-lg font-semibold text-yellow-800">Initial Rate Setup</h3>
+            <h3 className="text-lg font-semibold text-yellow-800">{t('rates.setup.initialSetupTitle')}</h3>
             <p className="text-yellow-700 text-sm mt-1">
-              Please set up your daily gold and silver rates to start using the calculator.
+              {t('rates.setup.initialSetupDescription')}
             </p>
           </div>
         </div>
@@ -208,52 +210,52 @@ const RateSetupModal = ({
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-                  <h4 className="text-lg font-semibold text-yellow-800">Gold Rates Setup</h4>
+                  <h4 className="text-lg font-semibold text-yellow-800">{t('rates.setup.goldRatesSetup')}</h4>
                 </div>
                 <p className="text-yellow-700 text-sm mb-4">
-  Set your gold rates per 10 grams. Selling rate must be equal to or higher than buying rate.
-</p>
+                  {t('rates.setup.goldRatesDescription')}
+                </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Input
-                      label="Gold Buying Rate"
+                      label={t('rates.setup.goldBuyingRate')}
                       type="number"
                       value={rates.goldBuy}
                       onChange={(e) => handleInputChange('goldBuy', e.target.value)}
-                      placeholder="e.g., 52000"
+                      placeholder={t('rates.setup.goldBuyPlaceholder')}
                       min="1"
                       step="1"
                       required
                       icon={<TrendingDown className="text-red-500" size={16} />}
                     />
-                    <p className="text-xs text-gray-500">₹ per 10 grams (buying price)</p>
+                    <p className="text-xs text-gray-500">{t('rates.setup.per10gBuying')}</p>
                   </div>
                   
                   <div className="space-y-2">
                     <Input
-                      label="Gold Selling Rate"
+                      label={t('rates.setup.goldSellingRate')}
                       type="number"
                       value={rates.goldSell}
                       onChange={(e) => handleInputChange('goldSell', e.target.value)}
-                      placeholder="e.g., 53000"
+                      placeholder={t('rates.setup.goldSellPlaceholder')}
                       min="1"
                       step="1"
                       required
                       icon={<TrendingUp className="text-green-500" size={16} />}
                     />
-                    <p className="text-xs text-gray-500">₹ per 10 grams (selling price)</p>
+                    <p className="text-xs text-gray-500">{t('rates.setup.per10gSelling')}</p>
                   </div>
                 </div>
 
                 {/* Gold Rate Preview */}
                 {rates.goldBuy && rates.goldSell && (
                   <div className="mt-4 p-3 bg-white rounded border border-yellow-200">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Rate Preview:</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">{t('rates.setup.ratePreview')}</p>
                     <div className="flex justify-between items-center text-sm">
-                      <span>Per 10g: ₹{parseInt(rates.goldBuy) || 0} / ₹{parseInt(rates.goldSell) || 0}</span>
+                      <span>{t('rates.setup.per10g')} ₹{parseInt(rates.goldBuy) || 0} / ₹{parseInt(rates.goldSell) || 0}</span>
                       <span className="text-gray-500">
-                        Per 1g: ₹{Math.floor((parseInt(rates.goldBuy) || 0) / 10)} / ₹{Math.ceil((parseInt(rates.goldSell) || 0) / 10)}
+                        {t('rates.setup.per1g')} ₹{Math.floor((parseInt(rates.goldBuy) || 0) / 10)} / ₹{Math.ceil((parseInt(rates.goldSell) || 0) / 10)}
                       </span>
                     </div>
                   </div>
@@ -268,52 +270,52 @@ const RateSetupModal = ({
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
-                  <h4 className="text-lg font-semibold text-gray-800">Silver Rates Setup</h4>
+                  <h4 className="text-lg font-semibold text-gray-800">{t('rates.setup.silverRatesSetup')}</h4>
                 </div>
                 <p className="text-gray-700 text-sm mb-4">
-  Set your silver rates per 1 kg. Selling rate must be equal to or higher than buying rate.
-</p>
+                  {t('rates.setup.silverRatesDescription')}
+                </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Input
-                      label="Silver Buying Rate"
+                      label={t('rates.setup.silverBuyingRate')}
                       type="number"
                       value={rates.silverBuy}
                       onChange={(e) => handleInputChange('silverBuy', e.target.value)}
-                      placeholder="e.g., 75000"
+                      placeholder={t('rates.setup.silverBuyPlaceholder')}
                       min="1"
                       step="1"
                       required
                       icon={<TrendingDown className="text-red-500" size={16} />}
                     />
-                    <p className="text-xs text-gray-500">₹ per kg (buying price)</p>
+                    <p className="text-xs text-gray-500">{t('rates.setup.perKgBuying')}</p>
                   </div>
                   
                   <div className="space-y-2">
                     <Input
-                      label="Silver Selling Rate"
+                      label={t('rates.setup.silverSellingRate')}
                       type="number"
                       value={rates.silverSell}
                       onChange={(e) => handleInputChange('silverSell', e.target.value)}
-                      placeholder="e.g., 78000"
+                      placeholder={t('rates.setup.silverSellPlaceholder')}
                       min="1"
                       step="1"
                       required
                       icon={<TrendingUp className="text-green-500" size={16} />}
                     />
-                    <p className="text-xs text-gray-500">₹ per kg (selling price)</p>
+                    <p className="text-xs text-gray-500">{t('rates.setup.perKgSelling')}</p>
                   </div>
                 </div>
 
                 {/* Silver Rate Preview */}
                 {rates.silverBuy && rates.silverSell && (
                   <div className="mt-4 p-3 bg-white rounded border border-gray-200">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Rate Preview:</p>
+                    <p className="text-sm font-medium text-gray-700 mb-2">{t('rates.setup.ratePreview')}</p>
                     <div className="flex justify-between items-center text-sm">
-                      <span>Per kg: ₹{parseInt(rates.silverBuy) || 0} / ₹{parseInt(rates.silverSell) || 0}</span>
+                      <span>{t('rates.setup.perKg')} ₹{parseInt(rates.silverBuy) || 0} / ₹{parseInt(rates.silverSell) || 0}</span>
                       <span className="text-gray-500">
-                        Per 1g: ₹{Math.floor((parseInt(rates.silverBuy) || 0) / 1000)} / ₹{Math.ceil((parseInt(rates.silverSell) || 0) / 1000)}
+                        {t('rates.setup.per1g')} ₹{Math.floor((parseInt(rates.silverBuy) || 0) / 1000)} / ₹{Math.ceil((parseInt(rates.silverSell) || 0) / 1000)}
                       </span>
                     </div>
                   </div>
@@ -322,16 +324,16 @@ const RateSetupModal = ({
 
               {/* Summary */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h5 className="font-medium text-blue-800 mb-2">Setup Summary</h5>
+                <h5 className="font-medium text-blue-800 mb-2">{t('rates.setup.setupSummary')}</h5>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-blue-700">
-                      <strong>Gold:</strong> Buy ₹{rates.goldBuy}/10g, Sell ₹{rates.goldSell}/10g
+                      <strong>{t('rates.setup.gold')}</strong> {t('rates.setup.buy')} ₹{rates.goldBuy}/10g, {t('rates.setup.sell')} ₹{rates.goldSell}/10g
                     </p>
                   </div>
                   <div>
                     <p className="text-blue-700">
-                      <strong>Silver:</strong> Buy ₹{rates.silverBuy}/kg, Sell ₹{rates.silverSell}/kg
+                      <strong>{t('rates.setup.silver')}</strong> {t('rates.setup.buy')} ₹{rates.silverBuy}/kg, {t('rates.setup.sell')} ₹{rates.silverSell}/kg
                     </p>
                   </div>
                 </div>
@@ -360,7 +362,7 @@ const RateSetupModal = ({
                 onClick={handlePreviousStep}
                 disabled={saving}
               >
-                Previous
+                {t('rates.setup.previous')}
               </Button>
             )}
 
@@ -372,7 +374,7 @@ const RateSetupModal = ({
                   onClick={onClose}
                   disabled={saving}
                 >
-                  Cancel
+                  {t('rates.setup.cancel')}
                 </Button>
               )}
               
@@ -382,7 +384,7 @@ const RateSetupModal = ({
                   onClick={handleNextStep}
                   disabled={saving}
                 >
-                  Next: Silver Rates
+                  {t('rates.setup.nextSilverRates')}
                 </Button>
               ) : (
                 <Button
@@ -395,7 +397,7 @@ const RateSetupModal = ({
                   ) : (
                     <Save size={16} />
                   )}
-                  <span>{saving ? 'Setting up...' : 'Complete Setup'}</span>
+                  <span>{saving ? t('rates.setup.settingUp') : t('rates.setup.completeSetup')}</span>
                 </Button>
               )}
             </div>
@@ -404,14 +406,14 @@ const RateSetupModal = ({
 
         {/* Help Text */}
         <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-          <p className="font-medium mb-2">Important Notes:</p>
+          <p className="font-medium mb-2">{t('rates.setup.importantNotes')}</p>
           <ul className="space-y-1">
-  <li>• Only whole numbers are accepted (no decimal values)</li>
-  <li>• Gold rates are per 10 grams, Silver rates are per kg</li>
-  <li>• Selling rates must be equal to or higher than buying rates</li>
-  <li>• These rates will be used for all calculations in your shop</li>
-  <li>• You can update these rates anytime from the rate management section</li>
-</ul>
+            <li>• {t('rates.setup.note1')}</li>
+            <li>• {t('rates.setup.note2')}</li>
+            <li>• {t('rates.setup.note3')}</li>
+            <li>• {t('rates.setup.note4')}</li>
+            <li>• {t('rates.setup.note5')}</li>
+          </ul>
         </div>
       </div>
     </Modal>

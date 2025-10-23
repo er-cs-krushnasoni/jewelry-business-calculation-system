@@ -1,4 +1,5 @@
 import React, { useState, forwardRef } from 'react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Input = forwardRef(({
   label,
@@ -25,6 +26,7 @@ const Input = forwardRef(({
   autoComplete,
   ...props
 }, ref) => {
+  const { t } = useLanguage();
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -106,7 +108,7 @@ const Input = forwardRef(({
       {label && (
         <label htmlFor={inputId} className={labelStyles}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1">{t('input.required')}</span>}
         </label>
       )}
 
@@ -149,6 +151,7 @@ const Input = forwardRef(({
                 onClick={togglePasswordVisibility}
                 className={`${iconSize} text-gray-400 hover:text-gray-600 focus:outline-none`}
                 tabIndex={-1}
+                aria-label={showPassword ? t('input.passwordHide') : t('input.passwordShow')}
               >
                 {showPassword ? (
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,8 +205,11 @@ export const Textarea = forwardRef(({
   labelClassName = '',
   id,
   name,
+  maxLength,
+  showCount = false,
   ...props
 }, ref) => {
+  const { t } = useLanguage();
   const inputId = id || `textarea-${Math.random().toString(36).substr(2, 9)}`;
 
   const textareaStyles = [
@@ -223,12 +229,14 @@ export const Textarea = forwardRef(({
     labelClassName
   ].filter(Boolean).join(' ');
 
+  const currentLength = value ? value.length : 0;
+
   return (
     <div className={containerClassName}>
       {label && (
         <label htmlFor={inputId} className={labelStyles}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1">{t('input.required')}</span>}
         </label>
       )}
       
@@ -245,9 +253,17 @@ export const Textarea = forwardRef(({
         readOnly={readOnly}
         required={required}
         rows={rows}
+        maxLength={maxLength}
         className={textareaStyles}
         {...props}
       />
+      
+      {/* Character count */}
+      {showCount && maxLength && (
+        <p className="mt-1 text-xs text-gray-500 text-right">
+          {t('input.characterCount', { current: currentLength, max: maxLength })}
+        </p>
+      )}
       
       {(helperText || error) && (
         <p className={`mt-1 text-sm ${error ? 'text-red-600' : 'text-gray-500'}`}>
@@ -279,6 +295,7 @@ export const Select = forwardRef(({
   name,
   ...props
 }, ref) => {
+  const { t } = useLanguage();
   const inputId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
 
   const sizes = {
@@ -309,7 +326,7 @@ export const Select = forwardRef(({
       {label && (
         <label htmlFor={inputId} className={labelStyles}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ml-1">{t('input.required')}</span>}
         </label>
       )}
       
