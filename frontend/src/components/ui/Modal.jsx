@@ -59,23 +59,26 @@ const Modal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 overflow-y-auto animate-fade-in">
+      {/* Backdrop with glass effect and blur */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm transition-all duration-300"
         onClick={handleOverlayClick}
         aria-hidden="true"
       />
       
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
         <div 
-          className={`relative w-full ${sizeClasses[maxWidth] || sizeClasses.medium} bg-white rounded-lg shadow-xl transform transition-all ${className}`}
+          className={`relative w-full ${sizeClasses[maxWidth] || sizeClasses.medium} bg-white dark:bg-slate-900 rounded-xl shadow-luxury-lg dark:shadow-gold/10 transform transition-all duration-300 animate-scale-in border border-gold-200/20 dark:border-gold-500/20 ${className}`}
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-label={title || t('modal.closeModal')}
         >
+          {/* Decorative top border */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-gold rounded-t-xl" />
+          
           {/* Render children directly - they contain their own structure */}
           {children}
         </div>
@@ -101,13 +104,13 @@ export const LegacyModal = ({
     <Modal onClose={onClose} maxWidth={size} {...props}>
       {/* Header */}
       {title && (
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className="flex items-center justify-between p-6 border-b border-gold-200/30 dark:border-slate-700/50 bg-gradient-to-r from-gold-50/50 to-transparent dark:from-slate-800/50">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white tracking-tight">
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+            className="text-gray-400 hover:text-gold-600 dark:text-gray-500 dark:hover:text-gold-400 transition-all duration-200 p-1.5 rounded-full hover:bg-gold-100 dark:hover:bg-slate-800 hover:shadow-gold"
             aria-label={t('modal.close')}
           >
             <X size={20} />
@@ -116,7 +119,7 @@ export const LegacyModal = ({
       )}
       
       {/* Content */}
-      <div className="p-6">
+      <div className="p-6 text-gray-700 dark:text-gray-300">
         {children}
       </div>
     </Modal>

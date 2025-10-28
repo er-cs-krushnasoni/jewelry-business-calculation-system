@@ -12,34 +12,34 @@ const Button = ({
   fullWidth = false,
   className = '',
   onClick,
-  translateKey = null, // Optional translation key for button text
+  translateKey = null,
   ...props
 }) => {
   const { t } = useLanguage();
 
-  // Base styles
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+  // Base styles with luxury transitions and focus states
+  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 dark:focus:ring-offset-slate-900';
 
-  // Variant styles
+  // Luxury variant styles with dark mode support
   const variants = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500',
-    outline: 'border border-gray-300 hover:bg-gray-50 text-gray-700 focus:ring-blue-500',
-    ghost: 'hover:bg-gray-100 text-gray-700 focus:ring-blue-500',
-    danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
-    success: 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500',
-    warning: 'bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500',
-    info: 'bg-cyan-600 hover:bg-cyan-700 text-white focus:ring-cyan-500',
-    link: 'text-blue-600 hover:text-blue-500 underline-offset-4 hover:underline focus:ring-blue-500'
+    primary: 'bg-gradient-gold text-white shadow-luxury hover:shadow-luxury-lg focus:ring-gold-500 dark:shadow-gold/20 dark:hover:shadow-gold/40',
+    secondary: 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white shadow-luxury focus:ring-slate-500 dark:from-slate-700 dark:to-slate-800 dark:hover:from-slate-600 dark:hover:to-slate-700',
+    outline: 'border-2 border-gold-400 hover:bg-gold-50 text-gold-700 focus:ring-gold-500 dark:border-gold-500 dark:hover:bg-gold-900/20 dark:text-gold-400 dark:hover:text-gold-300',
+    ghost: 'hover:bg-gold-50 text-slate-700 focus:ring-gold-500 dark:hover:bg-slate-800 dark:text-slate-300 dark:hover:text-gold-400',
+    danger: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-luxury focus:ring-red-500 dark:from-red-700 dark:to-red-800',
+    success: 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-luxury focus:ring-green-500 dark:from-green-700 dark:to-green-800',
+    warning: 'bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white shadow-luxury focus:ring-yellow-500 dark:from-yellow-700 dark:to-yellow-800',
+    info: 'bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-luxury focus:ring-cyan-500 dark:from-cyan-700 dark:to-cyan-800',
+    link: 'text-gold-600 hover:text-gold-700 underline-offset-4 hover:underline focus:ring-gold-500 dark:text-gold-400 dark:hover:text-gold-300'
   };
 
-  // Size styles
+  // Size styles with proper spacing
   const sizes = {
-    xs: 'px-2.5 py-1.5 text-xs',
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-4 py-2 text-base',
-    xl: 'px-6 py-3 text-base'
+    xs: 'px-3 py-1.5 text-xs',
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-2.5 text-sm',
+    lg: 'px-8 py-3 text-base',
+    xl: 'px-10 py-4 text-lg'
   };
 
   // Combine styles
@@ -51,19 +51,15 @@ const Button = ({
     className
   ].filter(Boolean).join(' ');
 
-  // FIXED: Handle click properly for submit buttons
+  // Handle click properly for submit buttons
   const handleClick = (e) => {
-    // For submit buttons, don't interfere with form submission
     if (type === 'submit') {
-      // Let the form handle the submission, but still call onClick if provided
       if (!loading && !disabled && onClick) {
         onClick(e);
       }
-      // Don't prevent default - let form submission proceed naturally
       return;
     }
     
-    // For non-submit buttons, handle normally
     if (!loading && !disabled && onClick) {
       onClick(e);
     }
@@ -83,7 +79,7 @@ const Button = ({
       {loading && (
         <InlineSpinner 
           size="sm" 
-          className="mr-2 text-current" 
+          className="mr-2 text-current animate-glow" 
         />
       )}
       {buttonContent}
@@ -91,7 +87,7 @@ const Button = ({
   );
 };
 
-// Icon Button Component
+// Icon Button Component with luxury styling
 export const IconButton = ({
   children,
   variant = 'ghost',
@@ -100,17 +96,17 @@ export const IconButton = ({
   ...props
 }) => {
   const iconSizes = {
-    xs: 'p-1',
-    sm: 'p-1.5',
-    md: 'p-2',
-    lg: 'p-2.5',
-    xl: 'p-3'
+    xs: 'p-1.5',
+    sm: 'p-2',
+    md: 'p-2.5',
+    lg: 'p-3',
+    xl: 'p-4'
   };
 
   return (
     <Button
       variant={variant}
-      className={`${iconSizes[size]} ${className}`}
+      className={`${iconSizes[size]} rounded-full ${className}`}
       {...props}
     >
       {children}
@@ -118,22 +114,25 @@ export const IconButton = ({
   );
 };
 
-// Button Group Component
+// Button Group Component with luxury styling
 export const ButtonGroup = ({ children, className = '' }) => {
   return (
-    <div className={`inline-flex rounded-md shadow-sm ${className}`} role="group">
+    <div 
+      className={`inline-flex rounded-xl shadow-luxury overflow-hidden dark:shadow-gold/10 ${className}`} 
+      role="group"
+    >
       {React.Children.map(children, (child, index) => {
         if (React.isValidElement(child)) {
           const isFirst = index === 0;
           const isLast = index === React.Children.count(children) - 1;
           
-          let groupClassName = '';
+          let groupClassName = 'hover:scale-100'; // Override individual button scale
           if (!isFirst && !isLast) {
-            groupClassName = 'rounded-none border-l-0';
+            groupClassName += ' rounded-none border-l-0';
           } else if (isFirst) {
-            groupClassName = 'rounded-r-none';
+            groupClassName += ' rounded-r-none';
           } else if (isLast) {
-            groupClassName = 'rounded-l-none border-l-0';
+            groupClassName += ' rounded-l-none border-l-0';
           }
 
           return React.cloneElement(child, {
@@ -146,7 +145,7 @@ export const ButtonGroup = ({ children, className = '' }) => {
   );
 };
 
-// Floating Action Button
+// Floating Action Button with luxury styling
 export const FloatingActionButton = ({
   children,
   className = '',
@@ -155,7 +154,7 @@ export const FloatingActionButton = ({
   return (
     <Button
       variant="primary"
-      className={`fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg hover:shadow-xl ${className}`}
+      className={`fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-luxury-lg hover:shadow-gold animate-glow z-50 ${className}`}
       {...props}
     >
       {children}

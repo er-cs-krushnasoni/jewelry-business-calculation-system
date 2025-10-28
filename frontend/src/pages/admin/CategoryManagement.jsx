@@ -208,37 +208,38 @@ const CategoryManagement = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold bg-gradient-gold bg-clip-text text-transparent dark:text-white">
             {t('category.management.title')}
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {t('category.management.subtitle')}
           </p>
         </div>
         <Button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 bg-gradient-gold hover:shadow-gold transition-all duration-300 transform hover:scale-105"
         >
           <Plus size={20} />
           {t('category.management.addCategory')}
         </Button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
+      {/* Filters Section */}
+      <div className="glass-effect rounded-xl border border-gold-200 dark:border-slate-700 p-6 space-y-4 shadow-luxury animate-slide-up">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium text-gray-900 flex items-center gap-2">
-            <Filter size={18} />
+          <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <Filter size={20} className="text-gold-500" />
             {t('category.management.filters.title')}
           </h3>
           <Button
             variant="outline"
             size="sm"
             onClick={resetFilters}
+            className="border-gold-300 dark:border-slate-600 text-gold-600 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-slate-700 transition-all duration-200"
           >
             {t('category.management.filters.reset')}
           </Button>
@@ -247,13 +248,13 @@ const CategoryManagement = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Type Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('category.management.filters.type')}
             </label>
             <select
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 transition-all duration-200"
             >
               <option value="">{t('category.management.filters.allTypes')}</option>
               <option value="NEW">{t('category.management.types.new')}</option>
@@ -263,13 +264,13 @@ const CategoryManagement = () => {
 
           {/* Metal Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('category.management.filters.metal')}
             </label>
             <select
               value={filters.metal}
               onChange={(e) => handleFilterChange('metal', e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 transition-all duration-200"
             >
               <option value="">{t('category.management.filters.allMetals')}</option>
               <option value="GOLD">{t('category.management.metals.gold')}</option>
@@ -279,14 +280,14 @@ const CategoryManagement = () => {
 
           {/* Item Category Filter (NEW jewelry only) */}
           {(filters.type === 'NEW' || !filters.type) && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="animate-scale-in">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t('category.management.filters.itemCategory')}
               </label>
               <select
                 value={filters.itemCategory}
                 onChange={(e) => handleFilterChange('itemCategory', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 transition-all duration-200"
               >
                 <option value="">{t('category.management.filters.allCategories')}</option>
                 {itemCategories.map(category => (
@@ -300,17 +301,17 @@ const CategoryManagement = () => {
 
           {/* Search Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('common.actions.search')}
             </label>
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500" />
               <input
                 type="text"
                 placeholder={t('category.management.filters.search')}
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="w-full border border-gray-300 rounded-md pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg pl-10 pr-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 transition-all duration-200"
               />
             </div>
           </div>
@@ -319,17 +320,17 @@ const CategoryManagement = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-          <AlertCircle size={20} className="text-red-600 flex-shrink-0" />
-          <div>
-            <h4 className="font-medium text-red-800">{t('common.messages.errorLoadingData')}</h4>
-            <p className="text-red-700">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center gap-3 shadow-luxury animate-slide-up">
+          <AlertCircle size={20} className="text-red-600 dark:text-red-400 flex-shrink-0" />
+          <div className="flex-1">
+            <h4 className="font-medium text-red-800 dark:text-red-300">{t('common.messages.errorLoadingData')}</h4>
+            <p className="text-red-700 dark:text-red-400 text-sm mt-1">{error}</p>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={loadCategories}
-            className="ml-auto"
+            className="border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200"
           >
             {t('common.actions.retry')}
           </Button>
@@ -337,21 +338,21 @@ const CategoryManagement = () => {
       )}
 
       {/* Categories List */}
-      <div className="bg-white rounded-lg border border-gray-200">
+      <div className="glass-effect rounded-xl border border-gold-200 dark:border-slate-700 overflow-hidden shadow-luxury-lg animate-slide-up">
         {loading ? (
-          <div className="p-8 text-center">
-            <LoadingSpinner />
-            <p className="mt-2 text-gray-600">{t('common.status.loading')}</p>
+          <div className="p-12 text-center">
+            <LoadingSpinner size="large" />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.status.loading')}</p>
           </div>
         ) : filteredCategories.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="text-gray-400 mb-4">
-              <AlertCircle size={48} className="mx-auto" />
+          <div className="p-12 text-center">
+            <div className="text-gold-400 dark:text-gold-500 mb-4">
+              <AlertCircle size={56} className="mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               {t('category.management.table.noCategoriesFound')}
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               {categories.length === 0 
                 ? t('category.management.table.createFirst')
                 : t('category.management.table.noMatches')
@@ -360,7 +361,7 @@ const CategoryManagement = () => {
             {categories.length === 0 && (
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="mx-auto"
+                className="mx-auto bg-gradient-gold hover:shadow-gold transition-all duration-300 transform hover:scale-105"
               >
                 {t('category.management.addCategory')}
               </Button>
@@ -369,96 +370,107 @@ const CategoryManagement = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gradient-to-r from-gold-50 to-gold-100 dark:from-slate-800 dark:to-slate-750">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.codeDetails')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.typeAndMetal')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.category')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.purity')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.keyPercentage')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.settings')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                     {t('category.management.table.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCategories.map((category) => (
-                  <tr key={category._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+                {filteredCategories.map((category, index) => (
+                  <tr 
+                    key={category._id} 
+                    className={`transition-all duration-200 hover:bg-gold-50/50 dark:hover:bg-slate-700/50 ${
+                      index % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50/50 dark:bg-slate-800/50'
+                    }`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-gray-900 dark:text-white">
                         {category.code}
                       </div>
                       {category.description && (
-                        <div className="text-sm text-gray-500 mt-1">
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           {category.description}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col gap-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-2">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${
                           category.type === 'NEW' 
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 dark:from-green-900/40 dark:to-emerald-900/40 dark:text-green-300'
+                            : 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 dark:from-amber-900/40 dark:to-yellow-900/40 dark:text-amber-300'
                         }`}>
                           {category.type === 'NEW' ? t('category.management.types.new') : t('category.management.types.old')}
                         </span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 ${
                           category.metal === 'GOLD' 
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-gradient-gold text-yellow-900 dark:text-yellow-200'
+                            : 'bg-gradient-silver text-gray-800 dark:text-gray-200'
                         }`}>
                           {category.metal === 'GOLD' ? t('category.management.metals.gold') : t('category.management.metals.silver')}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-200 font-medium">
                       {category.itemCategory || 
                         (category.type === 'OLD' ? t('category.management.table.oldJewelry') : t('category.management.table.notApplicable'))}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getEffectivePurity(category) ? `${getEffectivePurity(category)}%` : t('category.management.table.notApplicable')}
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                      {getEffectivePurity(category) ? (
+                        <span className="px-3 py-1 bg-gold-100 dark:bg-gold-900/30 text-gold-800 dark:text-gold-300 rounded-lg">
+                          {getEffectivePurity(category)}%
+                        </span>
+                      ) : (
+                        <span className="text-gray-500 dark:text-gray-400">{t('category.management.table.notApplicable')}</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm">
                       {category.type === 'NEW' && category.sellingPercentage && (
-                        <span className="text-green-600 font-medium">
+                        <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold rounded-lg">
                            {category.sellingPercentage}%
                         </span>
                       )}
                       {category.type === 'OLD' && (
-                        <div className="space-y-1">
-                          <div className="text-xs text-gray-500">
-                            {t('category.management.table.ownPercentage')} {category.scrapBuyOwnPercentage}%
+                        <div className="space-y-2">
+                          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">
+                            {t('category.management.table.ownPercentage')} <span className="font-semibold text-gray-900 dark:text-white">{category.scrapBuyOwnPercentage}%</span>
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {t('category.management.table.otherPercentage')} {category.scrapBuyOtherPercentage}%
+                          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded">
+                            {t('category.management.table.otherPercentage')} <span className="font-semibold text-gray-900 dark:text-white">{category.scrapBuyOtherPercentage}%</span>
                           </div>
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4">
                       {category.type === 'OLD' && (
                         <div className="flex items-center gap-2">
                           {category.resaleEnabled ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 text-green-800 dark:text-green-300 transition-all duration-200">
                               <Eye size={12} className="mr-1" />
                               {t('category.management.resale.on')}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 transition-all duration-200">
                               <EyeOff size={12} className="mr-1" />
                               {t('category.management.resale.off')}
                             </span>
@@ -466,27 +478,27 @@ const CategoryManagement = () => {
                         </div>
                       )}
                       {category.type === 'NEW' && (
-                        <span className="text-xs text-gray-500">{t('category.management.resale.standard')}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{t('category.management.resale.standard')}</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
                             setEditingCategory(category);
                             setShowEditModal(true);
                           }}
-                          className="text-blue-600 hover:text-blue-700 p-1 rounded"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all duration-200 transform hover:scale-110"
                           title={t('common.actions.edit')}
                         >
-                          <Edit size={16} />
+                          <Edit size={18} />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(category._id, category.code)}
-                          className="text-red-600 hover:text-red-700 p-1 rounded"
+                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200 transform hover:scale-110"
                           title={t('common.actions.delete')}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </td>

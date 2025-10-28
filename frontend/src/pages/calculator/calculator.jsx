@@ -7,7 +7,7 @@ import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import BlockingMessage from '../../components/rates/BlockingMessage';
 import NewJewelryCalculator from '../../components/calculator/NewJewelryCalculator';
 import OldJewelryCalculator from '../../components/calculator/OldJewelryCalculator';
-import { Calculator, AlertTriangle, Sparkles } from 'lucide-react';
+import { Calculator, AlertTriangle, Sparkles, Wifi, WifiOff } from 'lucide-react';
 
 const CalculatorPage = () => {
   const { user } = useAuth();
@@ -92,10 +92,14 @@ const CalculatorPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">{t('calculator.page.loading')}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center animate-fade-in">
+          <div className="mb-6">
+            <LoadingSpinner size="large" />
+          </div>
+          <p className="text-lg text-slate-600 dark:text-slate-300 font-medium animate-pulse">
+            {t('calculator.page.loading')}
+          </p>
         </div>
       </div>
     );
@@ -103,16 +107,20 @@ const CalculatorPage = () => {
 
   if (error && !isBlocked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 text-center">
-          <div className="text-red-500 mb-4">
-            <AlertTriangle size={48} className="mx-auto" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 px-4">
+        <div className="glass-effect bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-luxury-lg p-8 max-w-md w-full text-center animate-scale-in backdrop-blur-xl border border-gold-200/20 dark:border-gold-500/20">
+          <div className="text-red-500 dark:text-red-400 mb-6 animate-bounce">
+            <AlertTriangle size={56} className="mx-auto" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('calculator.page.error')}</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+            {t('calculator.page.error')}
+          </h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+            {error}
+          </p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg"
+            className="bg-gradient-gold hover:shadow-gold text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-luxury"
           >
             {t('calculator.page.refreshPage')}
           </button>
@@ -133,151 +141,207 @@ const CalculatorPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-8 text-center">
-        <div className="flex items-center justify-center space-x-3 mb-4">
-          <Calculator className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">
+    <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
+      {/* Header Section */}
+      <div className="mb-10 text-center">
+        <div className="flex items-center justify-center space-x-4 mb-6">
+          <div className="bg-gradient-gold p-3 rounded-xl shadow-gold animate-glow">
+            <Calculator className="h-10 w-10 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gold-600 to-gold-400 dark:from-gold-400 dark:to-gold-200 bg-clip-text text-transparent">
             {t('calculator.jewelryCalculator')}
           </h1>
         </div>
-        <p className="text-gray-600">
+        <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
           {t('calculator.subtitle')}
         </p>
         
+        {/* Connection Status Badge */}
         {!isConnected && (
-          <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-yellow-800 text-sm">
+          <div className="mt-6 inline-flex items-center gap-3 bg-amber-50 dark:bg-amber-900/30 border-2 border-amber-200 dark:border-amber-700/50 rounded-xl px-6 py-3 shadow-lg animate-slide-up backdrop-blur-sm">
+            <WifiOff className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            <p className="text-amber-800 dark:text-amber-300 font-medium">
               {t('calculator.offlineMessage')}
             </p>
           </div>
         )}
       </div>
 
-      {rates && (
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">{t('calculator.currentRates.title')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <h3 className="font-medium text-yellow-600 flex items-center gap-2">
-                <Sparkles size={16} />
-                {t('calculator.currentRates.goldPer10g')}
-              </h3>
-              <div className="flex justify-between">
-                <span className="text-gray-600">{t('calculator.currentRates.buying')}</span>
-                <span className="font-semibold">₹{rates.goldBuy}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">{t('calculator.currentRates.selling')}</span>
-                <span className="font-semibold">₹{rates.goldSell}</span>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-medium text-gray-400 flex items-center gap-2">
-                <Sparkles size={16} />
-                {t('calculator.currentRates.silverPerKg')}
-              </h3>
-              <div className="flex justify-between">
-                <span className="text-gray-600">{t('calculator.currentRates.buying')}</span>
-                <span className="font-semibold">₹{rates.silverBuy}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">{t('calculator.currentRates.selling')}</span>
-                <span className="font-semibold">₹{rates.silverSell}</span>
-              </div>
-            </div>
+      {/* Current Rates Display */}
+{/* Only show rates for admin and manager */}
+{rates && ['admin', 'manager'].includes(user?.role) && (
+  <div className="mb-10 glass-effect bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-luxury-lg p-4 sm:p-8 border border-gold-200/30 dark:border-gold-500/20 backdrop-blur-xl animate-slide-up hover:shadow-gold transition-all duration-300">
+    <div className="flex items-center gap-3 mb-6">
+      <Sparkles className="h-6 w-6 text-gold-500 dark:text-gold-400 animate-pulse" />
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+        {t('calculator.currentRates.title')}
+      </h2>
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+      {/* Gold Rates */}
+      <div className="space-y-4 p-3 sm:p-6 bg-gradient-to-br from-gold-50 to-amber-50 dark:from-gold-900/20 dark:to-amber-900/20 rounded-xl border-2 border-gold-200 dark:border-gold-600/30 shadow-gold hover:scale-105 transition-transform duration-300">
+        <h3 className="font-bold text-gold-700 dark:text-gold-400 flex items-center gap-2 text-lg">
+          <Sparkles size={20} className="animate-pulse" />
+          {t('calculator.currentRates.goldPer10g')}
+        </h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              {t('calculator.currentRates.buying')}
+            </span>
+            <span className="font-bold text-xl text-gold-700 dark:text-gold-300">
+              ₹{rates.goldBuy}
+            </span>
           </div>
-          
-          {rates.updateInfo && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
-                {t('calculator.currentRates.lastUpdated', {
-                  user: rates.updateInfo.updatedBy,
-                  timestamp: rates.updateInfo.timestamp
-                })}
-                {isConnected && (
-                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                    {t('calculator.currentRates.live')}
-                  </span>
-                )}
-              </p>
-            </div>
+          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              {t('calculator.currentRates.selling')}
+            </span>
+            <span className="font-bold text-xl text-gold-700 dark:text-gold-300">
+              ₹{rates.goldSell}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Silver Rates */}
+      <div className="space-y-4 p-3 sm:p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-700/40 rounded-xl border-2 border-slate-300 dark:border-slate-600/30 shadow-silver hover:scale-105 transition-transform duration-300">
+        <h3 className="font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 text-lg">
+          <Sparkles size={20} className="animate-pulse" />
+          {t('calculator.currentRates.silverPerKg')}
+        </h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              {t('calculator.currentRates.buying')}
+            </span>
+            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
+              ₹{rates.silverBuy}
+            </span>
+          </div>
+          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
+            <span className="text-slate-600 dark:text-slate-300 font-medium">
+              {t('calculator.currentRates.selling')}
+            </span>
+            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
+              ₹{rates.silverSell}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Update Info */}
+    {rates.updateInfo && (
+      <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-gold-200/50 dark:border-gold-700/30">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+            {t('calculator.currentRates.lastUpdated', {
+              user: rates.updateInfo.updatedBy,
+              timestamp: rates.updateInfo.timestamp
+            })}
+          </p>
+          {isConnected && (
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg animate-pulse">
+              <Wifi size={16} />
+              {t('calculator.currentRates.live')}
+            </span>
           )}
         </div>
-      )}
+      </div>
+    )}
+  </div>
+)}
 
-      <div className="mb-6 bg-white rounded-lg shadow p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+      {/* Calculator Type Selection */}
+      <div className="mb-10 glass-effect bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-luxury p-8 border border-gold-200/30 dark:border-gold-500/20 backdrop-blur-xl animate-slide-up">
+        <label className="block text-lg font-bold text-slate-900 dark:text-white mb-6">
           {t('calculator.page.selectJewelryType')}
         </label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* New Jewelry Button */}
           <button
             type="button"
             onClick={() => setCalculatorType('new')}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`group relative p-4 sm:p-8 rounded-2xl border-3 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
               calculatorType === 'new'
-                ? 'border-green-500 bg-green-50'
-                : 'border-gray-200 bg-white hover:border-green-200'
+                ? 'border-emerald-500 dark:border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 shadow-luxury-lg'
+                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-emerald-300 dark:hover:border-emerald-600 shadow-luxury hover:shadow-luxury-lg'
             }`}
           >
             <div className="text-center">
-              <div className={`text-lg font-semibold ${
-                calculatorType === 'new' ? 'text-green-700' : 'text-gray-700'
+              <div className={`text-2xl font-bold mb-3 transition-colors ${
+                calculatorType === 'new' 
+                  ? 'text-emerald-700 dark:text-emerald-300' 
+                  : 'text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
               }`}>
                 {t('calculator.newJewelry')}
               </div>
-              <div className="text-sm text-gray-600 mt-1">
+              <div className="text-slate-600 dark:text-slate-400 mb-4 text-base">
                 {t('calculator.page.freshStock')}
               </div>
               {calculatorType === 'new' && (
-                <div className="mt-2 text-xs text-green-600 font-medium">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg animate-pulse">
+                  <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
                   {t('calculator.page.active')}
                 </div>
               )}
             </div>
+            {calculatorType === 'new' && (
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-400/10 to-green-400/10 animate-glow"></div>
+            )}
           </button>
 
+          {/* Old Jewelry Button */}
           <button
             type="button"
             onClick={() => setCalculatorType('old')}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`group relative p-8 rounded-2xl border-3 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 ${
               calculatorType === 'old'
-                ? 'border-orange-500 bg-orange-50'
-                : 'border-gray-200 bg-white hover:border-orange-200'
+                ? 'border-orange-500 dark:border-orange-400 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 shadow-luxury-lg'
+                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-orange-300 dark:hover:border-orange-600 shadow-luxury hover:shadow-luxury-lg'
             }`}
           >
             <div className="text-center">
-              <div className={`text-lg font-semibold ${
-                calculatorType === 'old' ? 'text-orange-700' : 'text-gray-700'
+              <div className={`text-2xl font-bold mb-3 transition-colors ${
+                calculatorType === 'old' 
+                  ? 'text-orange-700 dark:text-orange-300' 
+                  : 'text-slate-700 dark:text-slate-300 group-hover:text-orange-600 dark:group-hover:text-orange-400'
               }`}>
                 {t('calculator.oldJewelry')}
               </div>
-              <div className="text-sm text-gray-600 mt-1">
+              <div className="text-slate-600 dark:text-slate-400 mb-4 text-base">
                 {t('calculator.page.scrapResale')}
               </div>
               {calculatorType === 'old' && (
-                <div className="mt-2 text-xs text-orange-600 font-medium">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg animate-pulse">
+                  <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
                   {t('calculator.page.active')}
                 </div>
               )}
             </div>
+            {calculatorType === 'old' && (
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-400/10 to-amber-400/10 animate-glow"></div>
+            )}
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">
+      {/* Calculator Component */}
+      <div className="glass-effect bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-luxury-lg border border-gold-200/30 dark:border-gold-500/20 backdrop-blur-xl overflow-hidden animate-slide-up">
+        <div className="px-4 sm:px-8 py-4 sm:py-6 bg-gradient-gold border-b-2 border-gold-300/50 dark:border-gold-600/30">
+          <h2 className="text-2xl font-bold text-white mb-2">
             {calculatorType === 'new' ? t('calculator.new.title') : t('calculator.old.title')}
           </h2>
-          <p className="text-gray-600 text-sm mt-1">
+          <p className="text-gold-100 text-base leading-relaxed">
             {calculatorType === 'new' 
               ? t('calculator.new.description')
               : t('calculator.old.description')
             }
           </p>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-8">
           {rates ? (
             calculatorType === 'new' ? (
               <NewJewelryCalculator rates={rates} />
@@ -285,52 +349,59 @@ const CalculatorPage = () => {
               <OldJewelryCalculator rates={rates} />
             )
           ) : (
-            <div className="text-center py-8">
+            <div className="text-center py-12">
               <LoadingSpinner size="medium" />
-              <p className="mt-2 text-gray-600">{t('calculator.currentRates.loadingRates')}</p>
+              <p className="mt-4 text-slate-600 dark:text-slate-300 font-medium">
+                {t('calculator.currentRates.loadingRates')}
+              </p>
             </div>
           )}
         </div>
       </div>
 
+      {/* Real-time Connection Indicator */}
       {isConnected && (
-        <div className="mt-8 bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-green-800 font-medium text-sm">
+        <div className="mt-8 glass-effect bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 border-2 border-emerald-200 dark:border-emerald-700/50 rounded-xl p-6 shadow-luxury animate-slide-up backdrop-blur-sm">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="relative">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
+            </div>
+            <Wifi className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-emerald-800 dark:text-emerald-300 font-bold text-lg">
               {t('calculator.realtime.active')}
             </span>
           </div>
         </div>
       )}
 
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">{t('calculator.features.title')}</h3>
-        <ul className="space-y-2 text-sm text-blue-800">
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.newJewelry')}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.oldJewelry')}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.multiLanguage')}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.roleBased')}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.realtimeRates')}</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-blue-600 mt-0.5">✓</span>
-            <span>{t('calculator.features.smartRounding')}</span>
-          </li>
+      {/* Features Section */}
+      <div className="mt-10 glass-effect bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700/50 rounded-2xl p-4 sm:p-8 shadow-luxury backdrop-blur-sm animate-slide-up">
+        <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-6 text-2xl flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          {t('calculator.features.title')}
+        </h3>
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            t('calculator.features.newJewelry'),
+            t('calculator.features.oldJewelry'),
+            t('calculator.features.multiLanguage'),
+            t('calculator.features.roleBased'),
+            t('calculator.features.realtimeRates'),
+            t('calculator.features.smartRounding')
+          ].map((feature, index) => (
+            <li 
+  key={index} 
+  className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl hover:scale-105 transition-transform duration-300 shadow-sm hover:shadow-lg"
+>
+              <span className="flex-shrink-0 w-6 h-6 bg-gradient-gold rounded-full flex items-center justify-center text-white font-bold text-sm shadow-gold">
+                ✓
+              </span>
+              <span className="text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
+                {feature}
+              </span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

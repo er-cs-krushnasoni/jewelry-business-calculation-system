@@ -12,7 +12,7 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
     adminUsername: shop?.adminUsername || '',
     adminPassword: '',
     confirmPassword: '',
-    subscriptionDays: shop ? '' : '30', // Default 30 days for new shops
+    subscriptionDays: shop ? '' : '30',
     contactInfo: {
       email: shop?.contactInfo?.email || '',
       phone: shop?.contactInfo?.phone || '',
@@ -44,7 +44,6 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
       }));
     }
 
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -82,7 +81,6 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
       }
     }
 
-    // Email validation if provided
     if (formData.contactInfo.email && !/\S+@\S+\.\S+/.test(formData.contactInfo.email)) {
       newErrors['contact.email'] = 'Invalid email format';
     }
@@ -94,10 +92,10 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    console.log('Form submitted', formData); // Debug log
+    console.log('Form submitted', formData);
 
     if (!validate()) {
-      console.log('Validation failed', errors); // Debug log
+      console.log('Validation failed', errors);
       return;
     }
 
@@ -121,13 +119,11 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
         submitData.subscriptionDays = parseInt(formData.subscriptionDays);
       }
 
-      console.log('Submitting data:', submitData); // Debug log
+      console.log('Submitting data:', submitData);
       
       await onSubmit(submitData);
-      // onClose is called by parent on success
     } catch (error) {
       console.error('Form submission error:', error);
-      // Error is handled by parent component
     } finally {
       setSubmitting(false);
     }
@@ -135,30 +131,37 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
 
   return (
     <Modal onClose={onClose} maxWidth="2xl">
-      <div className="px-6 py-4 border-b border-gray-200">
+      {/* Header with Gradient */}
+      <div className="px-6 py-5 border-b border-gold-200 dark:border-slate-700 bg-gradient-to-r from-gold-50 to-white dark:from-slate-800 dark:to-slate-900 animate-fade-in">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <Store className="h-6 w-6 text-blue-600" />
+          <h2 className="text-2xl font-bold bg-gradient-gold bg-clip-text text-transparent flex items-center gap-3">
+            <div className="p-2 bg-gradient-gold rounded-xl shadow-gold animate-glow">
+              <Store className="h-6 w-6 text-white" />
+            </div>
             {isEditMode ? 'Edit Shop' : 'Create New Shop'}
           </h2>
           <button
             onClick={onClose}
             type="button"
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-slate-400 hover:text-gold-600 dark:hover:text-gold-400 transition-all duration-300 hover:bg-gold-50 dark:hover:bg-slate-700 rounded-lg hover:rotate-90 transform"
+            aria-label="Close modal"
           >
             <X size={24} />
           </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-6 py-4 max-h-[80vh] overflow-y-auto">
-        <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="px-6 py-6 max-h-[80vh] overflow-y-auto bg-white dark:bg-slate-900 animate-slide-up">
+        <div className="space-y-8">
           {/* Shop Information */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Shop Information</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="glass-effect rounded-xl p-6 shadow-luxury border border-gold-100 dark:border-slate-700 animate-fade-in">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-gold-300 mb-6 flex items-center gap-2">
+              <div className="w-1 h-6 bg-gradient-gold rounded-full"></div>
+              Shop Information
+            </h3>
+            <div className="space-y-5">
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Shop Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -168,11 +171,12 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
                   placeholder="Enter shop name"
                   error={errors.shopName}
                   disabled={submitting}
+                  className="transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Language
                 </label>
                 <select
@@ -180,7 +184,7 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
                   value={formData.defaultLanguage}
                   onChange={handleChange}
                   disabled={submitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gold-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent text-slate-700 dark:text-slate-200 transition-all duration-300 hover:border-gold-300 dark:hover:border-slate-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                 >
                   <option value="en">English</option>
                   <option value="gu">ગુજરાતી (Gujarati)</option>
@@ -190,23 +194,26 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
             </div>
           </div>
 
-          {/* Admin Credentials (Only for new shops) */}
+          {/* Admin Credentials */}
           {!isEditMode && (
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Shop Admin Account</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="glass-effect rounded-xl p-6 shadow-luxury border border-gold-100 dark:border-slate-700 animate-fade-in">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-gold-300 mb-6 flex items-center gap-2">
+                <div className="w-1 h-6 bg-gradient-gold rounded-full"></div>
+                Shop Admin Account
+              </h3>
+              <div className="space-y-5">
+                <div className="group">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                     Admin Username <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                     <Input
                       name="adminUsername"
                       value={formData.adminUsername}
                       onChange={handleChange}
                       placeholder="Enter admin username"
-                      className="pl-10"
+                      className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                       error={errors.adminUsername}
                       disabled={submitting}
                       autoComplete="off"
@@ -214,20 +221,20 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                       Admin Password <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                       <Input
                         type="password"
                         name="adminPassword"
                         value={formData.adminPassword}
                         onChange={handleChange}
                         placeholder="Minimum 6 characters"
-                        className="pl-10"
+                        className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                         error={errors.adminPassword}
                         disabled={submitting}
                         autoComplete="new-password"
@@ -235,19 +242,19 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <div className="group">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                       Confirm Password <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                       <Input
                         type="password"
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         placeholder="Re-enter password"
-                        className="pl-10"
+                        className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                         error={errors.confirmPassword}
                         disabled={submitting}
                         autoComplete="new-password"
@@ -259,16 +266,19 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
             </div>
           )}
 
-          {/* Subscription Period (Only for new shops) */}
+          {/* Subscription Period */}
           {!isEditMode && (
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Initial Subscription</h3>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="glass-effect rounded-xl p-6 shadow-luxury border border-gold-100 dark:border-slate-700 animate-fade-in">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-gold-300 mb-6 flex items-center gap-2">
+                <div className="w-1 h-6 bg-gradient-gold rounded-full"></div>
+                Initial Subscription
+              </h3>
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Subscription Period (Days) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                   <Input
                     type="number"
                     name="subscriptionDays"
@@ -276,12 +286,12 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
                     onChange={handleChange}
                     placeholder="Enter number of days"
                     min="1"
-                    className="pl-10"
+                    className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                     error={errors.subscriptionDays}
                     disabled={submitting}
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 italic">
                   Common periods: 30 days (1 month), 90 days (3 months), 365 days (1 year)
                 </p>
               </div>
@@ -289,60 +299,63 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
           )}
 
           {/* Contact Information */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="glass-effect rounded-xl p-6 shadow-luxury border border-gold-100 dark:border-slate-700 animate-fade-in">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-gold-300 mb-6 flex items-center gap-2">
+              <div className="w-1 h-6 bg-gradient-gold rounded-full"></div>
+              Contact Information
+            </h3>
+            <div className="space-y-5">
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                   <Input
                     type="email"
                     name="contact.email"
                     value={formData.contactInfo.email}
                     onChange={handleChange}
                     placeholder="shop@example.com"
-                    className="pl-10"
+                    className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                     error={errors['contact.email']}
                     disabled={submitting}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Phone
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                  <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                   <Input
                     type="tel"
                     name="contact.phone"
                     value={formData.contactInfo.phone}
                     onChange={handleChange}
                     placeholder="+91 98765 43210"
-                    className="pl-10"
+                    className="pl-12 transition-all duration-300 hover:shadow-gold focus:shadow-gold"
                     disabled={submitting}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <div className="group">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400">
                   Address
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
+                  <MapPin className="absolute left-4 top-4 text-gold-400 dark:text-gold-500 transition-colors group-focus-within:text-gold-600 dark:group-focus-within:text-gold-400" size={18} />
                   <textarea
                     name="contact.address"
                     value={formData.contactInfo.address}
                     onChange={handleChange}
                     placeholder="Shop address"
-                    rows="2"
+                    rows="3"
                     disabled={submitting}
-                    className="w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-gold-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-300 hover:border-gold-300 dark:hover:border-slate-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md resize-none"
                   />
                 </div>
               </div>
@@ -350,8 +363,8 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
           </div>
 
           {/* Notes */}
-          <div className="border-t pt-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <div className="glass-effect rounded-xl p-6 shadow-luxury border border-gold-100 dark:border-slate-700 animate-fade-in">
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
               Notes
             </label>
             <textarea
@@ -359,24 +372,25 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
               value={formData.notes}
               onChange={handleChange}
               placeholder="Additional notes or comments..."
-              rows="3"
+              rows="4"
               maxLength="500"
               disabled={submitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-gold-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent text-slate-700 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-300 hover:border-gold-300 dark:hover:border-slate-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md resize-none"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 text-right">
               {formData.notes.length}/500 characters
             </p>
           </div>
         </div>
 
         {/* Form Actions */}
-        <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+        <div className="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-gold-200 dark:border-slate-700">
           <Button
             type="button"
             variant="secondary"
             onClick={onClose}
             disabled={submitting}
+            className="transition-all duration-300 hover:shadow-lg hover:scale-105"
           >
             Cancel
           </Button>
@@ -385,6 +399,7 @@ const ShopForm = ({ shop = null, onClose, onSubmit }) => {
             variant="primary"
             disabled={submitting}
             loading={submitting}
+            className="bg-gradient-gold hover:shadow-gold transition-all duration-300 hover:scale-105 animate-glow"
           >
             {isEditMode ? 'Update Shop' : 'Create Shop'}
           </Button>

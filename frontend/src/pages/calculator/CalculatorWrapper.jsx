@@ -18,10 +18,12 @@ const CalculatorWrapper = ({ children }) => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-gray-50 to-gold-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 animate-fade-in">
+        <div className="text-center space-y-6 p-8 glass-effect rounded-2xl shadow-luxury max-w-md">
           <LoadingSpinner size="large" />
-          <p className="mt-4 text-gray-600">{t('wrapper.checkingStatus')}</p>
+          <p className="mt-4 text-gray-700 dark:text-gray-300 font-medium text-lg animate-pulse">
+            {t('wrapper.checkingStatus')}
+          </p>
         </div>
       </div>
     );
@@ -30,12 +32,14 @@ const CalculatorWrapper = ({ children }) => {
   // Show blocking message if blocked
   if (isBlocked) {
     return (
-      <BlockingMessage 
-        onUnblock={() => {
-          // Refresh the page or trigger a re-check
-          window.location.reload();
-        }} 
-      />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-gray-50 to-gold-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 animate-fade-in">
+        <BlockingMessage 
+          onUnblock={() => {
+            // Refresh the page or trigger a re-check
+            window.location.reload();
+          }} 
+        />
+      </div>
     );
   }
 

@@ -113,8 +113,8 @@ const RateDisplay = ({ className = '' }) => {
     return (
       <div className={`flex items-center space-x-2 ${className}`}>
         <div className="animate-pulse flex items-center space-x-2">
-          <div className="h-4 bg-gray-300 rounded w-20"></div>
-          <div className="h-4 bg-gray-300 rounded w-16"></div>
+          <div className="h-6 w-16 bg-gradient-to-r from-gold-200 to-gold-300 dark:from-gold-800 dark:to-gold-700 rounded"></div>
+          <div className="h-6 w-20 bg-gradient-to-r from-gold-200 to-gold-300 dark:from-slate-700 dark:to-slate-600 rounded"></div>
         </div>
       </div>
     );
@@ -122,9 +122,9 @@ const RateDisplay = ({ className = '' }) => {
 
   if (error || !rateInfo?.hasRates) {
     return (
-      <div className={`flex items-center space-x-2 text-yellow-600 ${className}`}>
-        <AlertCircle size={16} />
-        <span className="text-sm font-medium">
+      <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 ${className}`}>
+        <AlertCircle size={16} className="text-amber-600 dark:text-amber-400" />
+        <span className="text-xs font-medium text-amber-800 dark:text-amber-300">
           {error || t('rates.display.noRatesSet')}
         </span>
       </div>
@@ -134,88 +134,93 @@ const RateDisplay = ({ className = '' }) => {
   const { updateInfo, currentRates } = rateInfo;
 
   return (
-    <div className={`flex items-center space-x-4 ${className}`}>
-      {/* Connection Status Indicator */}
-      <div className="flex items-center space-x-1">
-        {isConnected ? (
-          <div className="flex items-center space-x-1 text-green-600">
-            <Wifi size={14} />
-            <span className="text-xs hidden sm:inline">{t('rates.display.live')}</span>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-1 text-gray-500">
-            <WifiOff size={14} />
-            <span className="text-xs hidden sm:inline">{t('rates.display.offline')}</span>
-          </div>
+    <div className={`flex items-center gap-2 ${className}`}>
+
+      {/* Updated By - Compact */}
+      <div className="hidden md:flex items-center space-x-1.5 px-2 py-1 rounded-lg glass-effect border border-white/20 dark:border-slate-700/50">
+        <User size={13} className="text-gold-600 dark:text-gold-400" />
+        <span className="text-xs text-slate-600 dark:text-slate-400">
+          {updateInfo.updatedBy}
+        </span>
+        {lastUpdateFromSocket && (
+          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+        )}
+      </div>
+      
+      {/* Timestamp - Compact */}
+      <div className="hidden lg:flex items-center space-x-1.5 px-2 py-1 rounded-lg glass-effect border border-white/20 dark:border-slate-700/50">
+        <Clock size={13} className="text-gold-600 dark:text-gold-400" />
+        <span className="text-xs text-slate-600 dark:text-slate-400">
+          {updateInfo.timestamp}
+        </span>
+        {updateInfo.isToday && (
+          <span className="bg-emerald-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+            {t('rates.display.today')}
+          </span>
         )}
       </div>
 
-      {/* Rate Update Info */}
-      <div className="flex items-center space-x-2 text-gray-700">
-        <User size={14} />
-        <span className="text-sm">
-          {t('rates.display.rateUpdatedBy')} <span className="font-medium">{updateInfo.updatedBy}</span>
-          {lastUpdateFromSocket && (
-            <span className="ml-1 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded animate-pulse">
-              {t('rates.display.liveUpdate')}
-            </span>
-          )}
+      {/* Gold Rate - Compact Premium */}
+      <div className="hidden xl:flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-gradient-to-br from-amber-50 to-gold-100 dark:from-amber-900/30 dark:to-gold-900/30 border border-gold-200 dark:border-gold-800/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <TrendingUp className="text-amber-600 dark:text-amber-400" size={13} />
+        <span className="text-[10px] font-medium text-amber-700 dark:text-amber-300 uppercase">
+          {t('rates.display.gold')}
         </span>
+        <span className="text-xs font-bold text-amber-900 dark:text-amber-100">
+          ₹{currentRates.gold.sell}
+        </span>
+        {lastUpdateFromSocket && (
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+        )}
       </div>
       
-      <div className="flex items-center space-x-2 text-gray-700">
-        <Clock size={14} />
-        <span className="text-sm">
-          {updateInfo.timestamp}
-          {updateInfo.isToday && (
-            <span className="ml-1 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded">
-              {t('rates.display.today')}
+      {/* Silver Rate - Compact Premium */}
+      <div className="hidden xl:flex items-center space-x-1.5 px-3 py-1 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-800/40 border border-slate-200 dark:border-slate-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+        <TrendingDown className="text-slate-600 dark:text-slate-400" size={13} />
+        <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300 uppercase">
+          {t('rates.display.silver')}
+        </span>
+        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+          ₹{currentRates.silver.sell}
+        </span>
+        {lastUpdateFromSocket && (
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+        )}
+      </div>
+
+      {/* Mobile/Tablet View - Ultra Compact */}
+      <div className="xl:hidden flex items-center px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-50 via-yellow-50 to-slate-50 dark:from-amber-900/20 dark:via-yellow-900/20 dark:to-slate-800/20 border border-gold-200 dark:border-gold-800/50 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-bold text-amber-800 dark:text-amber-200">G</span>
+            <span className="text-xs font-bold text-amber-900 dark:text-amber-100">
+              ₹{currentRates.gold.sell}
             </span>
-          )}
-        </span>
-      </div>
-
-      {/* Current Rates Quick View */}
-      <div className="hidden lg:flex items-center space-x-4 text-sm">
-        <div className="flex items-center space-x-2 bg-yellow-50 px-3 py-1 rounded-full">
-          <TrendingUp className="text-yellow-600" size={14} />
-          <span className="text-yellow-800 font-medium">
-            {t('rates.display.gold')} ₹{currentRates.gold.sell}/10g
-            {lastUpdateFromSocket && (
-              <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            )}
-          </span>
-        </div>
-        
-        <div className="flex items-center space-x-2 bg-gray-50 px-3 py-1 rounded-full">
-          <TrendingDown className="text-gray-600" size={14} />
-          <span className="text-gray-800 font-medium">
-            {t('rates.display.silver')} ₹{currentRates.silver.sell}/kg
-            {lastUpdateFromSocket && (
-              <span className="ml-1 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            )}
-          </span>
-        </div>
-      </div>
-
-      {/* Mobile View - Simplified */}
-      <div className="lg:hidden flex items-center space-x-2 text-sm">
-        <span className="bg-blue-50 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-          {t('rates.display.rates')} G₹{currentRates.gold.sell} S₹{currentRates.silver.sell}
+          </div>
+          <div className="w-px h-3 bg-gold-300 dark:bg-gold-700"></div>
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">S</span>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              ₹{currentRates.silver.sell}
+            </span>
+          </div>
           {lastUpdateFromSocket && (
-            <span className="ml-1 inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
           )}
-        </span>
+        </div>
       </div>
 
-      {/* Connection Issues Warning */}
+      {/* Connection Issues - Compact */}
       {!isConnected && connectionStatus !== 'disconnected' && (
-        <div className="hidden xl:flex items-center text-xs text-yellow-600">
-          <span className="bg-yellow-50 px-2 py-1 rounded">
-            {connectionStatus === 'connecting' ? t('rates.display.connecting') : 
-             connectionStatus === 'reconnecting' ? t('rates.display.reconnecting') : 
-             t('rates.display.connectionIssues')}
-          </span>
+        <div className="hidden 2xl:flex items-center px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
+            <span className="text-[10px] font-medium text-amber-800 dark:text-amber-300">
+              {connectionStatus === 'connecting' ? t('rates.display.connecting') : 
+               connectionStatus === 'reconnecting' ? t('rates.display.reconnecting') : 
+               t('rates.display.connectionIssues')}
+            </span>
+          </div>
         </div>
       )}
     </div>

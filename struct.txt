@@ -114,6 +114,7 @@ jewellery-calculation-system
         │       ├── Input.jsx
         │       ├── LoadingSpinner.jsx
         │       ├── ConnectionStatus
+        │       ├── DarkModeToggle.jsx
         │       └── Modal.jsx
         │
         ├── constants
@@ -123,6 +124,7 @@ jewellery-calculation-system
         ├── contexts
         │   ├── AuthContext.jsx
         │   ├── LanguageContext.jsx
+        │   ├── ThemeContext.jsx
         │   └── SocketContext.jsx
         │
         ├── hooks

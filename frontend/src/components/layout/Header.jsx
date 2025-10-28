@@ -2,30 +2,32 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import Button from '../ui/Button';
 import RateDisplay from '../rates/RateDisplay';
 import SubscriptionCountdown from '../subscription/SubscriptionCountdown';
 import ProfileCredentialsModal from '../superadmin/ProfileCredentialsModal';
+import DarkModeToggle from '../ui/DarkModeToggle';
 import superAdminService from '../../services/superAdminService';
 import toast from 'react-hot-toast';
 import { 
   Menu, 
-  X, 
   LogOut, 
   Calculator, 
   Users, 
   Settings, 
   BarChart3,
   Globe,
-  Lock
+  Lock,
+  Sparkles
 } from 'lucide-react';
 
-const Header = () => {
+const Header = ({ onMenuToggle, isSidebarOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout, getSubscriptionStatus } = useAuth();
-  const { currentLanguage, setLanguage, t } = useLanguage(); // Changed from 'language' to 'currentLanguage'
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { currentLanguage, setLanguage, t } = useLanguage();
+  const { isDark } = useTheme();
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
 
   const subscriptionStatus = getSubscriptionStatus();
@@ -33,19 +35,6 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
-
-  const navigateAndClose = (path) => {
-    navigate(path);
-    closeMobileMenu();
   };
 
   const handleUpdateCredentials = async (credentialsData) => {
@@ -92,9 +81,9 @@ const Header = () => {
         },
         {
           name: t('nav.reports'),
-          path: '/admin/reports',
+          path: '/reports',
           icon: BarChart3,
-          current: location.pathname.startsWith('/admin/reports')
+          current: location.pathname.startsWith('/reports')
         }
       );
     }
@@ -122,211 +111,162 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo and Brand */}
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
-                <Calculator className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="ml-3">
-                <h1 className="text-xl font-bold text-gray-900">
-                  {user?.shopName || t('header.jewelryCalculator')}
-                </h1>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {/* Mobile Menu Toggle - Only triggers Sidebar */}
+              <button
+                onClick={onMenuToggle}
+                className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500 transition-colors"
+                aria-label="Toggle menu"
+              >
+                <Menu className="block h-6 w-6" />
+              </button>
+  
+              {/* Logo */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
+                    <Calculator className="h-6 w-6 text-white" />
+                  </div>
+                  <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-gold-400 animate-pulse" />
+                </div>
+                <div className="hidden sm:block">
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-white font-display whitespace-nowrap">
+                    {user?.shopName || t('header.jewelryCalculator')}
+                  </h1>
+                </div>
               </div>
             </div>
-
-            {/* Rate Display and Subscription - Desktop */}
-            <div className="hidden md:flex flex-1 justify-center items-center gap-4 px-4">
-              <RateDisplay className="max-w-2xl" />
-              
-              {/* Subscription Badge - Only for shop admin and manager */}
+  
+            {/* Desktop Actions - Right Side */}
+            <div className="hidden md:flex items-center gap-2 flex-shrink-0">
+              {/* Subscription Badge */}
               {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
-                <SubscriptionCountdown 
-                  subscriptionStatus={subscriptionStatus}
-                  compact={true}
-                />
+                <div className="flex justify-center">
+                  <SubscriptionCountdown 
+                    subscriptionStatus={subscriptionStatus}
+                    compact={true}
+                  />
+                </div>
               )}
-            </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              {/* Navigation Links */}
-              {navigationItems.map((item) => (
+              {/* Navigation Links - Compact */}
+              {navigationItems.slice(0, 2).map((item) => (
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`p-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                     item.current
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'bg-gradient-gold text-white shadow-gold'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
                   }`}
+                  title={item.name}
                 >
-                  <item.icon className="w-4 h-4 inline mr-2" />
-                  {item.name}
+                  <item.icon className="w-4 h-4" />
                 </button>
               ))}
-
-              {/* Language Selector */}
+  
+              {/* Dark Mode Toggle */}
+              <DarkModeToggle />
+  
+              {/* Language Selector - Compact */}
               <div className="relative">
                 <select
                   value={currentLanguage}
                   onChange={(e) => handleLanguageChange(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 transition-all cursor-pointer"
                 >
-                  <option value="en">{t('header.english')}</option>
-                  <option value="gu">{t('header.gujarati')}</option>
-                  <option value="hi">{t('header.hindi')}</option>
-                  <option value="mr">{t('header.marathi')}</option>
+                  <option value="en">English</option>
+                  <option value="gu">ગુજરાતી</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="mr">मराठी</option>
                 </select>
-                <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <Globe className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
               </div>
-
-              {/* User Info and Actions */}
-              <div className="flex items-center space-x-3 border-l border-gray-300 pl-4">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.username}</p>
-                  <p className="text-xs text-gray-600 capitalize">
-                    {user?.role?.replace('_', ' ')}
-                  </p>
+  
+              {/* User Avatar - Compact */}
+              <div className="flex items-center gap-2 pl-2 border-l border-gray-300 dark:border-slate-600">
+                <div className="w-9 h-9 rounded-full bg-gradient-gold flex items-center justify-center text-white font-semibold shadow-md cursor-pointer" title={`${user?.username} - ${user?.role?.replace('_', ' ')}`}>
+                  {user?.username?.charAt(0).toUpperCase()}
                 </div>
-
+  
                 {/* Update Credentials Button - Only for Super Admin */}
                 {user?.role === 'super_admin' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
+                  <button
                     onClick={() => setShowCredentialsModal(true)}
-                    className="flex items-center space-x-2"
+                    className="p-2 rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                     title={t('header.updateCredentialsTitle')}
                   >
-                    <Lock size={16} />
-                  </Button>
+                    <Lock size={16} className="text-gray-600 dark:text-gray-300" />
+                  </button>
                 )}
-
+  
                 {/* Logout Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
+                <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-2"
+                  className="p-2 rounded-lg border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  title={t('header.logout')}
                 >
-                  <LogOut size={16} />
-                  <span>{t('header.logout')}</span>
-                </Button>
+                  <LogOut size={16} className="text-red-600 dark:text-red-400" />
+                </button>
               </div>
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden">
-              <button
-                onClick={toggleMobileMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-              >
-                {mobileMenuOpen ? (
-                  <X className="block h-6 w-6" />
-                ) : (
-                  <Menu className="block h-6 w-6" />
-                )}
-              </button>
-            </div>
-          </div>
+            {/* Mobile Actions - Right Side */}
+            <div className="flex md:hidden items-center gap-2">
 
-          {/* Rate Display and Subscription - Mobile (below header) */}
-          <div className="md:hidden border-t border-gray-200 py-2 space-y-2">
-            <RateDisplay className="justify-center" />
-            
-            {/* Subscription Badge - Mobile */}
-            {subscriptionStatus && user?.role !== 'super_admin' && (
-              <div className="flex justify-center">
+              {/* Subscription Badge - Mobile Only */}
+            {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
+              <div className="flex md:hidden justify-center">
                 <SubscriptionCountdown 
                   subscriptionStatus={subscriptionStatus}
                   compact={true}
                 />
               </div>
-            )}
-          </div>
-        </div>
-      </header>
+            )}    
 
-      {/* Mobile Navigation Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b border-gray-200 shadow-lg">
-            {/* Navigation Links */}
-            {navigationItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => navigateAndClose(item.path)}
-                className={`w-full flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  item.current
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <item.icon className="w-5 h-5 mr-3" />
-                {item.name}
-              </button>
-            ))}
-
-            {/* Language Selector */}
-            <div className="px-3 py-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('settings.language')}
-              </label>
-              <select
-                value={currentLanguage}
-                onChange={(e) => handleLanguageChange(e.target.value)}
-                className="w-full appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="en">{t('header.english')}</option>
-                <option value="gu">{t('header.gujarati')}</option>
-                <option value="hi">{t('header.hindi')}</option>
-                <option value="mr">{t('header.marathi')}</option>
-              </select>
-            </div>
-
-            {/* User Info and Actions - Mobile */}
-            <div className="border-t border-gray-300 pt-4 pb-3">
-              <div className="px-3 mb-3">
-                <p className="text-base font-medium text-gray-900">{user?.username}</p>
-                <p className="text-sm text-gray-600 capitalize">
-                  {user?.role?.replace('_', ' ')}
-                </p>
-                {user?.shopName && (
-                  <p className="text-sm text-blue-600 mt-1">{user.shopName}</p>
-                )}
-              </div>
-
-              {/* Update Credentials Button - Mobile, Only for Super Admin */}
-              {user?.role === 'super_admin' && (
-                <button
-                  onClick={() => {
-                    setShowCredentialsModal(true);
-                    closeMobileMenu();
-                  }}
-                  className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors mb-2"
+              {/* Dark Mode Toggle - Mobile */}
+              <DarkModeToggle />
+              
+              {/* Language Selector - Mobile Compact */}
+              <div className="relative">
+                <select
+                  value={currentLanguage}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
+                  className="appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-8 pr-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 transition-all cursor-pointer"
                 >
-                  <Lock className="w-5 h-5 mr-3" />
-                  {t('header.updateCredentials')}
-                </button>
-              )}
+                  <option value="en">Eng.</option>
+                  <option value="gu">ગુજ.</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="mr">मराठी</option>
+                </select>
+                <Globe className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" />
+              </div>
 
               {/* Logout Button - Mobile */}
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                className="p-2 rounded-lg border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                title={t('header.logout')}
               >
-                <LogOut className="w-5 h-5 mr-3" />
-                {t('header.logout')}
+                <LogOut size={16} className="text-red-600 dark:text-red-400" />
               </button>
             </div>
           </div>
+  
+          {/* Rate Display and Subscription - Below Header (All Screens) */}
+          {(['admin', 'manager'].includes(user?.role)) && (
+  <div className="border-t border-gray-200 dark:border-slate-700 py-3 space-y-2 overflow-x-auto">
+    <RateDisplay className="justify-center min-w-max" />
+  </div>
+)}
         </div>
-      )}
-
-      {/* Credentials Modal - Only for Super Admin */}
+      </header>
+  
+      {/* Credentials Modal */}
       {showCredentialsModal && user?.role === 'super_admin' && (
         <ProfileCredentialsModal
           onClose={() => setShowCredentialsModal(false)}

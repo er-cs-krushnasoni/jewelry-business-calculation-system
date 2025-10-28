@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import { Eye, EyeOff, User, Lock, Globe } from 'lucide-react';
+import DarkModeToggle from '../ui/DarkModeToggle';
+import { User, Lock, Globe, Sparkles } from 'lucide-react';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [debugInfo, setDebugInfo] = useState([]);
   
   const { login, error, clearError, isAuthenticated, loading, user } = useAuth();
   const { t, currentLanguage, setLanguage, availableLanguages } = useLanguage();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -116,22 +118,37 @@ const LoginForm = () => {
   // Don't render anything while loading
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <LoadingSpinner size="large" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-gold-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="text-center">
+          <LoadingSpinner size="large" />
+          <p className="mt-4 text-gold-600 dark:text-gold-400 font-medium animate-pulse">
+            Loading...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Language Selector */}
-        <div className="flex justify-end">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-white to-gold-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4 sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gold-300/20 dark:bg-gold-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-300/20 dark:bg-amber-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+
+      <div className="max-w-md w-full space-y-6 relative z-10 animate-fade-in">
+        {/* Top Controls */}
+        <div className="flex justify-between items-center">
+          {/* Dark Mode Toggle */}
+          <DarkModeToggle />
+          
+          {/* Language Selector */}
           <div className="relative">
             <select
               value={currentLanguage}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="appearance-none bg-white border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="appearance-none glass-effect bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-gold-200 dark:border-slate-700 rounded-xl px-4 py-2 pr-10 text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent transition-all duration-300 hover:shadow-lg cursor-pointer"
             >
               {availableLanguages.map(lang => (
                 <option key={lang.code} value={lang.code}>
@@ -139,29 +156,34 @@ const LoginForm = () => {
                 </option>
               ))}
             </select>
-            <Globe className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Globe className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gold-500 dark:text-gold-400 pointer-events-none" />
           </div>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        {/* Login Card */}
+        <div className="glass-effect bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-3xl shadow-luxury-lg dark:shadow-2xl border border-gold-100 dark:border-slate-700 p-8 sm:p-10 transition-all duration-300 animate-scale-in">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="mx-auto h-16 w-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
-              <span className="text-white font-bold text-xl">JM</span>
+            {/* Logo */}
+            <div className="mx-auto h-20 w-20 bg-gradient-gold dark:bg-gradient-to-br dark:from-gold-500 dark:to-amber-600 rounded-3xl flex items-center justify-center mb-6 shadow-gold hover:scale-110 transition-transform duration-300 animate-glow">
+              <Sparkles className="text-white w-10 h-10" strokeWidth={2.5} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            
+            {/* Title */}
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-gold-600 to-amber-600 dark:from-gold-400 dark:to-amber-400 bg-clip-text text-transparent mb-2">
               {t('auth.login.title')}
-            </h2>
-            <p className="text-gray-600">
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-gray-600 dark:text-gray-400 text-base font-medium">
               {t('auth.login.subtitle')}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm text-center">
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-slide-up">
+              <p className="text-red-700 dark:text-red-400 text-sm text-center font-medium">
                 {error}
               </p>
             </div>
@@ -169,11 +191,12 @@ const LoginForm = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            {/* Username Field */}
+            <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 {t('auth.login.username')}
               </label>
-              <div className="relative">
+              <div className="relative group">
                 <Input
                   id="username"
                   name="username"
@@ -183,70 +206,65 @@ const LoginForm = () => {
                   value={formData.username}
                   onChange={handleInputChange}
                   placeholder={t('auth.login.username')}
-                  className="pl-10"
+                  className="pl-12 pr-4 h-12 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   disabled={isSubmitting}
                 />
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 group-focus-within:text-gold-500 dark:group-focus-within:text-gold-400 transition-colors duration-300">
+                  <User className="w-5 h-5" />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            {/* Password Field */}
+            <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 {t('auth.login.password')}
               </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete="current-password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  placeholder={t('auth.login.password')}
-                  className="pl-10 pr-10"
-                  disabled={isSubmitting}
-                />
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isSubmitting}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
+              <div className="relative group">
+  <Input
+    id="password"
+    name="password"
+    type="password"
+    required
+    autoComplete="current-password"
+    value={formData.password}
+    onChange={handleInputChange}
+    placeholder={t('auth.login.password')}
+    className="h-12 bg-gray-50 dark:bg-slate-900/50 border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+    disabled={isSubmitting}
+    leftIcon={<Lock className="w-5 h-5" />}
+  />
+</div>
             </div>
 
-            <div>
-              <Button
+            {/* Submit Button */}
+            <div className="pt-2 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <button
                 type="submit"
-                variant="primary"
-                size="large"
-                className="w-full"
                 disabled={isSubmitting || !formData.username || !formData.password}
+                className={`w-full h-12 rounded-xl font-semibold text-base transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gold-500/50 dark:focus:ring-gold-400/50 ${
+                  isSubmitting || !formData.username || !formData.password
+                    ? 'bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                    : 'bg-gradient-gold dark:bg-gradient-to-r dark:from-gold-500 dark:to-amber-600 text-white shadow-lg shadow-gold-500/30 dark:shadow-gold-500/20 hover:shadow-xl hover:shadow-gold-500/40 dark:hover:shadow-gold-500/30 hover:scale-[1.02] active:scale-[0.98]'
+                }`}
               >
                 {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <LoadingSpinner size="small" className="mr-2" />
-                    {t('auth.login.signingin')}
+                  <div className="flex items-center justify-center space-x-2">
+                    <LoadingSpinner size="small" />
+                    <span>{t('auth.login.signingin')}</span>
                   </div>
                 ) : (
-                  t('auth.login.signin')
+                  <span>{t('auth.login.signin')}</span>
                 )}
-              </Button>
+              </button>
             </div>
           </form>
 
-          {/* Footer */}
-          <div className="mt-8 text-center text-xs text-gray-500">
-            {t('app.version')}
+          {/* Footer Decoration */}
+          <div className="mt-8 pt-6 border-t border-gold-100 dark:border-slate-700">
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+              Jewelry Management System
+            </p>
           </div>
         </div>
       </div>

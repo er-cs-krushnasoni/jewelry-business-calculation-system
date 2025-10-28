@@ -108,7 +108,16 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider value={value}>
-      <div className={isRTL() ? 'rtl' : 'ltr'} dir={isRTL() ? 'rtl' : 'ltr'}>
+      <div 
+        className={`
+          ${isRTL() ? 'rtl' : 'ltr'}
+          transition-all duration-300 ease-in-out
+          min-h-screen
+          bg-gradient-to-br from-white via-gray-50 to-gold-50
+          dark:from-slate-900 dark:via-slate-800 dark:to-slate-900
+        `}
+        dir={isRTL() ? 'rtl' : 'ltr'}
+      >
         {children}
       </div>
     </LanguageContext.Provider>

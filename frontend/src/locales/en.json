@@ -522,7 +522,8 @@
       "adminEdit": "Only admins can edit table structure and formulas",
       "valuePerGram": "Rate per",
       "grams": "gram",
-      "gramPlural": "grams"
+      "gramPlural": "grams",
+      "gram":"gram"
     },
     "loading": {
       "message": "Loading rate tables..."
@@ -584,7 +585,7 @@
         "selectMetal": "Select Metal Type",
         "filterCategory": "Filter by Item Category (Optional)",
         "selectCode": "Select Code/Stamp",
-        "enterWeight": "Enter Weight (grams)"
+        "enterWeight": "Enter Weight"
       },
       "metal": {
         "gold": "Gold",
@@ -671,7 +672,7 @@
         "selectSource": "Select Jewelry Source",
         "selectCode": "Select Code/Stamp",
         "selectCategoryType": "Select Category Type",
-        "enterWeight": "Enter Weight (grams)"
+        "enterWeight": "Enter Weight"      
       },
       "metal": {
         "gold": "Gold",

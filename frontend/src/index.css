@@ -2,16 +2,338 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles for jewelry theme */
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #fafafa;
+/* Hide browser's default password reveal button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
 }
 
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* Root CSS Variables for Theme */
+:root {
+  /* Light Mode Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  
+  /* Metal Theme - Gold */
+  --metal-primary: #f59e0b;
+  --metal-secondary: #fbbf24;
+  --metal-shadow: rgba(245, 158, 11, 0.2);
+  
+  /* Toast Variables */
+  --toast-bg: #ffffff;
+  --toast-text: #111827;
+}
+
+/* Dark Mode Colors */
+.dark {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --border-color: #334155;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  
+  /* Metal Theme remains vibrant in dark mode */
+  --metal-primary: #fbbf24;
+  --metal-secondary: #f59e0b;
+  --metal-shadow: rgba(251, 191, 36, 0.3);
+  
+  /* Toast Variables */
+  --toast-bg: #1e293b;
+  --toast-text: #f8fafc;
+}
+
+/* Silver Theme Override */
+.theme-silver {
+  --metal-primary: #64748b;
+  --metal-secondary: #94a3b8;
+  --metal-shadow: rgba(100, 116, 139, 0.2);
+}
+
+.dark.theme-silver {
+  --metal-primary: #94a3b8;
+  --metal-secondary: #cbd5e1;
+  --metal-shadow: rgba(148, 163, 184, 0.3);
+}
+
+/* Base Styles */
+@layer base {
+  body {
+    @apply bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Smooth transitions for theme changes */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Disable transitions during page load */
+.preload * {
+  transition: none !important;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-slate-800;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gradient-gold dark:bg-gradient-to-b dark:from-gold-400 dark:to-gold-600;
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gradient-to-b from-gold-600 to-gold-700 dark:from-gold-300 dark:to-gold-500;
+}
+
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #f59e0b #f1f5f9;
+}
+
+.dark * {
+  scrollbar-color: #fbbf24 #1e293b;
+}
+
+/* Glass Morphism Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-effect {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient Backgrounds */
 .gold-gradient {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
 }
 
 .silver-gradient {
-  background: linear-gradient(135deg, #64748b, #475569);
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 50%, #64748b 100%);
+}
+
+.luxury-gradient {
+  background: linear-gradient(135deg, #f5bd3c 0%, #d4a433 50%, #b38829 100%);
+}
+
+.dark-gradient {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+/* Shimmer Effect */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+  }
+}
+
+/* Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Card Styles */
+.luxury-card {
+  @apply bg-white dark:bg-slate-800 rounded-xl shadow-luxury dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700;
+  transition: all 0.3s ease;
+}
+
+.luxury-card:hover {
+  @apply shadow-luxury-lg dark:shadow-slate-900/70 transform -translate-y-1;
+}
+
+/* Input Styles */
+.luxury-input {
+  @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-gold-500 dark:focus:ring-gold-400 focus:border-transparent transition-all;
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply bg-gradient-gold hover:from-gold-600 hover:to-gold-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-gold hover:shadow-glow-gold transition-all duration-200 transform hover:-translate-y-0.5;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-900 dark:text-gray-100 font-medium px-6 py-2.5 rounded-lg transition-all duration-200;
+}
+
+/* Badge Styles */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-gold {
+  @apply bg-gold-100 dark:bg-gold-900/30 text-gold-800 dark:text-gold-300 border border-gold-200 dark:border-gold-800;
+}
+
+.badge-silver {
+  @apply bg-silver-100 dark:bg-silver-900/30 text-silver-800 dark:text-silver-300 border border-silver-200 dark:border-silver-800;
+}
+
+/* Selection Styles */
+::selection {
+  @apply bg-gold-400 text-white;
+}
+
+.dark ::selection {
+  @apply bg-gold-600 text-white;
+}
+
+/* Focus Visible Styles */
+:focus-visible {
+  @apply outline-none ring-2 ring-gold-500 dark:ring-gold-400 ring-offset-2 dark:ring-offset-slate-900;
+}
+
+/* Disabled State */
+:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Loading Spinner */
+.spinner {
+  border: 3px solid rgba(245, 158, 11, 0.1);
+  border-top-color: #f59e0b;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
 }

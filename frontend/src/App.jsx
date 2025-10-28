@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { ThemeProvider } from './contexts/ThemeContext.jsx'
 
 // Components
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -145,9 +146,10 @@ function App() {
           position="top-right"
           toastOptions={{
             duration: 4000,
+            className: 'dark:bg-slate-800 dark:text-white',
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: 'var(--toast-bg)',
+              color: 'var(--toast-text)',
             },
             success: {
               duration: 3000,
@@ -167,10 +169,11 @@ function App() {
         />
 
         {/* Context Providers - Order matters! */}
-        <LanguageProvider>
-          <AuthProvider>
-            {/* Socket provider depends on auth context */}
-            <SocketProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              {/* Socket provider depends on auth context */}
+              <SocketProvider>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   {/* Public Routes */}
@@ -339,6 +342,7 @@ function App() {
             </SocketProvider>
           </AuthProvider>
         </LanguageProvider>
+        </ThemeProvider>
       </div>
     </Router>
   );

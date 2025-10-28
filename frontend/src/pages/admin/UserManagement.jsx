@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Shield, Users, CheckCircle, XCircle } from 'lucide-react';
+import { User, Plus, Edit2, Trash2, Eye, EyeOff, Save, X, Shield, Users, CheckCircle, XCircle, Crown } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -192,12 +192,12 @@ const UserManagement = () => {
 
   const getRoleColor = (role) => {
     const colorMap = {
-      manager: 'bg-purple-100 text-purple-800',
-      pro_client: 'bg-blue-100 text-blue-800',
-      client: 'bg-green-100 text-green-800',
-      admin: 'bg-yellow-100 text-yellow-800'
+      manager: 'bg-gradient-to-r from-silver-100 to-silver-200 text-silver-800 dark:from-silver-900/30 dark:to-silver-800/30 dark:text-silver-300',
+      pro_client: 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 dark:from-blue-900/30 dark:to-blue-800/30 dark:text-blue-300',
+      client: 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 dark:from-green-900/30 dark:to-green-800/30 dark:text-green-300',
+      admin: 'bg-gradient-gold text-gold-900 dark:text-gold-200 shadow-gold'
     };
-    return colorMap[role] || 'bg-gray-100 text-gray-800';
+    return colorMap[role] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
   };
 
   const startEdit = (user) => {
@@ -231,41 +231,47 @@ const UserManagement = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t('users.management.table.loading')}</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-white to-gold-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center animate-fade-in">
+          <div className="relative w-16 h-16 mx-auto mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-gold-200 dark:border-gold-900/30"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-gold-500 border-t-transparent animate-spin"></div>
+          </div>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">{t('users.management.table.loading')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-white via-gold-50/30 to-gold-100/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 animate-slide-up">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Users className="w-8 h-8 text-indigo-600" />
+              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-gold bg-clip-text text-transparent flex items-center gap-3">
+                <div className="p-2 bg-gradient-gold rounded-xl shadow-gold">
+                  <Users className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                </div>
                 {t('users.management.title')}
               </h1>
-              <p className="mt-2 text-gray-600">{t('users.management.subtitle')}</p>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">{t('users.management.subtitle')}</p>
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors shadow-lg"
+              className="flex items-center gap-2 bg-gradient-gold text-white px-6 py-3 rounded-xl hover:shadow-luxury-lg transition-all duration-300 shadow-luxury font-medium animate-glow"
             >
               <Plus className="w-5 h-5" />
-              {t('users.management.addNewUser')}
+              <span className="hidden sm:inline">{t('users.management.addNewUser')}</span>
+              <span className="sm:hidden">Add User</span>
             </button>
           </div>
         </div>
 
         {/* Available Roles Info */}
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+        <div className="mb-6 glass-effect rounded-xl p-5 border border-gold-200 dark:border-gold-900/30 shadow-luxury animate-fade-in">
+          <h3 className="font-semibold text-gold-900 dark:text-gold-300 mb-3 flex items-center gap-2">
             <Shield className="w-5 h-5" />
             {t('users.management.availableRoles')}
           </h3>
@@ -273,10 +279,10 @@ const UserManagement = () => {
             {availableRoles.map((roleInfo) => (
               <span
                 key={roleInfo.role}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   roleInfo.available
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-200 text-gray-600'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md hover:shadow-lg'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                 }`}
               >
                 {getRoleDisplay(roleInfo.role)} {roleInfo.available ? `✓ ${t('users.management.buttons.available')}` : `✗ ${t('users.management.buttons.taken')}`}
@@ -286,37 +292,40 @@ const UserManagement = () => {
         </div>
 
         {/* Current Admin Card */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('users.management.yourAccount')}</h2>
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-6 shadow-lg">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
-                  <Shield className="w-6 h-6 text-white" />
+        <div className="mb-8 animate-scale-in">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Crown className="w-6 h-6 text-gold-500" />
+            {t('users.management.yourAccount')}
+          </h2>
+          <div className="glass-effect border-2 border-gold-300 dark:border-gold-700 rounded-2xl p-6 shadow-luxury-lg hover:shadow-gold transition-all duration-300">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+              <div className="flex items-start gap-4 w-full sm:w-auto">
+                <div className="w-14 h-14 bg-gradient-gold rounded-2xl flex items-center justify-center shadow-gold animate-glow flex-shrink-0">
+                  <Shield className="w-7 h-7 text-white" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{currentUser.username}</h3>
-                  <span className="inline-block mt-1 px-3 py-1 bg-indigo-600 text-white text-sm font-medium rounded-full">
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{currentUser.username}</h3>
+                  <span className="inline-block mt-2 px-4 py-1.5 bg-gradient-gold text-white text-sm font-semibold rounded-full shadow-gold">
                     {t('users.management.roles.shopAdmin')}
                   </span>
-                  <p className="mt-2 text-sm text-gray-600">
+                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
                     {t('users.management.table.created')}: {formatDate(currentUser.createdAt)}
                   </p>
                 </div>
               </div>
               
               {editingUser === currentUser._id ? (
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => handleUpdateCredentials(currentUser._id, true)}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
                   >
                     <Save className="w-4 h-4" />
                     {t('users.management.buttons.save')}
                   </button>
                   <button
                     onClick={cancelEdit}
-                    className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gray-500 dark:bg-gray-600 text-white px-5 py-2.5 rounded-xl hover:bg-gray-600 dark:hover:bg-gray-700 transition-all duration-300 font-medium"
                   >
                     <X className="w-4 h-4" />
                     {t('common.actions.cancel')}
@@ -325,7 +334,7 @@ const UserManagement = () => {
               ) : (
                 <button
                   onClick={() => startEdit(currentUser)}
-                  className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                  className="flex items-center justify-center gap-2 bg-gradient-gold text-white px-5 py-2.5 rounded-xl hover:shadow-luxury transition-all duration-300 font-medium w-full sm:w-auto"
                 >
                   <Edit2 className="w-4 h-4" />
                   {t('common.actions.edit')}
@@ -334,20 +343,9 @@ const UserManagement = () => {
             </div>
 
             {editingUser === currentUser._id && (
-              <div className="mt-6 space-y-4 border-t border-indigo-200 pt-6">
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('users.management.form.username')}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div> */}
+              <div className="mt-6 space-y-4 border-t border-gold-200 dark:border-gold-800 pt-6 animate-fade-in">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     {t('users.management.form.oldPasswordLabel')}
                   </label>
                   <div className="relative">
@@ -356,19 +354,19 @@ const UserManagement = () => {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder={t('users.management.form.oldPasswordPlaceholder')}
-                      className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                     />
                     <button
                       type="button"
                       onClick={() => toggleInputPasswordVisibility('oldPassword')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                     >
                       {showInputPasswords.oldPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     {t('users.management.form.newPasswordLabel')}
                   </label>
                   <div className="relative">
@@ -377,12 +375,12 @@ const UserManagement = () => {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder={t('users.management.form.passwordMinHint')}
-                      className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                     />
                     <button
                       type="button"
                       onClick={() => toggleInputPasswordVisibility('newPassword')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                     >
                       {showInputPasswords.newPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
@@ -390,7 +388,7 @@ const UserManagement = () => {
                 </div>
                 {formData.password && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       {t('users.management.form.confirmPasswordLabel')}
                     </label>
                     <div className="relative">
@@ -399,27 +397,27 @@ const UserManagement = () => {
                         value={formData.confirmPassword}
                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                         placeholder={t('users.management.form.confirmPasswordPlaceholder')}
-                        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                       />
                       <button
                         type="button"
                         onClick={() => toggleInputPasswordVisibility('confirmPassword')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                       >
                         {showInputPasswords.confirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
                     </div>
                     {formData.password && formData.confirmPassword && (
-                      <div className="mt-2 flex items-center gap-2 text-sm">
+                      <div className="mt-2 flex items-center gap-2 text-sm animate-fade-in">
                         {formData.password === formData.confirmPassword ? (
                           <>
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-green-600">{t('users.management.form.passwordMatch')}</span>
+                            <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <span className="text-green-600 dark:text-green-400 font-medium">{t('users.management.form.passwordMatch')}</span>
                           </>
                         ) : (
                           <>
-                            <XCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-red-600">{t('users.management.form.passwordNotMatch')}</span>
+                            <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                            <span className="text-red-600 dark:text-red-400 font-medium">{t('users.management.form.passwordNotMatch')}</span>
                           </>
                         )}
                       </div>
@@ -432,46 +430,52 @@ const UserManagement = () => {
         </div>
 
         {/* Shop Users */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('users.management.shopUsers')}</h2>
+        <div className="animate-fade-in">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Users className="w-6 h-6 text-gold-500" />
+            {t('users.management.shopUsers')}
+          </h2>
           {users.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-300">
-              <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">{t('users.management.table.noUsers')}</p>
-              <p className="text-gray-400 mt-2">{t('users.management.table.createFirst')}</p>
+            <div className="text-center py-16 glass-effect rounded-2xl border-2 border-dashed border-gold-300 dark:border-gold-700 shadow-luxury">
+              <div className="w-20 h-20 bg-gradient-gold rounded-full flex items-center justify-center mx-auto mb-4 animate-glow">
+                <User className="w-10 h-10 text-white" />
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">{t('users.management.table.noUsers')}</p>
+              <p className="text-gray-500 dark:text-gray-500 mt-2">{t('users.management.table.createFirst')}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {users.map((user) => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {users.map((user, index) => (
                 <div
                   key={user._id}
-                  className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow"
+                  className="glass-effect rounded-2xl border border-gold-200 dark:border-gold-900/30 p-6 shadow-luxury hover:shadow-luxury-lg transition-all duration-300 animate-scale-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gold-400 to-gold-600 dark:from-gold-600 dark:to-gold-800 rounded-xl flex items-center justify-center shadow-gold flex-shrink-0">
                         <User className="w-6 h-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{user.username}</h3>
-                        <span className={`inline-block mt-1 px-3 py-1 text-xs font-medium rounded-full ${getRoleColor(user.role)}`}>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{user.username}</h3>
+                        <span className={`inline-block mt-1.5 px-3 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
                           {getRoleDisplay(user.role)}
                         </span>
                       </div>
                     </div>
 
                     {editingUser !== user._id && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => startEdit(user)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all duration-300"
                           title={t('common.actions.edit')}
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setConfirmDelete(user._id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all duration-300"
                           title={t('common.actions.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
@@ -481,20 +485,20 @@ const UserManagement = () => {
                   </div>
 
                   {editingUser === user._id ? (
-                    <div className="space-y-4 border-t border-gray-200 pt-4">
+                    <div className="space-y-4 border-t border-gold-200 dark:border-gold-800 pt-4 animate-fade-in">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           {t('users.management.form.username')}
                         </label>
                         <input
                           type="text"
                           value={formData.username}
                           onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           {t('users.management.form.newPasswordLabel')}
                         </label>
                         <div className="relative">
@@ -503,12 +507,12 @@ const UserManagement = () => {
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             placeholder={t('users.management.form.passwordMinHint')}
-                            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                           />
                           <button
                             type="button"
                             onClick={() => toggleInputPasswordVisibility('newPassword')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                           >
                             {showInputPasswords.newPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
@@ -516,7 +520,7 @@ const UserManagement = () => {
                       </div>
                       {formData.password && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                             {t('users.management.form.confirmPasswordLabel')}
                           </label>
                           <div className="relative">
@@ -525,27 +529,27 @@ const UserManagement = () => {
                               value={formData.confirmPassword}
                               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                               placeholder={t('users.management.form.confirmPasswordPlaceholder')}
-                              className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                              className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                             />
                             <button
                               type="button"
                               onClick={() => toggleInputPasswordVisibility('confirmPassword')}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                             >
                               {showInputPasswords.confirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                           </div>
                           {formData.password && formData.confirmPassword && (
-                            <div className="mt-2 flex items-center gap-2 text-sm">
+                            <div className="mt-2 flex items-center gap-2 text-sm animate-fade-in">
                               {formData.password === formData.confirmPassword ? (
                                 <>
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
-                                  <span className="text-green-600">{t('users.management.form.passwordMatch')}</span>
+                                  <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                  <span className="text-green-600 dark:text-green-400 font-medium">{t('users.management.form.passwordMatch')}</span>
                                 </>
                               ) : (
                                 <>
-                                  <XCircle className="w-4 h-4 text-red-600" />
-                                  <span className="text-red-600">{t('users.management.form.passwordNotMatch')}</span>
+                                  <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                  <span className="text-red-600 dark:text-red-400 font-medium">{t('users.management.form.passwordNotMatch')}</span>
                                 </>
                               )}
                             </div>
@@ -555,14 +559,14 @@ const UserManagement = () => {
                       <div className="flex gap-2 pt-2">
                         <button
                           onClick={() => handleUpdateCredentials(user._id, false)}
-                          className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2.5 rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
                         >
                           <Save className="w-4 h-4" />
                           {t('users.management.buttons.saveChanges')}
                         </button>
                         <button
                           onClick={cancelEdit}
-                          className="flex-1 flex items-center justify-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 bg-gray-500 dark:bg-gray-600 text-white px-4 py-2.5 rounded-xl hover:bg-gray-600 dark:hover:bg-gray-700 transition-all duration-300 font-medium"
                         >
                           <X className="w-4 h-4" />
                           {t('common.actions.cancel')}
@@ -570,12 +574,12 @@ const UserManagement = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-3 border-t border-gray-200 pt-4">
+                    <div className="space-y-3 border-t border-gold-200 dark:border-gold-800 pt-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{t('users.management.form.password')}:</span>
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('users.management.form.password')}:</span>
                         <button
                           onClick={() => togglePasswordVisibility(user._id)}
-                          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                          className="flex items-center gap-2 text-gold-600 dark:text-gold-400 hover:text-gold-700 dark:hover:text-gold-300 text-sm font-semibold transition-colors"
                         >
                           {showPassword[user._id] ? (
                             <>
@@ -591,33 +595,33 @@ const UserManagement = () => {
                         </button>
                       </div>
                       {showPassword[user._id] && (
-                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                          <code className="text-sm font-mono text-gray-900">
+                        <div className="glass-effect p-3 rounded-xl border border-gold-300 dark:border-gold-700 animate-fade-in">
+                          <code className="text-sm font-mono text-gray-900 dark:text-white break-all">
                             {showPassword[user._id]}
                           </code>
                         </div>
                       )}
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {t('users.management.table.created')}: {formatDate(user.createdAt)}
                       </div>
                     </div>
                   )}
 
                   {confirmDelete === user._id && (
-                    <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-800 font-medium mb-3">
+                    <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-2 border-red-300 dark:border-red-700 rounded-xl animate-fade-in">
+                      <p className="text-sm text-red-800 dark:text-red-300 font-semibold mb-3">
                         {t('users.management.error.confirmDelete')}
                       </p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleDeleteUser(user._id)}
-                          className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                          className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white px-4 py-2 rounded-xl hover:shadow-lg transition-all duration-300 text-sm font-semibold"
                         >
                           {t('users.management.buttons.yes')}
                         </button>
                         <button
                           onClick={() => setConfirmDelete(null)}
-                          className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                          className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 text-sm font-semibold"
                         >
                           {t('common.actions.cancel')}
                         </button>
@@ -633,10 +637,10 @@ const UserManagement = () => {
 
       {/* Create User Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="glass-effect border-2 border-gold-300 dark:border-gold-700 rounded-2xl max-w-md w-full p-6 shadow-luxury-lg animate-scale-in">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">{t('users.management.createNew')}</h2>
+              <h2 className="text-2xl font-bold bg-gradient-gold bg-clip-text text-transparent">{t('users.management.createNew')}</h2>
               <button
                 onClick={() => {
                   setShowCreateModal(false);
@@ -648,7 +652,7 @@ const UserManagement = () => {
                     createPassword: false
                   });
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -656,7 +660,7 @@ const UserManagement = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   {t('users.management.form.username')} *
                 </label>
                 <input
@@ -664,12 +668,12 @@ const UserManagement = () => {
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   placeholder={t('users.management.form.usernamePlaceholder')}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   {t('users.management.form.password')} *
                 </label>
                 <div className="relative">
@@ -678,21 +682,21 @@ const UserManagement = () => {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder={t('users.management.form.passwordPlaceholder')}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   <button
                     type="button"
                     onClick={() => toggleInputPasswordVisibility('createPassword')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                   >
                     {showInputPasswords.createPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">{t('users.management.form.passwordMinHint')}</p>
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{t('users.management.form.passwordMinHint')}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   {t('users.management.form.confirmPassword')} *
                 </label>
                 <div className="relative">
@@ -701,27 +705,27 @@ const UserManagement = () => {
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder={t('users.management.form.confirmPasswordPlaceholder')}
-                    className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full px-4 py-3 pr-12 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
                   />
                   <button
                     type="button"
                     onClick={() => toggleInputPasswordVisibility('confirmPassword')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gold-600 dark:text-gray-400 dark:hover:text-gold-400 transition-colors"
                   >
                     {showInputPasswords.confirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {formData.password && formData.confirmPassword && (
-                  <div className="mt-2 flex items-center gap-2 text-sm">
+                  <div className="mt-2 flex items-center gap-2 text-sm animate-fade-in">
                     {formData.password === formData.confirmPassword ? (
                       <>
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                        <span className="text-green-600">{t('users.management.form.passwordMatch')}</span>
+                        <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <span className="text-green-600 dark:text-green-400 font-medium">{t('users.management.form.passwordMatch')}</span>
                       </>
                     ) : (
                       <>
-                        <XCircle className="w-4 h-4 text-red-600" />
-                        <span className="text-red-600">{t('users.management.form.passwordNotMatch')}</span>
+                        <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                        <span className="text-red-600 dark:text-red-400 font-medium">{t('users.management.form.passwordNotMatch')}</span>
                       </>
                     )}
                   </div>
@@ -729,13 +733,13 @@ const UserManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   {t('users.management.form.role')} *
                 </label>
                 <select
                   value={formData.role}
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-gold-500 focus:border-gold-500 transition-all duration-300 text-gray-900 dark:text-white"
                 >
                   <option value="">{t('users.management.form.selectRole')}</option>
                   {availableRoles.map((roleInfo) => (
@@ -743,6 +747,7 @@ const UserManagement = () => {
                       key={roleInfo.role}
                       value={roleInfo.role}
                       disabled={!roleInfo.available}
+                      className="dark:bg-slate-800"
                     >
                       {getRoleDisplay(roleInfo.role)} {roleInfo.available ? '' : `(${t('users.management.buttons.taken')})`}
                     </option>
@@ -753,7 +758,7 @@ const UserManagement = () => {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={handleCreateUser}
-                  className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                  className="flex-1 bg-gradient-gold text-white px-4 py-3 rounded-xl hover:shadow-luxury transition-all duration-300 font-semibold"
                 >
                   {t('users.management.buttons.createButton')}
                 </button>
@@ -768,7 +773,7 @@ const UserManagement = () => {
                       createPassword: false
                     });
                   }}
-                  className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-3 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 font-semibold"
                 >
                   {t('common.actions.cancel')}
                 </button>
