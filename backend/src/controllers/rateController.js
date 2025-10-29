@@ -1,5 +1,5 @@
 // Rate Controller - Safe Implementation
-console.log('Loading rate controller...');
+// console.log('Loading rate controller...');
 
 const { validationResult } = require('express-validator');
 
@@ -8,7 +8,7 @@ let Rate, Shop;
 try {
   Rate = require('../models/Rate');
   Shop = require('../models/Shop');
-  console.log('Rate and Shop models imported successfully');
+  // console.log('Rate and Shop models imported successfully');
 } catch (error) {
   console.error('Error importing models:', error);
 }
@@ -18,7 +18,7 @@ let checkRateBlocking;
 try {
   const rateBlockingMiddleware = require('../middleware/rateBlocking');
   checkRateBlocking = rateBlockingMiddleware.checkRateBlocking;
-  console.log('Rate blocking middleware imported successfully');
+  // console.log('Rate blocking middleware imported successfully');
 } catch (error) {
   console.log('Rate blocking middleware not found, using fallback');
   // Fallback function if middleware doesn't exist
@@ -59,7 +59,7 @@ try {
 // @access  Private (Shop users only)
 const getCurrentRates = async (req, res) => {
   try {
-    console.log('getCurrentRates called for shopId:', req.params.shopId);
+    // console.log('getCurrentRates called for shopId:', req.params.shopId);
     
     if (!Rate) {
       return res.status(500).json({
@@ -114,7 +114,6 @@ const getCurrentRates = async (req, res) => {
 // @access  Private (Shop users only)
 const getMyShopRates = async (req, res) => {
   try {
-    console.log('getMyShopRates called for user:', req.user.username);
     
     if (!Rate) {
       return res.status(500).json({
@@ -280,7 +279,7 @@ const updateRates = async (req, res) => {
           global.broadcastSystemBlocking(shopId, blockingResult);
         }
         
-        console.log(`Real-time rate update broadcasted for shop ${shopId} by ${req.user.username}`);
+        // console.log(`Real-time rate update broadcasted for shop ${shopId} by ${req.user.username}`);
       } catch (error) {
         console.error('Error broadcasting update:', error);
       }
@@ -353,7 +352,7 @@ const updateMyShopRates = async (req, res) => {
 // @access  Private (Shop users only)
 const checkRateSetup = async (req, res) => {
   try {
-    console.log('checkRateSetup called for shopId:', req.params.shopId);
+    // console.log('checkRateSetup called for shopId:', req.params.shopId);
     
     if (!Rate) {
       return res.status(500).json({
@@ -406,7 +405,7 @@ const checkRateSetup = async (req, res) => {
 // @access  Private (Shop users only)
 const checkMyShopSetup = async (req, res) => {
   try {
-    console.log('checkMyShopSetup called for user:', req.user.username);
+    // console.log('checkMyShopSetup called for user:', req.user.username);
     
     if (req.user.role === 'super_admin') {
       return res.status(400).json({
@@ -432,7 +431,7 @@ const checkMyShopSetup = async (req, res) => {
 // @access  Private (Shop users only)
 const getRateUpdateInfo = async (req, res) => {
   try {
-    console.log('getRateUpdateInfo called for shopId:', req.params.shopId);
+    // console.log('getRateUpdateInfo called for shopId:', req.params.shopId);
     
     if (!Rate) {
       return res.status(500).json({
@@ -495,7 +494,7 @@ const getRateUpdateInfo = async (req, res) => {
 // @access  Private (Shop users only)
 const checkDailyRateUpdate = async (req, res) => {
   try {
-    console.log('checkDailyRateUpdate called for shopId:', req.params.shopId);
+    // console.log('checkDailyRateUpdate called for shopId:', req.params.shopId);
     
     if (!Rate) {
       return res.status(500).json({
@@ -674,7 +673,6 @@ const getHeaderRateInfo = async (req, res) => {
 // @access  Private (Shop users only)
 const getBlockingStatus = async (req, res) => {
   try {
-    console.log('getBlockingStatus called for user:', req.user ? req.user.username : 'unknown');
     
     if (req.user.role === 'super_admin') {
       return res.status(200).json({
@@ -764,7 +762,7 @@ const getBlockingStatus = async (req, res) => {
   }
 };
 
-console.log('Rate controller functions defined successfully');
+// console.log('Rate controller functions defined successfully');
 
 // Export all functions
 module.exports = {
@@ -780,4 +778,4 @@ module.exports = {
   getBlockingStatus
 };
 
-console.log('Rate controller module exported successfully');
+// console.log('Rate controller module exported successfully');

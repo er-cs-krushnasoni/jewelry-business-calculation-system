@@ -17,6 +17,7 @@ backend/build/
 frontend/build/
 
 # Environment variables
+*.env
 .env
 .env.local
 .env.development

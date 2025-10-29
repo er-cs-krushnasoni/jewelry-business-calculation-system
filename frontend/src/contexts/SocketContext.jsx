@@ -54,7 +54,7 @@ export const SocketProvider = ({ children }) => {
   // Disconnect socket
   const disconnectSocket = useCallback(() => {
     if (socketRef.current) {
-      console.log('SocketContext: Disconnecting socket');
+      // console.log('SocketContext: Disconnecting socket');
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
       socketRef.current = null;
@@ -72,17 +72,17 @@ export const SocketProvider = ({ children }) => {
   const connectSocket = useCallback(() => {
     // Prevent multiple simultaneous connection attempts
     if (isConnectingRef.current || socketRef.current?.connected) {
-      console.log('SocketContext: Already connecting or connected, skipping');
+      // console.log('SocketContext: Already connecting or connected, skipping');
       return;
     }
 
     if (!user || !isAuthenticated) {
-      console.log('SocketContext: No authenticated user for connection');
+      // console.log('SocketContext: No authenticated user for connection');
       return;
     }
 
     if (user.role === 'super_admin') {
-      console.log('SocketContext: Super admin users do not connect to sockets');
+      // console.log('SocketContext: Super admin users do not connect to sockets');
       return;
     }
 
@@ -106,7 +106,7 @@ export const SocketProvider = ({ children }) => {
     // Check if we're trying to connect with the same user (prevent unnecessary reconnections)
     const currentUserHash = createUserHash(user);
     if (currentUserHash === userHashRef.current && socketRef.current?.connected) {
-      console.log('SocketContext: Already connected with same user, skipping');
+      // console.log('SocketContext: Already connected with same user, skipping');
       return;
     }
 
@@ -149,7 +149,7 @@ export const SocketProvider = ({ children }) => {
 
     // Connection events
     newSocket.on('connect', () => {
-      console.log('SocketContext: Connected with ID:', newSocket.id);
+      // console.log('SocketContext: Connected with ID:', newSocket.id);
       isConnectingRef.current = false;
       setIsConnected(true);
       setConnectionStatus('connected');
@@ -162,12 +162,12 @@ export const SocketProvider = ({ children }) => {
         role: user.role
       };
 
-      console.log('SocketContext: Joining shop with data:', shopData);
+      // console.log('SocketContext: Joining shop with data:', shopData);
       newSocket.emit('join-shop', shopData);
     });
 
     newSocket.on('joined-shop', (data) => {
-      console.log('SocketContext: Successfully joined shop room:', data);
+      // console.log('SocketContext: Successfully joined shop room:', data);
       setConnectionStatus('joined');
       hasInitializedRef.current = true;
     });
@@ -181,7 +181,7 @@ export const SocketProvider = ({ children }) => {
 
     // Real-time updates
     newSocket.on('rate-updated', (data) => {
-      console.log('SocketContext: Rate update received:', data);
+      // console.log('SocketContext: Rate update received:', data);
       setLastRateUpdate(data);
       
       // Trigger custom event for components
@@ -196,7 +196,7 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('system-blocking-changed', (data) => {
-      console.log('SocketContext: System blocking changed:', data);
+      // console.log('SocketContext: System blocking changed:', data);
       setSystemBlocking(data);
       
       const event = new CustomEvent('systemBlockingChanged', { 
@@ -219,14 +219,14 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('SocketContext: Disconnected:', reason);
+      // console.log('SocketContext: Disconnected:', reason);
       isConnectingRef.current = false;
       setIsConnected(false);
       setConnectionStatus('disconnected');
       
       // Don't auto-reconnect if this was a manual disconnect
       if (reason !== 'io client disconnect') {
-        console.log('SocketContext: Will attempt to reconnect automatically');
+        // console.log('SocketContext: Will attempt to reconnect automatically');
       }
     });
 

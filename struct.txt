@@ -87,6 +87,9 @@ jewellery-calculation-system
         │   │   ├── NewJewelryCalculator.jsx
         │   │   ├── OldJewelryCalculator.jsx
         │   │
+        │   ├── pwa
+        │   │   ├── InstallPrompt.jsx
+        │   │    
         │   ├── layout
         │   │   ├── Header.jsx
         │   │   ├── Layout.jsx
@@ -119,6 +122,7 @@ jewellery-calculation-system
         │       ├── LoadingSpinner.jsx
         │       ├── ConnectionStatus
         │       ├── DarkModeToggle.jsx
+        │       ├── OfflineDetector.jsx
         │       └── Modal.jsx
         │
         ├── constants
@@ -166,8 +170,3 @@ jewellery-calculation-system
         │   ├── rateService.js
         │   ├── superAdminService.js
         │   └── socketService.js
-        │
-        └── utils
-            ├── constants.js
-            ├── helpers.js
-            └── validation.js

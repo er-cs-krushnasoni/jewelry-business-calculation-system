@@ -24,7 +24,7 @@ class SocketService {
       ...options
     };
 
-    console.log('Initializing Socket.IO connection to:', serverUrl);
+    // console.log('Initializing Socket.IO connection to:', serverUrl);
     this.socket = io(serverUrl, defaultOptions);
 
     this.setupEventListeners();
@@ -64,13 +64,13 @@ class SocketService {
 
     // Rate update events
     this.socket.on('rate-updated', (data) => {
-      console.log('Rate update received:', data);
+      // console.log('Rate update received:', data);
       this.emit('rateUpdated', data);
     });
 
     // System blocking events
     this.socket.on('system-blocking-changed', (data) => {
-      console.log('System blocking changed:', data);
+      // console.log('System blocking changed:', data);
       this.emit('systemBlockingChanged', data);
     });
 
@@ -85,7 +85,7 @@ class SocketService {
 
     // Shop room events
     this.socket.on('joined-shop', (data) => {
-      console.log('Joined shop room:', data);
+      // console.log('Joined shop room:', data);
       this.emit('joinedShop', data);
     });
 
@@ -137,7 +137,7 @@ class SocketService {
       return false;
     }
 
-    console.log('Joining shop room:', shopData);
+    // console.log('Joining shop room:', shopData);
     this.socket.emit('join-shop', shopData);
     return true;
   }
@@ -238,7 +238,7 @@ class SocketService {
     this.reconnectAttempts = 0;
     this.listeners.clear();
     
-    console.log('Socket service disconnected');
+    // console.log('Socket service disconnected');
   }
 }
 

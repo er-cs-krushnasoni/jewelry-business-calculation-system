@@ -5,7 +5,7 @@ const { authenticate } = require('../middleware/auth');
 let rateTableController;
 try {
   rateTableController = require('../controllers/rateTableController');
-  console.log('Rate table controller imported successfully');
+  // console.log('Rate table controller imported successfully');
 } catch (error) {
   console.error('Error importing rate table controller:', error);
   // Fallback
@@ -31,6 +31,6 @@ router.get('/:metalType', authenticate, getRateTable);
 // Update specific metal table (admin only)
 router.put('/:metalType', authenticate, updateRateTable);
 
-console.log('Rate table routes loaded successfully');
+// console.log('Rate table routes loaded successfully');
 
 module.exports = router;

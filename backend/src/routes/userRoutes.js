@@ -22,9 +22,9 @@ const {
 
 // Debugging middleware - BEFORE authentication
 router.use((req, res, next) => {
-  console.log(`[USER ROUTES DEBUG] ${req.method} ${req.originalUrl}`);
-  console.log(`[USER ROUTES DEBUG] Path: ${req.path}`);
-  console.log(`[USER ROUTES DEBUG] Base URL: ${req.baseUrl}`);
+  // console.log(`[USER ROUTES DEBUG] ${req.method} ${req.originalUrl}`);
+  // console.log(`[USER ROUTES DEBUG] Path: ${req.path}`);
+  // console.log(`[USER ROUTES DEBUG] Base URL: ${req.baseUrl}`);
   next();
 });
 

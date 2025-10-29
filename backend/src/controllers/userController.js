@@ -44,7 +44,7 @@ const createShopUser = async (req, res) => {
 
     // Get shop admin's shopId
     const shopId = req.user.shopId;
-    console.log('Controller: Using shopId:', shopId);
+    // console.log('Controller: Using shopId:', shopId);
     
     // Verify shop exists and is active
     const shop = await Shop.findById(shopId).select('+masterEncryptionKey');
@@ -55,7 +55,7 @@ const createShopUser = async (req, res) => {
       });
     }
 
-    console.log('Controller: Shop found:', shop.shopName, 'Has encryption key:', !!shop.masterEncryptionKey);
+    // console.log('Controller: Shop found:', shop.shopName, 'Has encryption key:', !!shop.masterEncryptionKey);
 
     // Handle encryption for specific roles
     let encryptedPassword = null;

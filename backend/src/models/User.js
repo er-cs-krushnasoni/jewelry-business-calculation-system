@@ -93,7 +93,7 @@ userSchema.pre('save', async function(next) {
   try {
     // Get the plain password
     const plainPassword = tempPlainPassword || this.password;
-    console.log('Pre-save: Plain password available:', !!plainPassword);
+    // console.log('Pre-save: Plain password available:', !!plainPassword);
     
     if (!plainPassword) {
       console.error('Pre-save: No plain password available');

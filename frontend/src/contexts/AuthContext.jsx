@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   // Listen for auth expiration events from api interceptor
   useEffect(() => {
     const handleAuthExpired = () => {
-      console.log('Auth expired event received');
+      // console.log('Auth expired event received');
       logout();
     };
 
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
   // Listen for shop deactivation events
   useEffect(() => {
     const handleShopDeactivated = (event) => {
-      console.log('Shop deactivated event received:', event.detail);
+      // console.log('Shop deactivated event received:', event.detail);
       logout();
     };
 
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      console.log('Login attempt started with:', { username: credentials.username });
+      // console.log('Login attempt started with:', { username: credentials.username });
       
       // Clear any existing errors
       setError(null);
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       // Validate inputs
       if (!username || !password) {
         const errorMsg = 'Username and password are required';
-        console.log('Validation error:', errorMsg);
+        // console.log('Validation error:', errorMsg);
         setError(errorMsg);
         return { success: false, message: errorMsg };
       }
@@ -112,8 +112,8 @@ export const AuthProvider = ({ children }) => {
       if (response.data.success) {
         const { token, user: userData } = response.data;
         
-        console.log('Login successful, storing data...');
-        console.log('Subscription status:', userData.subscriptionStatus); // Debug log
+        // console.log('Login successful, storing data...');
+        // console.log('Subscription status:', userData.subscriptionStatus); // Debug log
         
         // Store token and user data (includes subscriptionStatus)
         localStorage.setItem('token', token);
@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    console.log('Logging out user');
+    // console.log('Logging out user');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);

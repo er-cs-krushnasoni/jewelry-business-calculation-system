@@ -9,7 +9,7 @@ const { authenticate } = require('../middleware/auth');
 let rateController;
 try {
   rateController = require('../controllers/rateController');
-  console.log('Rate controller imported successfully');
+  // console.log('Rate controller imported successfully');
   
   // Check if all required functions exist
   const requiredFunctions = [
@@ -31,7 +31,7 @@ try {
     throw new Error(`Missing functions: ${missingFunctions.join(', ')}`);
   }
   
-  console.log('All rate controller functions verified');
+  // console.log('All rate controller functions verified');
   
 } catch (error) {
   console.error('Error importing rate controller:', error);
@@ -276,6 +276,6 @@ router.use((err, req, res, next) => {
   });
 });
 
-console.log('Rate routes module loaded successfully');
+// console.log('Rate routes module loaded successfully');
 
 module.exports = router;

@@ -280,6 +280,6 @@ rateSchema.set('toJSON', {
   }
 });
 
-console.log('Rate model loaded successfully');
+// console.log('Rate model loaded successfully');
 
 module.exports = mongoose.model('Rate', rateSchema);

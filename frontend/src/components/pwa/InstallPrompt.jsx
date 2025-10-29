@@ -78,12 +78,12 @@ const InstallPrompt = ({ trigger = 'button', showInModal = false, onClose }) => 
       const { outcome } = await deferredPrompt.userChoice;
 
       if (outcome === 'accepted') {
-        console.log('User accepted PWA installation');
+        // console.log('User accepted PWA installation');
         setIsInstallable(false);
         setShowModal(false);
         if (onClose) onClose();
       } else {
-        console.log('User dismissed PWA installation');
+        // console.log('User dismissed PWA installation');
         // Remember dismissal for 7 days
         const dismissDate = new Date();
         dismissDate.setDate(dismissDate.getDate() + 7);
