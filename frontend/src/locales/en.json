@@ -1,8 +1,8 @@
 {
   "app": {
-    "title": "Jewelry Manager",
-    "version": "Jewelry Manager v1.0",
-    "brand": "Jewelry Manager"
+    "title": "JewelCalc",
+    "version": "JewelCalc v1.0",
+    "brand": "JewelCalc"
   },
   "nav": {
     "calculator": "Calculator",
@@ -19,13 +19,13 @@
     "manageShops": "Manage Shops"
   },
   "sidebar": {
-    "mobileHeaderTitle": "Jewelry Manager",
+    "mobileHeaderTitle": "JewelCalc",
     "closeMenu": "Close menu",
     "userInfoPanel": "User information",
     "yourRole": "Your role",
     "platformAdmin": "Platform Admin",
     "shopAdmin": "Shop Admin",
-    "version": "Jewelry Manager v1.0",
+    "version": "JewelCalc v1.0",
     "navigation": "Navigation",
     "noNavigationItems": "No navigation items available"
   },
@@ -184,7 +184,7 @@
   "auth": {
     "login": {
       "title": "Sign In",
-      "subtitle": "Welcome back to Jewelry Manager",
+      "subtitle": "Welcome back to JewelCalc",
       "username": "Username",
       "password": "Password",
       "signin": "Sign In",
@@ -1046,5 +1046,30 @@
   "settings": {
     "title": "Settings",
     "language": "Language"
+  },
+  "pwa": {
+    "section": "App",
+    "installApp": "Install App",
+    "installDesc": "Use offline & faster",
+    "installTitle": "Install JewelCalc",
+    "installSubtitle": "Get the app experience",
+    "installMessage": "Install JewelCalc on your device for a faster, app-like experience with offline access to cached pages.",
+    "benefit1": "Faster loading times",
+    "benefit2": "Works like a native app",
+    "benefit3": "Access from home screen",
+    "install": "Install",
+    "notNow": "Not Now",
+    "installed": "App installed successfully! 🎉",
+    "appInstalled": "App Installed",
+    "manualInstall": "To install this app:",
+    "installError": "Installation failed. Please try again."
+  },
+  "offline": {
+    "noConnection": "No Internet Connection",
+    "functionalityDisabled": "All functionality is disabled. Please check your connection.",
+    "status": "Offline",
+    "reconnected": "Connection Restored",
+    "backOnline": "You are back online. All features are now available.",
+    "online": "Online"
   }
 }

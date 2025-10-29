@@ -263,7 +263,7 @@ const LoginForm = () => {
           {/* Footer Decoration */}
           <div className="mt-8 pt-6 border-t border-gold-100 dark:border-slate-700">
             <p className="text-center text-sm text-gray-500 dark:text-gray-400">
-              Jewelry Management System
+              JewelCalc
             </p>
           </div>
         </div>

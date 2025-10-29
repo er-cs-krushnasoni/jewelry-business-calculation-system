@@ -1,4 +1,4 @@
-// Language constants for the jewelry management system
+// Language constants for the JewelCalc
 export const LANGUAGES = [
     {
       code: 'en',

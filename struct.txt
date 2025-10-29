@@ -63,7 +63,11 @@ jewellery-calculation-system
     │
     ├── node_modules
     ├── public
-    │   └── vite.svg
+    │   ├── favicon.ico
+    │   ├── manifest.json
+    │   ├── pwa-192x192.png
+    │   ├── pwa-512x512.png
+    │   ├── apple-touch-icon.png
     │
     └── src
         │   App.css

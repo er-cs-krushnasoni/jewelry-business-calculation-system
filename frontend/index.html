@@ -2,9 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    
+    <!-- Primary Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="description" content="JewelCalc - Professional jewelry business calculation and pricing system for jewelers. Manage inventory, pricing, and calculations for gold and silver jewelry." />
+    <meta name="keywords" content="jewelry calculator, gold calculator, silver calculator, jewelry business, jewelry pricing" />
+    
+    <!-- PWA Primary Meta Tags -->
+    <meta name="application-name" content="JewelCalc" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="JewelCalc" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Theme Colors -->
+    <meta name="theme-color" content="#f59e0b" />
+    <meta name="msapplication-TileColor" content="#f59e0b" />
+    <meta name="msapplication-navbutton-color" content="#f59e0b" />
+    
+    <!-- Icons - CHANGED THIS LINE -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    
+    <title>JewelCalc - Jewelry Business Calculator</title>
+    
+    <!-- Prevent Zoom on Input Focus (Mobile) -->
+    <style>
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        select, textarea, input {
+          font-size: 16px !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

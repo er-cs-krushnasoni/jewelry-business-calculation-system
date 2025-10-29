@@ -39,9 +39,9 @@ const Layout = () => {
         <footer className="py-3 px-4 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 flex-shrink-0">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              © {new Date().getFullYear()} Jewelry Management System. All rights reserved.
+              © {new Date().getFullYear()} JewelCalc. All rights reserved.
             </p>
-            <p className="text-xs font-medium text-transparent bg-clip-text bg-gradient-gold dark:bg-gradient-to-r dark:from-gold-400 dark:to-gold-600">
+            <p className="text-sm font-medium text-transparent bg-clip-text bg-gradient-gold dark:bg-gradient-to-r dark:from-gold-400 dark:to-gold-600">
               @developed by Krushna Soni
             </p>
           </div>
