@@ -267,12 +267,12 @@ const Sidebar = ({ isOpen, onClose }) => {
           )}
 
           {/* PWA Install Button */}
-          <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
+          {/* <div className="pt-4 mt-4 border-t border-gray-200 dark:border-slate-700">
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-2">
               {t('pwa.section') || 'App'}
             </div>
             <InstallPrompt trigger="button" />
-          </div>
+          </div> */}
         </nav>
 
         {/* Footer with Version & Watermark */}

@@ -202,28 +202,33 @@ const createCategory = asyncHandler(async (req, res) => {
               message: `Category #${i + 1}: Item category is required`
             });
           }
-
           if (!cat.directResalePercentage || cat.directResalePercentage < 1) {
             return res.status(400).json({
               success: false,
               message: `Category "${cat.itemCategory}": Direct resale percentage must be at least 1`
             });
           }
-
+          
+          // Validate directResaleRateType
+          if (!cat.directResaleRateType || !['SELLING', 'BUYING'].includes(cat.directResaleRateType.toUpperCase())) {
+            return res.status(400).json({
+              success: false,
+              message: `Category "${cat.itemCategory}": Direct resale rate type must be either SELLING or BUYING`
+            });
+          }
+          
           if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
             return res.status(400).json({
               success: false,
               message: `Category "${cat.itemCategory}": Buying from wholesaler percentage must be at least 1`
             });
           }
-
           if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === '') {
             return res.status(400).json({
               success: false,
               message: `Category "${cat.itemCategory}": Wholesaler labour per gram is required`
             });
           }
-
           const catLabour = parseFloat(cat.wholesalerLabourPerGram);
           if (isNaN(catLabour) || catLabour < 0) {
             return res.status(400).json({
@@ -231,7 +236,6 @@ const createCategory = asyncHandler(async (req, res) => {
               message: `Category "${cat.itemCategory}": Wholesaler labour per gram must be 0 or greater`
             });
           }
-
           // Validate polish/repair fields only if enabled
           if (cat.polishRepairEnabled) {
             if (!cat.polishRepairResalePercentage || cat.polishRepairResalePercentage < 1) {
@@ -260,6 +264,14 @@ const createCategory = asyncHandler(async (req, res) => {
               return res.status(400).json({
                 success: false,
                 message: `Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater`
+              });
+            }
+            
+            // Validate polishRepairRateType
+            if (!cat.polishRepairRateType || !['SELLING', 'BUYING'].includes(cat.polishRepairRateType.toUpperCase())) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Polish/repair rate type must be either SELLING or BUYING when polish/repair is enabled`
               });
             }
           }
@@ -326,11 +338,13 @@ const createCategory = asyncHandler(async (req, res) => {
         categoryData.resaleCategories = resaleCategories.map(cat => ({
           itemCategory: cat.itemCategory.trim(),
           directResalePercentage: parseFloat(cat.directResalePercentage),
+          directResaleRateType: (cat.directResaleRateType || 'SELLING').toUpperCase(),
           buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
           wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
           polishRepairEnabled: Boolean(cat.polishRepairEnabled),
           ...(cat.polishRepairEnabled && {
             polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+            polishRepairRateType: (cat.polishRepairRateType || 'SELLING').toUpperCase(),
             polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
             polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
           })
@@ -470,6 +484,14 @@ const updateCategory = asyncHandler(async (req, res) => {
               });
             }
 
+            // Validate directResaleRateType
+            if (!cat.directResaleRateType || !['SELLING', 'BUYING'].includes(cat.directResaleRateType.toUpperCase())) {
+              return res.status(400).json({
+                success: false,
+                message: `Category "${cat.itemCategory}": Direct resale rate type must be either SELLING or BUYING`
+              });
+            }
+
             if (!cat.buyingFromWholesalerPercentage || cat.buyingFromWholesalerPercentage < 1) {
               return res.status(400).json({
                 success: false,
@@ -522,6 +544,14 @@ const updateCategory = asyncHandler(async (req, res) => {
                   message: `Category "${cat.itemCategory}": Polish/repair labour per gram must be 0 or greater`
                 });
               }
+              
+              // Validate polishRepairRateType
+              if (!cat.polishRepairRateType || !['SELLING', 'BUYING'].includes(cat.polishRepairRateType.toUpperCase())) {
+                return res.status(400).json({
+                  success: false,
+                  message: `Category "${cat.itemCategory}": Polish/repair rate type must be either SELLING or BUYING when polish/repair is enabled`
+                });
+              }
             }
           }
 
@@ -567,11 +597,13 @@ const updateCategory = asyncHandler(async (req, res) => {
             category.resaleCategories = resaleCategories.map(cat => ({
               itemCategory: cat.itemCategory.trim(),
               directResalePercentage: parseFloat(cat.directResalePercentage),
+              directResaleRateType: (cat.directResaleRateType || 'SELLING').toUpperCase(),
               buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
               wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
               polishRepairEnabled: Boolean(cat.polishRepairEnabled),
               ...(cat.polishRepairEnabled && {
                 polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+                polishRepairRateType: (cat.polishRepairRateType || 'SELLING').toUpperCase(),
                 polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
                 polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
               })

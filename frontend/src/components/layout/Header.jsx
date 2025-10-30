@@ -29,7 +29,6 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
   const { currentLanguage, setLanguage, t } = useLanguage();
   const { isDark } = useTheme();
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
-
   const subscriptionStatus = getSubscriptionStatus();
 
   const handleLogout = () => {
@@ -115,26 +114,26 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo and Brand */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
               {/* Mobile Menu Toggle - Only triggers Sidebar */}
               <button
                 onClick={onMenuToggle}
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500 transition-colors"
+                className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500 transition-colors flex-shrink-0"
                 aria-label="Toggle menu"
               >
                 <Menu className="block h-6 w-6" />
               </button>
   
               {/* Logo */}
-              <div className="flex items-center gap-3">
-                <div className="relative">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative flex-shrink-0">
                   <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center shadow-gold">
                     <Calculator className="h-6 w-6 text-white" />
                   </div>
                   <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-gold-400 animate-pulse" />
                 </div>
-                <div className="hidden sm:block">
-                  <h1 className="text-lg font-bold text-gray-900 dark:text-white font-display whitespace-nowrap">
+                <div className="hidden sm:block min-w-0">
+                  <h1 className="text-lg font-bold text-gray-900 dark:text-white font-display truncate">
                     {user?.shopName || t('header.jewelryCalculator')}
                   </h1>
                 </div>
@@ -145,12 +144,10 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
             <div className="hidden md:flex items-center gap-2 flex-shrink-0">
               {/* Subscription Badge */}
               {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
-                <div className="flex justify-center">
-                  <SubscriptionCountdown 
-                    subscriptionStatus={subscriptionStatus}
-                    compact={true}
-                  />
-                </div>
+                <SubscriptionCountdown 
+                  subscriptionStatus={subscriptionStatus}
+                  compact={true}
+                />
               )}
 
               {/* Navigation Links - Compact */}
@@ -216,29 +213,26 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
             </div>
 
             {/* Mobile Actions - Right Side */}
-            <div className="flex md:hidden items-center gap-2">
-
+            <div className="flex md:hidden items-center gap-2 flex-shrink-0">
               {/* Subscription Badge - Mobile Only */}
-            {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
-              <div className="flex md:hidden justify-center">
+              {subscriptionStatus && (user?.role === 'admin' || user?.role === 'manager') && (
                 <SubscriptionCountdown 
                   subscriptionStatus={subscriptionStatus}
                   compact={true}
                 />
-              </div>
-            )}    
-
+              )}
+              
               {/* Dark Mode Toggle - Mobile */}
               <DarkModeToggle />
               
               {/* Language Selector - Mobile Compact */}
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <select
                   value={currentLanguage}
                   onChange={(e) => handleLanguageChange(e.target.value)}
-                  className="appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-8 pr-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 transition-all cursor-pointer"
+                  className="appearance-none bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg pl-7 pr-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 transition-all cursor-pointer"
                 >
-                  <option value="en">Eng.</option>
+                  <option value="en">ENG</option>
                   <option value="gu">ગુજ.</option>
                   <option value="hi">हिंदी</option>
                   <option value="mr">मराठी</option>
@@ -249,7 +243,7 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
               {/* Logout Button - Mobile */}
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="p-2 rounded-lg border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0"
                 title={t('header.logout')}
               >
                 <LogOut size={16} className="text-red-600 dark:text-red-400" />
@@ -259,10 +253,10 @@ const Header = ({ onMenuToggle, isSidebarOpen }) => {
   
           {/* Rate Display and Subscription - Below Header (All Screens) */}
           {(['admin', 'manager'].includes(user?.role)) && (
-  <div className="border-t border-gray-200 dark:border-slate-700 py-3 space-y-2 overflow-x-auto">
-    <RateDisplay className="justify-center min-w-max" />
-  </div>
-)}
+            <div className="border-t border-gray-200 dark:border-slate-700 py-3 flex justify-center">
+              <RateDisplay />
+            </div>
+          )}
         </div>
       </header>
   

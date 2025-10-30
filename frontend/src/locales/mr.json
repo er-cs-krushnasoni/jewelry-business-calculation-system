@@ -345,6 +345,14 @@
             "polishLabourPlaceholder": "30",
             "polishLabourRequired": "पॉलिश/रिपेअर सक्रिय असताना आवश्यक",
             "polishLabourMin": "0 किंवा जास्त असावे",
+            "directResaleRateType": "डायरेक्ट रिसेल रेट प्रकार",
+      "polishRepairRateType": "पॉलिश/रिपेअर रिसेल रेट प्रकार",
+      "rateType": {
+        "selling": "विक्री रेट",
+        "buying": "खरेदी रेट",
+        "label": "गणनेसाठी रेट प्रकार",
+        "help": "टक्केवारी गणनेसाठी कोणता रेट वापरायचा ते निवडा"
+      },
             "enablePolishNote": "पॉलिश/रिपेअर पुनर्विक्री कॉन्फिगरेशन जोडण्यासाठी हा पर्याय सक्रिय करा",
             "addCategory": "कॅटेगरी जोडा",
             "resaleCategoryRequired": "पुनर्विक्री सक्रिय असताना किमान एक पुनर्विक्री कॅटेगरी आवश्यक आहे",

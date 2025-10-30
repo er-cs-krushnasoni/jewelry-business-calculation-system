@@ -28,23 +28,25 @@ const ExtendedJewelryForm = ({
     metal: initialData?.metal || '',
     code: initialData?.code || '',
     itemCategory: initialData?.itemCategory || '',
-    purityPercentage: initialData?.purityPercentage || '',
-    buyingFromWholesalerPercentage: initialData?.buyingFromWholesalerPercentage || '',
-    wholesalerLabourPerGram: initialData?.wholesalerLabourPerGram || '',
-    sellingPercentage: initialData?.sellingPercentage || '',
-    truePurityPercentage: initialData?.truePurityPercentage || '',
-    scrapBuyOwnPercentage: initialData?.scrapBuyOwnPercentage || '',
-    scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage || '',
+    purityPercentage: initialData?.purityPercentage ?? '',
+    buyingFromWholesalerPercentage: initialData?.buyingFromWholesalerPercentage ?? '',
+    wholesalerLabourPerGram: initialData?.wholesalerLabourPerGram ?? '',
+    sellingPercentage: initialData?.sellingPercentage ?? '',
+    truePurityPercentage: initialData?.truePurityPercentage ?? '',
+    scrapBuyOwnPercentage: initialData?.scrapBuyOwnPercentage ?? '',
+    scrapBuyOtherPercentage: initialData?.scrapBuyOtherPercentage ?? '',
     resaleEnabled: initialData?.resaleEnabled || false,
     resaleCategories: initialData?.resaleCategories?.map(cat => ({
       itemCategory: cat.itemCategory || '',
-      directResalePercentage: cat.directResalePercentage || '',
-      buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage || '',
-      wholesalerLabourPerGram: cat.wholesalerLabourPerGram || '',
+      directResalePercentage: cat.directResalePercentage ?? '',
+      directResaleRateType: cat.directResaleRateType || 'SELLING',
+      buyingFromWholesalerPercentage: cat.buyingFromWholesalerPercentage ?? '',
+      wholesalerLabourPerGram: cat.wholesalerLabourPerGram ?? '',
       polishRepairEnabled: cat.polishRepairEnabled || false,
-      polishRepairResalePercentage: cat.polishRepairResalePercentage || '',
-      polishRepairCostPercentage: cat.polishRepairCostPercentage || '',
-      polishRepairLabourPerGram: cat.polishRepairLabourPerGram || ''
+      polishRepairResalePercentage: cat.polishRepairResalePercentage ?? '',
+      polishRepairRateType: cat.polishRepairRateType || 'SELLING',
+      polishRepairCostPercentage: cat.polishRepairCostPercentage ?? '',
+      polishRepairLabourPerGram: cat.polishRepairLabourPerGram ?? ''
     })) || [],
     descriptions: {
       universal: initialData?.descriptions?.universal || '',
@@ -83,7 +85,7 @@ const ExtendedJewelryForm = ({
       const queryParams = new URLSearchParams();
       if (formData.metal) queryParams.append('metal', formData.metal);
       
-      const response = await fetch(`/api/categories/item-categories?${queryParams.toString()}`, {
+      const response = await fetch(`/api/calculator/new-jewelry/item-categories?${queryParams.toString()}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -91,7 +93,9 @@ const ExtendedJewelryForm = ({
       
       const data = await response.json();
       if (data.success) {
-        setAvailableCategories(data.data || []);
+        // The calculator returns an array of objects with 'name' property
+        const categoryNames = data.data.map(cat => cat.name);
+        setAvailableCategories(categoryNames);
       }
     } catch (error) {
       console.error('Load categories error:', error);
@@ -143,10 +147,12 @@ const ExtendedJewelryForm = ({
       resaleCategories: [...prev.resaleCategories, {
         itemCategory: '',
         directResalePercentage: '',
+        directResaleRateType: 'SELLING',
         buyingFromWholesalerPercentage: '',
         wholesalerLabourPerGram: '',
         polishRepairEnabled: false,
         polishRepairResalePercentage: '',
+        polishRepairRateType: 'SELLING',
         polishRepairCostPercentage: '',
         polishRepairLabourPerGram: ''
       }]
@@ -200,6 +206,7 @@ const ExtendedJewelryForm = ({
             ...cat, 
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
+            polishRepairRateType: 'SELLING',
             polishRepairCostPercentage: '',
             polishRepairLabourPerGram: ''
           } : cat
@@ -320,7 +327,7 @@ const ExtendedJewelryForm = ({
           newErrors.buyingFromWholesalerPercentage = t('category.form.buyingPercentageMin');
         }
       }
-      if (formData.wholesalerLabourPerGram === '') {
+      if (formData.wholesalerLabourPerGram === '' || formData.wholesalerLabourPerGram === null || formData.wholesalerLabourPerGram === undefined) {
         newErrors.wholesalerLabourPerGram = t('category.form.labourRequired');
       } else {
         const labour = parseFloat(formData.wholesalerLabourPerGram);
@@ -390,7 +397,7 @@ const ExtendedJewelryForm = ({
               newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = t('category.form.directResaleMin');
             }
             
-            if (cat.wholesalerLabourPerGram === '') {
+            if (cat.wholesalerLabourPerGram === '' || cat.wholesalerLabourPerGram === null || cat.wholesalerLabourPerGram === undefined) {
               newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.wholesalerLabourPerGram) < 0) {
               newErrors[`resaleCategories.${index}.wholesalerLabourPerGram`] = t('category.form.polishLabourMin');
@@ -403,7 +410,7 @@ const ExtendedJewelryForm = ({
                 newErrors[`resaleCategories.${index}.polishRepairResalePercentage`] = t('category.form.polishResaleMin');
               }
               
-              if (cat.polishRepairCostPercentage === '') {
+              if (cat.polishRepairCostPercentage === '' || cat.polishRepairCostPercentage === null || cat.polishRepairCostPercentage === undefined) {
                 newErrors[`resaleCategories.${index}.polishRepairCostPercentage`] = t('category.form.polishCostRequired');
               } else {
                 const cost = parseFloat(cat.polishRepairCostPercentage);
@@ -412,7 +419,7 @@ const ExtendedJewelryForm = ({
                 }
               }
               
-              if (cat.polishRepairLabourPerGram === '') {
+              if (cat.polishRepairLabourPerGram === '' || cat.polishRepairLabourPerGram === null || cat.polishRepairLabourPerGram === undefined) {
                 newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = t('category.form.polishLabourRequired');
               } else if (parseFloat(cat.polishRepairLabourPerGram) < 0) {
                 newErrors[`resaleCategories.${index}.polishRepairLabourPerGram`] = t('category.form.polishLabourMin');
@@ -528,176 +535,176 @@ const ExtendedJewelryForm = ({
           </h3>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Type Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              {t('category.form.type')} <span className="text-red-500 dark:text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <select
-                value={formData.type}
-                onChange={(e) => handleTypeChange(e.target.value)}
-                className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
-                  text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 
-                  focus:border-transparent transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                  ${errors.type ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}
-                  ${isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
-                disabled={isEditing}
-              >
-                <option value="">{t('category.form.selectType')}</option>
-                <option value="NEW">{t('category.management.types.new')}</option>
-                <option value="OLD">{t('category.management.types.old')}</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={20} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {/* Type Field */}
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+      {t('category.form.type')} <span className="text-red-500 dark:text-red-400">*</span>
+    </label>
+    <div className="relative">
+      <select
+        value={formData.type}
+        onChange={(e) => handleTypeChange(e.target.value)}
+        className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
+          text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 
+          focus:border-transparent transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+          ${errors.type ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}
+          ${isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+        disabled={isEditing}
+      >
+        <option value="">{t('category.form.selectType')}</option>
+        <option value="NEW">{t('category.management.types.new')}</option>
+        <option value="OLD">{t('category.management.types.old')}</option>
+      </select>
+      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={20} />
+    </div>
+    {errors.type && (
+      <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.type}</p>
+    )}
+  </div>
+
+  {/* Metal Field */}
+  <div className="space-y-2">
+    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+      {t('category.form.metal')} <span className="text-red-500 dark:text-red-400">*</span>
+    </label>
+    <div className="relative">
+      <select
+        value={formData.metal}
+        onChange={(e) => handleInputChange('metal', e.target.value)}
+        className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
+          text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 
+          focus:border-transparent transition-all duration-300 shadow-luxury hover:shadow-luxury-lg cursor-pointer
+          ${errors.metal ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}`}
+      >
+        <option value="">{t('category.form.selectMetal')}</option>
+        <option value="GOLD">{t('category.management.metals.gold')}</option>
+        <option value="SILVER">{t('category.management.metals.silver')}</option>
+      </select>
+      <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={20} />
+    </div>
+    {errors.metal && (
+      <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.metal}</p>
+    )}
+  </div>
+</div>
+
+{/* Item Category Field (NEW type only) - NOW BEFORE CODE */}
+{formData.type === 'NEW' && (
+  <div className="space-y-2 animate-slide-up">
+    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+      {t('category.form.itemCategory')} <span className="text-red-500 dark:text-red-400">*</span>
+    </label>
+    <div className="relative" ref={categoryDropdownRef}>
+      <div className="relative">
+        <input
+          type="text"
+          value={formData.itemCategory}
+          onChange={(e) => handleCategoryInputChange(e.target.value)}
+          onFocus={() => setShowCategoryDropdown(true)}
+          placeholder={t('category.form.selectCategoryPlaceholder')}
+          className={`w-full glass-effect border-2 rounded-xl px-4 py-3 pr-12 bg-white dark:bg-slate-800 
+            text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
+            transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+            ${errors.itemCategory ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}
+            ${!formData.metal ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={!formData.metal}
+          maxLength={100}
+        />
+        <ChevronDown 
+          size={20} 
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none"
+        />
+      </div>
+
+      {showCategoryDropdown && formData.metal && (
+        <div className="absolute z-50 w-full mt-2 glass-effect bg-white dark:bg-slate-800 border-2 border-gold-200 dark:border-slate-700 rounded-xl shadow-luxury-lg max-h-80 overflow-auto animate-scale-in">
+          {loadingCategories ? (
+            <div className="p-6 text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-gold-200 dark:border-slate-700 border-t-gold-600 dark:border-t-gold-500 mx-auto"></div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 font-medium">{t('category.form.loading')}</p>
             </div>
-            {errors.type && (
-              <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.type}</p>
-            )}
-          </div>
-  
-          {/* Metal Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              {t('category.form.metal')} <span className="text-red-500 dark:text-red-400">*</span>
-            </label>
-            <div className="relative">
-              <select
-                value={formData.metal}
-                onChange={(e) => handleInputChange('metal', e.target.value)}
-                className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
-                  text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gold-500 
-                  focus:border-transparent transition-all duration-300 shadow-luxury hover:shadow-luxury-lg cursor-pointer
-                  ${errors.metal ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}`}
-              >
-                <option value="">{t('category.form.selectMetal')}</option>
-                <option value="GOLD">{t('category.management.metals.gold')}</option>
-                <option value="SILVER">{t('category.management.metals.silver')}</option>
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none" size={20} />
-            </div>
-            {errors.metal && (
-              <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.metal}</p>
-            )}
-          </div>
-  
-          {/* Code Field */}
-          <div className="space-y-2">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              {t('category.form.codeStamp')} <span className="text-red-500 dark:text-red-400">*</span>
-            </label>
-            <input
-              type="text"
-              value={formData.code}
-              onChange={(e) => handleInputChange('code', e.target.value)}
-              placeholder={t('category.form.codePlaceholder')}
-              maxLength={100}
-              className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
-                text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
-                transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                ${errors.code ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}`}
-            />
-            {errors.code && (
-              <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.code}</p>
-            )}
-          </div>
-        </div>
-  
-        {/* Item Category Field (NEW type only) */}
-        {formData.type === 'NEW' && (
-          <div className="space-y-2 animate-slide-up">
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-              {t('category.form.itemCategory')} <span className="text-red-500 dark:text-red-400">*</span>
-            </label>
-            <div className="relative" ref={categoryDropdownRef}>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={formData.itemCategory}
-                  onChange={(e) => handleCategoryInputChange(e.target.value)}
-                  onFocus={() => setShowCategoryDropdown(true)}
-                  placeholder={t('category.form.selectCategoryPlaceholder')}
-                  className={`w-full glass-effect border-2 rounded-xl px-4 py-3 pr-12 bg-white dark:bg-slate-800 
-                    text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                    focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
-                    transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                    ${errors.itemCategory ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}
-                    ${!formData.metal ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={!formData.metal}
-                  maxLength={100}
-                />
-                <ChevronDown 
-                  size={20} 
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none"
-                />
-              </div>
-  
-              {showCategoryDropdown && formData.metal && (
-                <div className="absolute z-50 w-full mt-2 glass-effect bg-white dark:bg-slate-800 border-2 border-gold-200 dark:border-slate-700 rounded-xl shadow-luxury-lg max-h-80 overflow-auto animate-scale-in">
-                  {loadingCategories ? (
-                    <div className="p-6 text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-4 border-gold-200 dark:border-slate-700 border-t-gold-600 dark:border-t-gold-500 mx-auto"></div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-3 font-medium">{t('category.form.loading')}</p>
+          ) : (
+            <>
+              {showCreateNewOption && (
+                <button
+                  type="button"
+                  onClick={() => handleCategorySelect(formData.itemCategory)}
+                  className="w-full px-5 py-4 text-left hover:bg-gold-50 dark:hover:bg-slate-700/50 
+                    flex items-center gap-3 border-b-2 border-gold-100 dark:border-slate-700 
+                    bg-gold-50/50 dark:bg-slate-700/30 transition-all duration-200 group"
+                >
+                  <Plus size={18} className="text-gold-600 dark:text-gold-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold text-gold-700 dark:text-gold-300">
+                      {t('category.form.createNewCategory')}
                     </div>
-                  ) : (
-                    <>
-                      {showCreateNewOption && (
-                        <button
-                          type="button"
-                          onClick={() => handleCategorySelect(formData.itemCategory)}
-                          className="w-full px-5 py-4 text-left hover:bg-gold-50 dark:hover:bg-slate-700/50 
-                            flex items-center gap-3 border-b-2 border-gold-100 dark:border-slate-700 
-                            bg-gold-50/50 dark:bg-slate-700/30 transition-all duration-200 group"
-                        >
-                          <Plus size={18} className="text-gold-600 dark:text-gold-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-gold-700 dark:text-gold-300">
-                              {t('category.form.createNewCategory')}
-                            </div>
-                            <div className="text-xs text-gold-600 dark:text-gold-400 truncate mt-1">
-                              "{formData.itemCategory}"
-                            </div>
-                          </div>
-                        </button>
-                      )}
-                      {filteredCategories.length > 0 ? (
-                        filteredCategories.map((category, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleCategorySelect(category)}
-                            className="w-full px-5 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 
-                              flex items-center justify-between group transition-all duration-200"
-                          >
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-medium group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">
-                              {category}
-                            </span>
-                            {formData.itemCategory === category && (
-                              <Check size={18} className="text-green-600 dark:text-green-400 animate-scale-in" />
-                            )}
-                          </button>
-                        ))
-                      ) : !showCreateNewOption ? (
-                        <div className="px-5 py-6 text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
-                          {t('category.form.noCategoriesFound')}
-                        </div>
-                      ) : null}
-                    </>
-                  )}
+                    <div className="text-xs text-gold-600 dark:text-gold-400 truncate mt-1">
+                      "{formData.itemCategory}"
+                    </div>
+                  </div>
+                </button>
+              )}
+              {filteredCategories.length > 0 ? (
+                filteredCategories.map((category, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleCategorySelect(category)}
+                    className="w-full px-5 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 
+                      flex items-center justify-between group transition-all duration-200"
+                  >
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-medium group-hover:text-gold-600 dark:group-hover:text-gold-400 transition-colors">
+                      {category}
+                    </span>
+                    {formData.itemCategory === category && (
+                      <Check size={18} className="text-green-600 dark:text-green-400 animate-scale-in" />
+                    )}
+                  </button>
+                ))
+              ) : !showCreateNewOption ? (
+                <div className="px-5 py-6 text-sm text-gray-500 dark:text-gray-400 text-center font-medium">
+                  {t('category.form.noCategoriesFound')}
                 </div>
-              )}
-              {!formData.metal && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
-                  {t('category.form.selectMetalFirst')}
-                </p>
-              )}
-            </div>
-            {errors.itemCategory && (
-              <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.itemCategory}</p>
-            )}
-          </div>
-        )}
+              ) : null}
+            </>
+          )}
+        </div>
+      )}
+      {!formData.metal && (
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+          {t('category.form.selectMetalFirst')}
+        </p>
+      )}
+    </div>
+    {errors.itemCategory && (
+      <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.itemCategory}</p>
+    )}
+  </div>
+)}
+
+{/* Code Field - NOW AFTER CATEGORY */}
+<div className="space-y-2">
+  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+    {t('category.form.codeStamp')} <span className="text-red-500 dark:text-red-400">*</span>
+  </label>
+  <input
+    type="text"
+    value={formData.code}
+    onChange={(e) => handleInputChange('code', e.target.value)}
+    placeholder={t('category.form.codePlaceholder')}
+    maxLength={100}
+    className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-800 
+      text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+      focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
+      transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+      ${errors.code ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-700'}`}
+  />
+  {errors.code && (
+    <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors.code}</p>
+  )}
+</div>
   
         {/* NEW Type Fields */}
         {formData.type === 'NEW' && (
@@ -1043,72 +1050,115 @@ const ExtendedJewelryForm = ({
                     </div>
   
                     {/* Resale Percentages Grid */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                          {t('category.form.directResale')} <span className="text-red-500 dark:text-red-400">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={category.directResalePercentage}
-                          onChange={(e) => updateResaleCategory(index, 'directResalePercentage', e.target.value)}
-                          placeholder={t('category.form.directResalePlaceholder')}
-                          min="1"
-                          step="0.01"
-                          className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
-                            text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                            focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
-                            transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                            ${errors[`resaleCategories.${index}.directResalePercentage`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
-                        />
-                        {errors[`resaleCategories.${index}.directResalePercentage`] && (
-                          <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.directResalePercentage`]}</p>
-                        )}
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {t('category.form.directResale')} <span className="text-red-500 dark:text-red-400">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={category.directResalePercentage}
+                            onChange={(e) => updateResaleCategory(index, 'directResalePercentage', e.target.value)}
+                            placeholder={t('category.form.directResalePlaceholder')}
+                            min="1"
+                            step="0.01"
+                            className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
+                              text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
+                              transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+                              ${errors[`resaleCategories.${index}.directResalePercentage`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
+                          />
+                          {errors[`resaleCategories.${index}.directResalePercentage`] && (
+                            <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.directResalePercentage`]}</p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {t('category.form.buyingFromWholesaler')} <span className="text-red-500 dark:text-red-400">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={category.buyingFromWholesalerPercentage}
+                            onChange={(e) => updateResaleCategory(index, 'buyingFromWholesalerPercentage', e.target.value)}
+                            placeholder={t('category.form.buyingFromWholesalerPlaceholder')}
+                            min="1"
+                            step="0.01"
+                            className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
+                              text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
+                              transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+                              ${errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
+                          />
+                          {errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] && (
+                            <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`]}</p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                            {t('category.form.wholesalerLabour')} <span className="text-red-500 dark:text-red-400">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={category.wholesalerLabourPerGram}
+                            onChange={(e) => updateResaleCategory(index, 'wholesalerLabourPerGram', e.target.value)}
+                            placeholder={t('category.form.wholesalerLabourPlaceholder')}
+                            min="0"
+                            step="0.01"
+                            className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
+                              text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
+                              focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
+                              transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
+                              ${errors[`resaleCategories.${index}.wholesalerLabourPerGram`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">{t('category.form.labourNote')}</p>
+                          {errors[`resaleCategories.${index}.wholesalerLabourPerGram`] && (
+                            <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.wholesalerLabourPerGram`]}</p>
+                          )}
+                        </div>
                       </div>
-  
+
+                      {/* Direct Resale Rate Type Selector */}
                       <div className="space-y-2">
                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                          {t('category.form.buyingFromWholesaler')} <span className="text-red-500 dark:text-red-400">*</span>
+                          {t('category.form.directResaleRateType')} <span className="text-red-500 dark:text-red-400">*</span>
                         </label>
-                        <input
-                          type="number"
-                          value={category.buyingFromWholesalerPercentage}
-                          onChange={(e) => updateResaleCategory(index, 'buyingFromWholesalerPercentage', e.target.value)}
-                          placeholder={t('category.form.buyingFromWholesalerPlaceholder')}
-                          min="1"
-                          step="0.01"
-                          className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
-                            text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                            focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
-                            transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                            ${errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
-                        />
-                        {errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] && (
-                          <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.buyingFromWholesalerPercentage`]}</p>
-                        )}
-                      </div>
-  
-                      <div className="space-y-2">
-                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                          {t('category.form.wholesalerLabour')} <span className="text-red-500 dark:text-red-400">*</span>
-                        </label>
-                        <input
-                          type="number"
-                          value={category.wholesalerLabourPerGram}
-                          onChange={(e) => updateResaleCategory(index, 'wholesalerLabourPerGram', e.target.value)}
-                          placeholder={t('category.form.wholesalerLabourPlaceholder')}
-                          min="0"
-                          step="0.01"
-                          className={`w-full glass-effect border-2 rounded-xl px-4 py-3 bg-white dark:bg-slate-700 
-                            text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500
-                            focus:outline-none focus:ring-2 focus:ring-gold-500 focus:border-transparent 
-                            transition-all duration-300 shadow-luxury hover:shadow-luxury-lg
-                            ${errors[`resaleCategories.${index}.wholesalerLabourPerGram`] ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-slate-600'}`}
-                        />
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">{t('category.form.labourNote')}</p>
-                        {errors[`resaleCategories.${index}.wholesalerLabourPerGram`] && (
-                          <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.wholesalerLabourPerGram`]}</p>
-                        )}
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateResaleCategory(index, 'directResaleRateType', 'SELLING')}
+                            className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border-2 ${
+                              category.directResaleRateType === 'SELLING'
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-600 shadow-md'
+                                : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-green-400'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1.5">
+                              {category.directResaleRateType === 'SELLING' && (
+                                <Check size={16} className="flex-shrink-0" />
+                              )}
+                              <span>{t('category.form.rateType.selling')}</span>
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateResaleCategory(index, 'directResaleRateType', 'BUYING')}
+                            className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border-2 ${
+                              category.directResaleRateType === 'BUYING'
+                                ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-600 shadow-md'
+                                : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-blue-400'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center gap-1.5">
+                              {category.directResaleRateType === 'BUYING' && (
+                                <Check size={16} className="flex-shrink-0" />
+                              )}
+                              <span>{t('category.form.rateType.buying')}</span>
+                            </div>
+                          </button>
+                        </div>
                       </div>
                     </div>
   
@@ -1134,7 +1184,8 @@ const ExtendedJewelryForm = ({
                       </div>
                       
                       {category.polishRepairEnabled && (
-                        <div className="grid grid-cols-3 gap-4 mt-4 animate-slide-up">
+                        <div className="space-y-4 mt-4 animate-slide-up">
+                        <div className="grid grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                               {t('category.form.polishResale')} <span className="text-red-500 dark:text-red-400">*</span>
@@ -1156,7 +1207,7 @@ const ExtendedJewelryForm = ({
                               <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.polishRepairResalePercentage`]}</p>
                             )}
                           </div>
-  
+
                           <div className="space-y-2">
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                               {t('category.form.polishCost')} <span className="text-red-500 dark:text-red-400">*</span>
@@ -1179,7 +1230,7 @@ const ExtendedJewelryForm = ({
                               <p className="text-red-600 dark:text-red-400 text-xs mt-1 animate-slide-up font-medium">{errors[`resaleCategories.${index}.polishRepairCostPercentage`]}</p>
                             )}
                           </div>
-  
+
                           <div className="space-y-2">
                             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                               {t('category.form.polishLabour')} <span className="text-red-500 dark:text-red-400">*</span>
@@ -1203,6 +1254,48 @@ const ExtendedJewelryForm = ({
                             )}
                           </div>
                         </div>
+
+                        {/* Polish/Repair Rate Type Selector */}
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                              {t('category.form.polishRepairRateType')} <span className="text-red-500 dark:text-red-400">*</span>
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button
+                                type="button"
+                                onClick={() => updateResaleCategory(index, 'polishRepairRateType', 'SELLING')}
+                                className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border-2 ${
+                                  category.polishRepairRateType === 'SELLING'
+                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-600 shadow-md'
+                                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-green-400'
+                                }`}
+                              >
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {category.polishRepairRateType === 'SELLING' && (
+                                    <Check size={16} className="flex-shrink-0" />
+                                  )}
+                                  <span>{t('category.form.rateType.selling')}</span>
+                                </div>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => updateResaleCategory(index, 'polishRepairRateType', 'BUYING')}
+                                className={`px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border-2 ${
+                                  category.polishRepairRateType === 'BUYING'
+                                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-blue-600 shadow-md'
+                                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-slate-600 hover:border-blue-400'
+                                }`}
+                              >
+                                <div className="flex items-center justify-center gap-1.5">
+                                  {category.polishRepairRateType === 'BUYING' && (
+                                    <Check size={16} className="flex-shrink-0" />
+                                  )}
+                                  <span>{t('category.form.rateType.buying')}</span>
+                                </div>
+                              </button>
+                            </div>
+                          </div>
+                      </div>
                       )}
                       
                       {!category.polishRepairEnabled && (

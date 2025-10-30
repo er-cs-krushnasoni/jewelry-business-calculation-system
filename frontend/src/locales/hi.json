@@ -344,6 +344,14 @@
         "polishLabourPlaceholder": "30",
         "polishLabourRequired": "पॉलिश/रिपेयर सक्रिय होने पर जरूरी",
         "polishLabourMin": "0 या ज्यादा होना चाहिए",
+        "directResaleRateType": "डायरेक्ट रीसेल रेट प्रकार",
+      "polishRepairRateType": "पॉलिश/रिपेयर रीसेल रेट प्रकार",
+      "rateType": {
+        "selling": "बिक्री रेट",
+        "buying": "खरीद रेट",
+        "label": "गणना के लिए रेट प्रकार",
+        "help": "प्रतिशत गणना के लिए कौन सा रेट उपयोग करना है चुनें"
+      },
         "enablePolishNote": "पॉलिश/रिपेयर रीसेल कॉन्फ़िगरेशन जोड़ने के लिए यह विकल्प सक्रिय करें",
         "addCategory": "कैटेगरी जोड़ें",
         "resaleCategoryRequired": "रीसेल सक्रिय होने पर कम से कम एक रीसेल कैटेगरी जरूरी है",

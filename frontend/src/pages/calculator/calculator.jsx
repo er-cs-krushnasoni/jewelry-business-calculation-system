@@ -167,84 +167,67 @@ const CalculatorPage = () => {
         )}
       </div>
 
-      {/* Current Rates Display */}
-{/* Only show rates for admin and manager */}
+{/* Current Rates Display (Compact Version) */}
 {rates && ['admin', 'manager'].includes(user?.role) && (
-  <div className="mb-10 glass-effect bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-luxury-lg p-4 sm:p-8 border border-gold-200/30 dark:border-gold-500/20 backdrop-blur-xl animate-slide-up hover:shadow-gold transition-all duration-300">
-    <div className="flex items-center gap-3 mb-6">
-      <Sparkles className="h-6 w-6 text-gold-500 dark:text-gold-400 animate-pulse" />
-      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+  <div className="mb-8 p-4 sm:p-6 rounded-xl border border-gold-200/30 dark:border-gold-500/20 bg-white/70 dark:bg-slate-800/70 shadow-sm backdrop-blur-md animate-fade-in">
+    <div className="flex items-center gap-2 mb-4">
+      <Sparkles className="h-5 w-5 text-gold-500 dark:text-gold-400" />
+      <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white">
         {t('calculator.currentRates.title')}
       </h2>
     </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Gold Rates */}
-      <div className="space-y-4 p-3 sm:p-6 bg-gradient-to-br from-gold-50 to-amber-50 dark:from-gold-900/20 dark:to-amber-900/20 rounded-xl border-2 border-gold-200 dark:border-gold-600/30 shadow-gold hover:scale-105 transition-transform duration-300">
-        <h3 className="font-bold text-gold-700 dark:text-gold-400 flex items-center gap-2 text-lg">
-          <Sparkles size={20} className="animate-pulse" />
+      <div className="p-3 sm:p-4 rounded-lg bg-gradient-to-br from-gold-50 to-amber-50 dark:from-gold-900/20 dark:to-amber-900/20 border border-gold-200 dark:border-gold-600/30 transition-all">
+        <h3 className="font-semibold text-gold-700 dark:text-gold-400 flex items-center gap-1 text-base mb-2">
+          <Sparkles size={16} />
           {t('calculator.currentRates.goldPer10g')}
         </h3>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
-              {t('calculator.currentRates.buying')}
-            </span>
-            <span className="font-bold text-xl text-gold-700 dark:text-gold-300">
-              ₹{rates.goldBuy}
-            </span>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center px-2 py-1.5 bg-white/60 dark:bg-slate-800/60 rounded-md">
+            <span className="text-slate-600 dark:text-slate-300 text-sm">{t('calculator.currentRates.selling')}</span>
+            <span className="font-semibold text-gold-700 dark:text-gold-300 text-base">₹{rates.goldSell}</span>
           </div>
-          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
-              {t('calculator.currentRates.selling')}
-            </span>
-            <span className="font-bold text-xl text-gold-700 dark:text-gold-300">
-              ₹{rates.goldSell}
-            </span>
+          <div className="flex justify-between items-center px-2 py-1.5 bg-white/60 dark:bg-slate-800/60 rounded-md">
+            <span className="text-slate-600 dark:text-slate-300 text-sm">{t('calculator.currentRates.buying')}</span>
+            <span className="font-semibold text-gold-700 dark:text-gold-300 text-base">₹{rates.goldBuy}</span>
           </div>
         </div>
       </div>
 
       {/* Silver Rates */}
-      <div className="space-y-4 p-3 sm:p-6 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-700/40 rounded-xl border-2 border-slate-300 dark:border-slate-600/30 shadow-silver hover:scale-105 transition-transform duration-300">
-        <h3 className="font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 text-lg">
-          <Sparkles size={20} className="animate-pulse" />
+      <div className="p-3 sm:p-4 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/40 dark:to-slate-700/40 border border-slate-300 dark:border-slate-600/30 transition-all">
+        <h3 className="font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1 text-base mb-2">
+          <Sparkles size={16} />
           {t('calculator.currentRates.silverPerKg')}
         </h3>
-        <div className="space-y-3">
-          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
-              {t('calculator.currentRates.buying')}
-            </span>
-            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
-              ₹{rates.silverBuy}
-            </span>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center px-2 py-1.5 bg-white/60 dark:bg-slate-800/60 rounded-md">
+            <span className="text-slate-600 dark:text-slate-300 text-sm">{t('calculator.currentRates.selling')}</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-base">₹{rates.silverSell}</span>
           </div>
-          <div className="flex justify-between items-center p-2 sm:p-3 bg-white/60 dark:bg-slate-800/60 rounded-lg">
-            <span className="text-slate-600 dark:text-slate-300 font-medium">
-              {t('calculator.currentRates.selling')}
-            </span>
-            <span className="font-bold text-xl text-slate-700 dark:text-slate-200">
-              ₹{rates.silverSell}
-            </span>
+          <div className="flex justify-between items-center px-2 py-1.5 bg-white/60 dark:bg-slate-800/60 rounded-md">
+            <span className="text-slate-600 dark:text-slate-300 text-sm">{t('calculator.currentRates.buying')}</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200 text-base">₹{rates.silverBuy}</span>
           </div>
         </div>
       </div>
     </div>
-    
+
     {/* Update Info */}
     {rates.updateInfo && (
-      <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t-2 border-gold-200/50 dark:border-gold-700/30">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+      <div className="mt-4 pt-3 border-t border-gold-200/40 dark:border-gold-700/30">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             {t('calculator.currentRates.lastUpdated', {
               user: rates.updateInfo.updatedBy,
               timestamp: rates.updateInfo.timestamp
             })}
           </p>
           {isConnected && (
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg animate-pulse">
-              <Wifi size={16} />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-sm">
+              <Wifi size={14} />
               {t('calculator.currentRates.live')}
             </span>
           )}
@@ -253,6 +236,7 @@ const CalculatorPage = () => {
     )}
   </div>
 )}
+
 
       {/* Calculator Type Selection */}
       <div className="mb-10 glass-effect bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-luxury p-8 border border-gold-200/30 dark:border-gold-500/20 backdrop-blur-xl animate-slide-up">
@@ -376,13 +360,12 @@ const CalculatorPage = () => {
       )}
 
       {/* Features Section */}
-      <div className="mt-10 glass-effect bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700/50 rounded-2xl p-4 sm:p-8 shadow-luxury backdrop-blur-sm animate-slide-up">
-        <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-6 text-2xl flex items-center gap-3">
+      <div className="mt-10 animate-slide-up">
+        <h3 className="font-bold text-blue-900 dark:text-blue-100 mb-4 text-sm sm:text-base flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           {t('calculator.features.title')}
         </h3>
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
+        <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">          {[
             t('calculator.features.newJewelry'),
             t('calculator.features.oldJewelry'),
             t('calculator.features.multiLanguage'),
@@ -392,12 +375,12 @@ const CalculatorPage = () => {
           ].map((feature, index) => (
             <li 
   key={index} 
-  className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl hover:scale-105 transition-transform duration-300 shadow-sm hover:shadow-lg"
+  className="flex items-start gap-1 sm:gap-2 p-2 sm:p-3bg-white/60 dark:bg-slate-800/60 rounded-xl hover:scale-105 transition-transform duration-300 shadow-sm hover:shadow-lg"
 >
               <span className="flex-shrink-0 w-6 h-6 bg-gradient-gold rounded-full flex items-center justify-center text-white font-bold text-sm shadow-gold">
                 ✓
               </span>
-              <span className="text-blue-800 dark:text-blue-200 font-medium leading-relaxed">
+              <span className="text-blue-800 dark:text-blue-200 text-xs sm:text-sm font-medium leading-snug">
                 {feature}
               </span>
             </li>

@@ -446,9 +446,11 @@ const getOldJewelryCategories = async (req, res) => {
               _id: rc._id,
               itemCategory: rc.itemCategory,
               directResalePercentage: rc.directResalePercentage,
+              directResaleRateType: rc.directResaleRateType || 'SELLING',
               buyingFromWholesalerPercentage: rc.buyingFromWholesalerPercentage,
               wholesalerLabourPerGram: rc.wholesalerLabourPerGram,
               polishRepairResalePercentage: rc.polishRepairResalePercentage,
+              polishRepairRateType: rc.polishRepairRateType || 'SELLING',
               polishRepairCostPercentage: rc.polishRepairCostPercentage,
               polishRepairLabourPerGram: rc.polishRepairLabourPerGram,
               polishRepairEnabled: rc.polishRepairEnabled
@@ -680,14 +682,16 @@ const calculateOldJewelryPrice = async (req, res) => {
       
       if (canSeeResale) {
         // ========================================
-        // DIRECT RESALE CALCULATION (using SELLING rate + Labour)
+        // DIRECT RESALE CALCULATION (with dynamic rate type + Labour)
         // ========================================
-        const directResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.directResalePercentage / 100);
+        const directResaleRateType = selectedResaleCategory.directResaleRateType || 'SELLING';
+        const directResaleBaseRate = directResaleRateType === 'BUYING' ? buyingRatePerGram : sellingRatePerGram;
+        
+        const directResaleValuePerGram = directResaleBaseRate * (selectedResaleCategory.directResalePercentage / 100);
         const totalDirectResaleBeforeRounding = directResaleValuePerGram * weightNum;
         const totalDirectResaleValue = applyOldJewelryRounding(totalDirectResaleBeforeRounding);
-
         // CALCULATION: Wholesaler Cost includes base cost + labour charges
-        const directResaleWholesalerBaseCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
+        const directResaleWholesalerBaseCost = directResaleBaseRate * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * weightNum;
         const directResaleLabourCharges = selectedResaleCategory.wholesalerLabourPerGram * weightNum;
         const directResaleWholesalerCost = directResaleWholesalerBaseCost + directResaleLabourCharges;
         
@@ -725,25 +729,29 @@ const calculateOldJewelryPrice = async (req, res) => {
           // Resale percentages
           percentages: {
             directResale: selectedResaleCategory.directResalePercentage,
+            directResaleRateType: directResaleRateType,
             buyingFromWholesaler: selectedResaleCategory.buyingFromWholesalerPercentage
           }
         };
 
-        // ========================================
-        // POLISH/REPAIR RESALE CALCULATION (only if enabled + Labour)
+// ========================================
+        // POLISH/REPAIR RESALE CALCULATION (only if enabled + Labour with dynamic rate type)
         // ========================================
         if (selectedResaleCategory.polishRepairEnabled) {
+          const polishRepairRateType = selectedResaleCategory.polishRepairRateType || 'SELLING';
+          const polishRepairBaseRate = polishRepairRateType === 'BUYING' ? buyingRatePerGram : sellingRatePerGram;
+          
           const polishRepairCostWeight = weightNum * (selectedResaleCategory.polishRepairCostPercentage / 100);
           const effectiveWeightAfterPolish = weightNum - polishRepairCostWeight;
           
-          const polishRepairResaleValuePerGram = sellingRatePerGram * (selectedResaleCategory.polishRepairResalePercentage / 100);
+          const polishRepairResaleValuePerGram = polishRepairBaseRate * (selectedResaleCategory.polishRepairResalePercentage / 100);
           const totalPolishRepairResaleBeforeRounding = polishRepairResaleValuePerGram * effectiveWeightAfterPolish;
           const totalPolishRepairResaleValue = applyOldJewelryRounding(totalPolishRepairResaleBeforeRounding);
 
           // CORRECTED CALCULATION:
           // 1. Wholesaler Labour: Calculated on EFFECTIVE weight (after polish/repair loss)
           // 2. Polish/Repair Labour: Calculated on ORIGINAL weight
-          const polishRepairWholesalerBaseCost = sellingRatePerGram * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
+          const polishRepairWholesalerBaseCost = polishRepairBaseRate * (selectedResaleCategory.buyingFromWholesalerPercentage / 100) * effectiveWeightAfterPolish;
           const polishRepairWholesalerLabourCharges = selectedResaleCategory.wholesalerLabourPerGram * effectiveWeightAfterPolish;
           const polishRepairWholesalerCost = polishRepairWholesalerBaseCost + polishRepairWholesalerLabourCharges;
           
@@ -796,6 +804,7 @@ const calculateOldJewelryPrice = async (req, res) => {
 
           // Add polish/repair percentages
           calculationResult.resaleCalculations.percentages.polishRepairResale = selectedResaleCategory.polishRepairResalePercentage;
+          calculationResult.resaleCalculations.percentages.polishRepairRateType = polishRepairRateType;
           calculationResult.resaleCalculations.percentages.polishRepairCost = selectedResaleCategory.polishRepairCostPercentage;
         } else {
           // Polish/repair is disabled for this category

@@ -6,12 +6,20 @@ const resaleCategorySchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxlength: [100, 'Item category cannot exceed 100 characters'] // INCREASED from 50
+    maxlength: [100, 'Item category cannot exceed 100 characters']
   },
   directResalePercentage: {
     type: Number,
     required: true,
     min: [1, 'Direct resale percentage must be at least 1%']
+  },
+  // NEW FIELD: Rate type for direct resale
+  directResaleRateType: {
+    type: String,
+    enum: ['SELLING', 'BUYING'],
+    default: 'SELLING',
+    uppercase: true,
+    required: true
   },
   buyingFromWholesalerPercentage: {
     type: Number,
@@ -34,6 +42,16 @@ const resaleCategorySchema = new mongoose.Schema({
       return this.polishRepairEnabled === true;
     },
     min: [1, 'Polish/Repair resale percentage must be at least 1%']
+  },
+  // NEW FIELD: Rate type for polish/repair resale
+  polishRepairRateType: {
+    type: String,
+    enum: ['SELLING', 'BUYING'],
+    default: 'SELLING',
+    uppercase: true,
+    required: function() {
+      return this.polishRepairEnabled === true;
+    }
   },
   polishRepairCostPercentage: {
     type: Number,
@@ -332,6 +350,12 @@ categorySchema.pre('save', function(next) {
             categoryNames.add(lowerName);
           }
           
+          // Ensure rate types have default values
+          if (!cat.directResaleRateType) {
+            cat.directResaleRateType = 'SELLING';
+          }
+          cat.directResaleRateType = cat.directResaleRateType.toUpperCase();
+          
           if (cat.wholesalerLabourPerGram === undefined || cat.wholesalerLabourPerGram === null) {
             cat.wholesalerLabourPerGram = 0;
           }
@@ -340,10 +364,16 @@ categorySchema.pre('save', function(next) {
             cat.polishRepairResalePercentage = undefined;
             cat.polishRepairCostPercentage = undefined;
             cat.polishRepairLabourPerGram = undefined;
+            cat.polishRepairRateType = undefined;
           } else {
             if (cat.polishRepairLabourPerGram === undefined || cat.polishRepairLabourPerGram === null) {
               cat.polishRepairLabourPerGram = 0;
             }
+            // Ensure polish/repair rate type has default value
+            if (!cat.polishRepairRateType) {
+              cat.polishRepairRateType = 'SELLING';
+            }
+            cat.polishRepairRateType = cat.polishRepairRateType.toUpperCase();
           }
         });
       }

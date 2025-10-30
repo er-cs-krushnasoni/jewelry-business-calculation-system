@@ -322,16 +322,16 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                   </span>
                 </div>
                 <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Sell:</span>
+                    <span className="font-bold text-gold-600 dark:text-gold-400 text-lg">
+                      ₹{currentRates.goldSell}
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Buy:</span>
                     <span className="font-bold text-gold-600 dark:text-gold-400 text-lg">
                       ₹{currentRates.goldBuy}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Sell:</span>
-                    <span className="font-bold text-gold-600 dark:text-gold-400 text-lg">
-                      ₹{currentRates.goldSell}
                     </span>
                   </div>
                 </div>
@@ -348,16 +348,16 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                   </span>
                 </div>
                 <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Sell:</span>
+                    <span className="font-bold text-silver-600 dark:text-silver-400 text-lg">
+                      ₹{currentRates.silverSell}
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Buy:</span>
                     <span className="font-bold text-silver-600 dark:text-silver-400 text-lg">
                       ₹{currentRates.silverBuy}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Sell:</span>
-                    <span className="font-bold text-silver-600 dark:text-silver-400 text-lg">
-                      ₹{currentRates.silverSell}
                     </span>
                   </div>
                 </div>
@@ -398,6 +398,20 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
+                <Input
+                  label={t('rates.manager.goldSellingRate')}
+                  type="number"
+                  value={rates.goldSell}
+                  onChange={(e) => handleInputChange('goldSell', e.target.value)}
+                  placeholder={t('rates.manager.goldSellPlaceholder')}
+                  min="1"
+                  step="1"
+                  required
+                  helperText={t('rates.manager.goldSellHelperText')}
+                  className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-gold-400 dark:ring-gold-500 animate-pulse' : ''}`}
+                />
+              </div>
               <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
                 <Input
                   label={t('rates.manager.goldBuyingRate')}
@@ -409,20 +423,6 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                   step="1"
                   required
                   helperText={t('rates.manager.goldBuyHelperText')}
-                  className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-gold-400 dark:ring-gold-500 animate-pulse' : ''}`}
-                />
-              </div>
-              <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
-                <Input
-                  label={t('rates.manager.goldSellingRate')}
-                  type="number"
-                  value={rates.goldSell}
-                  onChange={(e) => handleInputChange('goldSell', e.target.value)}
-                  placeholder={t('rates.manager.goldSellPlaceholder')}
-                  min="1"
-                  step="1"
-                  required
-                  helperText={t('rates.manager.goldSellHelperText')}
                   className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-gold-400 dark:ring-gold-500 animate-pulse' : ''}`}
                 />
               </div>
@@ -440,6 +440,20 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
+                <Input
+                  label={t('rates.manager.silverSellingRate')}
+                  type="number"
+                  value={rates.silverSell}
+                  onChange={(e) => handleInputChange('silverSell', e.target.value)}
+                  placeholder={t('rates.manager.silverSellPlaceholder')}
+                  min="1"
+                  step="1"
+                  required
+                  helperText={t('rates.manager.silverSellHelperText')}
+                  className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-silver-400 dark:ring-silver-500 animate-pulse' : ''}`}
+                />
+              </div>
               <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
                 <Input
                   label={t('rates.manager.silverBuyingRate')}
@@ -451,20 +465,6 @@ const RateManager = ({ shopId = null, onRateUpdate = null, showTitle = true }) =
                   step="1"
                   required
                   helperText={t('rates.manager.silverBuyHelperText')}
-                  className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-silver-400 dark:ring-silver-500 animate-pulse' : ''}`}
-                />
-              </div>
-              <div className={`transition-all duration-300 ${realTimeUpdate ? 'animate-glow' : ''}`}>
-                <Input
-                  label={t('rates.manager.silverSellingRate')}
-                  type="number"
-                  value={rates.silverSell}
-                  onChange={(e) => handleInputChange('silverSell', e.target.value)}
-                  placeholder={t('rates.manager.silverSellPlaceholder')}
-                  min="1"
-                  step="1"
-                  required
-                  helperText={t('rates.manager.silverSellHelperText')}
                   className={`luxury-input ${realTimeUpdate ? 'ring-2 ring-silver-400 dark:ring-silver-500 animate-pulse' : ''}`}
                 />
               </div>

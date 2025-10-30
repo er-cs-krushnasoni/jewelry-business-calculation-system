@@ -344,6 +344,14 @@
       "polishLabourPlaceholder": "30",
       "polishLabourRequired": "પોલિશ/રિપેર સક્રિય હોય ત્યારે જરૂરી",
       "polishLabourMin": "0 અથવા વધારે હોવું જોઈએ",
+      "directResaleRateType": "ડાયરેક્ટ રિસેલ ભાવ પ્રકાર",
+      "polishRepairRateType": "પોલિશ/રિપેર રિસેલ ભાવ પ્રકાર",
+      "rateType": {
+        "selling": "વેચાણ ભાવ",
+        "buying": "ખરીદી ભાવ",
+        "label": "ગણતરી માટે ભાવ પ્રકાર",
+        "help": "ટકાવારી ગણતરી માટે કયો ભાવ ઉપયોગ કરવો તે પસંદ કરો"
+      },
       "enablePolishNote": "પોલિશ/રિપેર પુનઃવેચાણ કન્ફિગરેશન ઉમેરવા આ વિકલ્પ સક્રિય કરો",
       "addCategory": "કેટેગરી ઉમેરો",
       "resaleCategoryRequired": "પુનઃવેચાણ સક્રિય હોય ત્યારે ઓછામાં ઓછી એક પુનઃવેચાણ કેટેગરી જરૂરી છે",

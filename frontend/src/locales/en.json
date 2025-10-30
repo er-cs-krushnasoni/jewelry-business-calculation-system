@@ -260,8 +260,8 @@
         "silver": "Silver"
       },
       "resale": {
-        "on": "Resale ON",
-        "off": "Resale OFF",
+        "on": "Resaleable ON",
+        "off": "Resaleable OFF",
         "standard": "Standard"
       }
     },
@@ -314,25 +314,25 @@
       "scrapBuyOtherPlaceholder": "80.0",
       "scrapBuyOtherRequired": "Scrap buy other percentage is required",
       "scrapBuyOtherMin": "Scrap buy other percentage must be at least 1",
-      "resaleOptions": "Resale Options",
+      "resaleOptions": "Resaleable Options",
       "enabled": "Enabled",
       "disabled": "Disabled",
       "resaleNote": "When enabled, you must add at least one resale category with direct resale configuration.",
-      "resaleCategories": "Resale Categories",
+      "resaleCategories": "Resaleable Categories",
       "noResaleCategories": "No resale categories added yet.",
       "addFirstResaleCategory": "Click \"Add Category\" below to create your first resale category.",
       "categoryNumber": "Category #{{number}}",
       "removeCategory": "Remove Category",
       "categoryName": "Category Name",
       "categoryNameRequired": "Category name is required",
-      "directResale": "Direct Resale %",
+      "directResale": "Direct Resaleable %",
       "directResalePlaceholder": "92.0",
       "directResaleRequired": "Required",
       "directResaleMin": "Must be at least 1",
       "buyingFromWholesalerResale": "Buying from Wholesaler %",
       "wholesalerLabourResale": "Wholesaler Labour Per Gram (₹)",
-      "polishRepair": "Polish/Repair Resale",
-      "polishResale": "Polish/Repair Resale %",
+      "polishRepair": "Polish/Repair Resaleable",
+      "polishResale": "Polish/Repair Resaleable %",
       "polishResalePlaceholder": "90.0",
       "polishResaleRequired": "Required when polish/repair enabled",
       "polishResaleMin": "Must be at least 1",
@@ -344,6 +344,16 @@
       "polishLabourPlaceholder": "30",
       "polishLabourRequired": "Required when polish/repair enabled",
       "polishLabourMin": "Must be 0 or greater",
+
+      "directResaleRateType": "Direct Resaleable Rate Type",
+      "polishRepairRateType": "Polish/Repair Rate Type",
+      "rateType": {
+        "selling": "Selling Rate",
+        "buying": "Buying Rate",
+        "label": "Rate Type for Calculation",
+        "help": "Choose which rate to use for percentage calculation"
+      },
+
       "enablePolishNote": "Enable this option to add polish/repair resale configuration",
       "addCategory": "Add Category",
       "resaleCategoryRequired": "At least one resale category is required when resale is enabled",
@@ -722,16 +732,16 @@
         "calculationFormula": "Calculation Formula"
       },
       "resale": {
-        "title": "Resale Options",
-        "directResale": "Direct Resale (Ready to Sell)",
-        "directResaleValue": "Direct Resale Value",
-        "directResaleMargin": "Direct Resale Margin",
+        "title": "Resaleable Options",
+        "directResale": "Direct Resaleable (Ready to Sell)",
+        "directResaleValue": "If Direct Resaleable then Value",
+        "directResaleMargin": "If Direct Resaleable then Margin",
         "directResaleMarginPercentage": "of Total Amount",
-        "polishRepair": "Polish/Repair Resale",
-        "finalPolishRepairValue": "Final Polish/Repair Value",
+        "polishRepair": "After Polish/Repair Resaleable",
+        "finalPolishRepairValue": "If Resaleable After Polish/Repair then",
         "afterWeightLoss": "(after {{percentage}}% weight loss)",
         "afterPolishRepair": "after polish/repair",
-        "polishRepairNote": "(Resale Value: ₹{{resaleValue}} - Polish Labour: ₹{{labourCost}})",
+        "polishRepairNote": "(If Resaleable Then Value: ₹{{resaleValue}} - Polish Labour: ₹{{labourCost}})",
         "polishRepairMargin": "Polish/Repair Margin",
         "polishRepairMarginPercentage": "of Final Value",
         "notAvailable": "Not Available",
@@ -743,12 +753,12 @@
         "baseCost": "Base Cost",
         "labourCharges": "Labour Charges: ₹{{rate}}/g × {{weight}}g",
         "wholesalerLabour": "Wholesaler Labour: ₹{{rate}}/g × {{weight}}g",
-        "directResaleValue": "Direct Resale Value",
-        "polishRepairResaleValue": "Polish/Repair Resale Value",
+        "directResaleValue": "Direct Resaleable Value",
+        "polishRepairResaleValue": "Polish/Repair Resaleable Value",
         "polishRepairLabour": "Polish/Repair Labour: ₹{{rate}}/g × {{weight}}g",
         "finalValue": "Final Value:",
         "netMargin": "Net Margin After Polish/Repair:",
-        "directResaleMargin": "Direct Resale Margin:"
+        "directResaleMargin": "Direct Resaleable Margin:"
       },
       "weightAdjustment": {
         "title": "Weight Adjustment",
@@ -926,8 +936,8 @@
           "silver": "Silver"
         },
         "resale": {
-          "on": "Resale ON",
-          "off": "Resale OFF",
+          "on": "Resaleable ON",
+          "off": "Resaleable OFF",
           "standard": "Standard"
         }
       }

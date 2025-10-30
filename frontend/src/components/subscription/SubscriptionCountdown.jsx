@@ -106,23 +106,40 @@ const SubscriptionCountdown = ({ subscriptionStatus, compact = false, className 
   const config = getStatusConfig();
   const { Icon } = config;
 
+  // Dynamic font sizing for compact view based on content length
+  const getDynamicFontSize = () => {
+    if (status === 'expired') {
+      return 'text-xs'; // "Expired" is short
+    }
+    
+    const contentLength = `${daysRemaining} days left`.length;
+    
+    // Adjust font size based on total character length
+    if (contentLength <= 10) return 'text-sm';
+    if (contentLength <= 12) return 'text-xs';
+    return 'text-[0.7rem]'; // Extra small for very long content
+  };
+
   // Compact view for header
   if (compact) {
+    const dynamicFontSize = getDynamicFontSize();
+    
     return (
-      <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-sm
+      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full backdrop-blur-sm
         ${config.bgColor} ${config.borderColor} border 
         shadow-luxury hover:shadow-luxury-lg
         transition-all duration-300 hover:scale-105
+        max-w-[140px] sm:max-w-none
         ${className}`}
       >
-        <Icon size={16} className={`${config.iconColor} animate-fade-in`} />
-        <span className={`text-sm font-semibold ${config.textColor}`}>
+        <Icon size={14} className={`${config.iconColor} animate-fade-in flex-shrink-0`} />
+        <span className={`${dynamicFontSize} font-semibold ${config.textColor} whitespace-nowrap truncate`}>
           {status === 'expired' ? (
             'Expired'
           ) : (
             <>
               <span className="font-bold">{daysRemaining}</span>
-              <span className="ml-1 font-medium">days left</span>
+              <span className="ml-0.5 font-medium">day{daysRemaining !== 1 ? 's' : ''}</span>
             </>
           )}
         </span>
