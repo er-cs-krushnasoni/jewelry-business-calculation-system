@@ -624,7 +624,7 @@
         "finalAmount": "Final Selling Amount",
         "for": "for",
         "of": "of",
-        "roundedFrom": "(Rounded from",
+        "roundedFrom": "Rounded from",
         "calculatedAt": "Calculated at:"
       },
       "sellingRate": {
@@ -723,7 +723,7 @@
         "totalValue": "Total Scrap Buying Value",
         "for": "for",
         "of": "of",
-        "roundedFrom": "(Rounded from",
+        "roundedFrom": "Rounded from",
         "marginTitle": "Scrap Margin",
         "marginPercentage": "of Scrap Value",
         "marginBreakdown": "Margin Breakdown",

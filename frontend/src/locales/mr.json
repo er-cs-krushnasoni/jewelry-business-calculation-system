@@ -623,7 +623,7 @@
                   "finalAmount": "अंतिम विक्री रक्कम",
                   "for": "साठी",
                   "of": "चे",
-                  "roundedFrom": "(पासून राउंड केले",
+                  "roundedFrom": "पासून राउंड केले",
                   "calculatedAt": "ला गणना केली:"
                 },
                 "sellingRate": {
@@ -722,7 +722,7 @@
                   "totalValue": "एकूण भंगार खरेदी मूल्य",
                   "for": "साठी",
                   "of": "चे",
-                  "roundedFrom": "(पासून राउंड केले",
+                  "roundedFrom": "पासून राउंड केले",
                   "marginTitle": "भंगार मार्जिन",
                   "marginPercentage": "देण्याच्या रक्कमेचे",
                   "marginBreakdown": "नफा तपशील",

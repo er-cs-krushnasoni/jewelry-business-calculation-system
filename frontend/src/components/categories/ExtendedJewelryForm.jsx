@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Info, Eye, EyeOff, ChevronDown, Plus, Check, X, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import api from '../../services/api';
 
 const ExtendedJewelryForm = ({ 
   initialData = null, 
@@ -85,16 +86,10 @@ const ExtendedJewelryForm = ({
       const queryParams = new URLSearchParams();
       if (formData.metal) queryParams.append('metal', formData.metal);
       
-      const response = await fetch(`/api/calculator/new-jewelry/item-categories?${queryParams.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.get(`/calculator/new-jewelry/item-categories?${queryParams.toString()}`);
       
-      const data = await response.json();
-      if (data.success) {
-        // The calculator returns an array of objects with 'name' property
-        const categoryNames = data.data.map(cat => cat.name);
+      if (response.data.success) {
+        const categoryNames = response.data.data.map(cat => cat.name);
         setAvailableCategories(categoryNames);
       }
     } catch (error) {
