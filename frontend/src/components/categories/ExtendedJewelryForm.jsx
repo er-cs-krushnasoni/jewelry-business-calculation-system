@@ -19,7 +19,6 @@ const ExtendedJewelryForm = ({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categorySearchTerm, setCategorySearchTerm] = useState('');
   const categoryDropdownRef = useRef(null);
-
   const [resaleCategoryDropdowns, setResaleCategoryDropdowns] = useState({});
   const [resaleCategorySearchTerms, setResaleCategorySearchTerms] = useState({});
   const resaleCategoryRefs = useRef({});
@@ -76,6 +75,7 @@ const ExtendedJewelryForm = ({
         }
       });
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -86,11 +86,11 @@ const ExtendedJewelryForm = ({
       const queryParams = new URLSearchParams();
       if (formData.metal) queryParams.append('metal', formData.metal);
       
-      const response = await api.get(`/calculator/new-jewelry/item-categories?${queryParams.toString()}`);
+      // FIXED: Proper template literal syntax
+      const response = await api.get(`/categories/item-categories?${queryParams.toString()}`);
       
       if (response.data.success) {
-        const categoryNames = response.data.data.map(cat => cat.name);
-        setAvailableCategories(categoryNames);
+        setAvailableCategories(response.data.data || []);
       }
     } catch (error) {
       console.error('Load categories error:', error);
@@ -270,15 +270,18 @@ const ExtendedJewelryForm = ({
         ? [{
             itemCategory: '',
             directResalePercentage: '',
+            directResaleRateType: 'SELLING',
             buyingFromWholesalerPercentage: '',
             wholesalerLabourPerGram: '',
             polishRepairEnabled: false,
             polishRepairResalePercentage: '',
+            polishRepairRateType: 'SELLING',
             polishRepairCostPercentage: '',
             polishRepairLabourPerGram: ''
           }]
         : enabled ? prev.resaleCategories : []
     }));
+
     if (!enabled) {
       const newErrors = { ...errors };
       Object.keys(newErrors).forEach(key => {
@@ -292,6 +295,7 @@ const ExtendedJewelryForm = ({
 
   const validateForm = () => {
     const newErrors = {};
+
     if (!formData.type) newErrors.type = t('category.form.typeRequired');
     if (!formData.metal) newErrors.metal = t('category.form.metalRequired');
     if (!formData.code.trim()) {
@@ -306,6 +310,7 @@ const ExtendedJewelryForm = ({
       } else if (formData.itemCategory.length > 100) {
         newErrors.itemCategory = t('category.form.itemCategoryMaxLength');
       }
+
       if (!formData.purityPercentage) {
         newErrors.purityPercentage = t('category.form.purityRequired');
       } else {
@@ -314,6 +319,7 @@ const ExtendedJewelryForm = ({
           newErrors.purityPercentage = t('category.form.purityRange');
         }
       }
+
       if (!formData.buyingFromWholesalerPercentage) {
         newErrors.buyingFromWholesalerPercentage = t('category.form.buyingPercentageRequired');
       } else {
@@ -322,6 +328,7 @@ const ExtendedJewelryForm = ({
           newErrors.buyingFromWholesalerPercentage = t('category.form.buyingPercentageMin');
         }
       }
+
       if (formData.wholesalerLabourPerGram === '' || formData.wholesalerLabourPerGram === null || formData.wholesalerLabourPerGram === undefined) {
         newErrors.wholesalerLabourPerGram = t('category.form.labourRequired');
       } else {
@@ -330,6 +337,7 @@ const ExtendedJewelryForm = ({
           newErrors.wholesalerLabourPerGram = t('category.form.labourMin');
         }
       }
+
       if (!formData.sellingPercentage) {
         newErrors.sellingPercentage = t('category.form.sellingPercentageRequired');
       } else {
@@ -349,6 +357,7 @@ const ExtendedJewelryForm = ({
           newErrors.truePurityPercentage = t('category.form.truePurityRange');
         }
       }
+
       if (!formData.scrapBuyOwnPercentage) {
         newErrors.scrapBuyOwnPercentage = t('category.form.scrapBuyOwnRequired');
       } else {
@@ -357,6 +366,7 @@ const ExtendedJewelryForm = ({
           newErrors.scrapBuyOwnPercentage = t('category.form.scrapBuyOwnMin');
         }
       }
+
       if (!formData.scrapBuyOtherPercentage) {
         newErrors.scrapBuyOtherPercentage = t('category.form.scrapBuyOtherRequired');
       } else {
@@ -381,11 +391,13 @@ const ExtendedJewelryForm = ({
             if (!cat.itemCategory.trim()) {
               newErrors[`resaleCategories.${index}.itemCategory`] = t('category.form.categoryNameRequired');
             }
+
             if (!cat.directResalePercentage) {
               newErrors[`resaleCategories.${index}.directResalePercentage`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.directResalePercentage) < 1) {
               newErrors[`resaleCategories.${index}.directResalePercentage`] = t('category.form.directResaleMin');
             }
+
             if (!cat.buyingFromWholesalerPercentage) {
               newErrors[`resaleCategories.${index}.buyingFromWholesalerPercentage`] = t('category.form.directResaleRequired');
             } else if (parseFloat(cat.buyingFromWholesalerPercentage) < 1) {
@@ -461,11 +473,13 @@ const ExtendedJewelryForm = ({
           submitData.resaleCategories = formData.resaleCategories.map(cat => ({
             itemCategory: cat.itemCategory.trim(),
             directResalePercentage: parseFloat(cat.directResalePercentage),
+            directResaleRateType: (cat.directResaleRateType || 'SELLING').toUpperCase(),
             buyingFromWholesalerPercentage: parseFloat(cat.buyingFromWholesalerPercentage),
             wholesalerLabourPerGram: parseFloat(cat.wholesalerLabourPerGram),
             polishRepairEnabled: Boolean(cat.polishRepairEnabled),
             ...(cat.polishRepairEnabled && {
               polishRepairResalePercentage: parseFloat(cat.polishRepairResalePercentage),
+              polishRepairRateType: (cat.polishRepairRateType || 'SELLING').toUpperCase(),
               polishRepairCostPercentage: parseFloat(cat.polishRepairCostPercentage),
               polishRepairLabourPerGram: parseFloat(cat.polishRepairLabourPerGram)
             })
