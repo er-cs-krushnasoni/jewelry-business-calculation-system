@@ -81,6 +81,9 @@ const updateShopAdminCredentials = async (req, res) => {
       });
     }
 
+    let usernameChanged = false;
+    let passwordChanged = false;
+
     if (username && username.toLowerCase() !== shopAdmin.username) {
       const existingUser = await User.findByUsername(username);
       if (existingUser) {
@@ -92,6 +95,7 @@ const updateShopAdminCredentials = async (req, res) => {
       
       shopAdmin.username = username.toLowerCase().trim();
       shop.adminUsername = username.toLowerCase().trim();
+      usernameChanged = true;
     }
 
     if (password) {
@@ -102,11 +106,32 @@ const updateShopAdminCredentials = async (req, res) => {
         });
       }
       
+      // CRITICAL FIX: Set temporary plain password before updating
+      User.setTempPlainPassword(password);
       shopAdmin.password = password;
+      passwordChanged = true;
+      
+      console.log('[UPDATE SHOP ADMIN] Password will be hashed via pre-save middleware');
     }
 
     await shopAdmin.save();
-    await shop.save();
+    
+    // Only save shop if adminUsername changed
+    if (usernameChanged) {
+      await shop.save();
+    }
+
+    // CRITICAL: Emit socket event to force logout if password changed
+    if (passwordChanged && req.app.get('io')) {
+      const io = req.app.get('io');
+      io.to(`shop_${shopId}`).emit('admin-password-changed', {
+        adminId: shopAdmin._id,
+        message: 'Your password has been updated by Super Admin. Please log in again.',
+        timestamp: new Date().toISOString(),
+        forceLogout: true
+      });
+      console.log(`[UPDATE SHOP ADMIN] Sent logout signal to shop admin ${shopAdmin.username}`);
+    }
 
     res.status(200).json({
       success: true,
@@ -117,9 +142,12 @@ const updateShopAdminCredentials = async (req, res) => {
         role: shopAdmin.role,
         updatedAt: shopAdmin.updatedAt
       },
-      note: 'Password updated but not shown for security reasons'
+      passwordChanged: passwordChanged,
+      usernameChanged: usernameChanged,
+      note: passwordChanged 
+        ? 'Password updated. Admin will be logged out and must re-login.' 
+        : 'Credentials updated successfully'
     });
-
   } catch (error) {
     console.error('Update shop admin credentials error:', error);
     

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import toast from 'react-hot-toast';
 
 const SocketContext = createContext();
 
@@ -31,14 +32,14 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [error, setError] = useState(null);
   const [lastRateUpdate, setLastRateUpdate] = useState(null);
   const [systemBlocking, setSystemBlocking] = useState(null);
-
+  
   const socketRef = useRef(null);
   const isConnectingRef = useRef(false);
   const hasInitializedRef = useRef(false);
@@ -54,12 +55,10 @@ export const SocketProvider = ({ children }) => {
   // Disconnect socket
   const disconnectSocket = useCallback(() => {
     if (socketRef.current) {
-      // console.log('SocketContext: Disconnecting socket');
       socketRef.current.removeAllListeners();
       socketRef.current.disconnect();
       socketRef.current = null;
     }
-
     setSocket(null);
     setIsConnected(false);
     setConnectionStatus('disconnected');
@@ -72,17 +71,14 @@ export const SocketProvider = ({ children }) => {
   const connectSocket = useCallback(() => {
     // Prevent multiple simultaneous connection attempts
     if (isConnectingRef.current || socketRef.current?.connected) {
-      // console.log('SocketContext: Already connecting or connected, skipping');
       return;
     }
 
     if (!user || !isAuthenticated) {
-      // console.log('SocketContext: No authenticated user for connection');
       return;
     }
 
     if (user.role === 'super_admin') {
-      // console.log('SocketContext: Super admin users do not connect to sockets');
       return;
     }
 
@@ -106,7 +102,6 @@ export const SocketProvider = ({ children }) => {
     // Check if we're trying to connect with the same user (prevent unnecessary reconnections)
     const currentUserHash = createUserHash(user);
     if (currentUserHash === userHashRef.current && socketRef.current?.connected) {
-      // console.log('SocketContext: Already connected with same user, skipping');
       return;
     }
 
@@ -149,7 +144,6 @@ export const SocketProvider = ({ children }) => {
 
     // Connection events
     newSocket.on('connect', () => {
-      // console.log('SocketContext: Connected with ID:', newSocket.id);
       isConnectingRef.current = false;
       setIsConnected(true);
       setConnectionStatus('connected');
@@ -161,13 +155,11 @@ export const SocketProvider = ({ children }) => {
         username: user.username,
         role: user.role
       };
-
-      // console.log('SocketContext: Joining shop with data:', shopData);
+      
       newSocket.emit('join-shop', shopData);
     });
 
     newSocket.on('joined-shop', (data) => {
-      // console.log('SocketContext: Successfully joined shop room:', data);
       setConnectionStatus('joined');
       hasInitializedRef.current = true;
     });
@@ -181,10 +173,8 @@ export const SocketProvider = ({ children }) => {
 
     // Real-time updates
     newSocket.on('rate-updated', (data) => {
-      // console.log('SocketContext: Rate update received:', data);
       setLastRateUpdate(data);
       
-      // Trigger custom event for components
       const event = new CustomEvent('rateUpdate', { 
         detail: { 
           rates: data.rates, 
@@ -196,7 +186,6 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('system-blocking-changed', (data) => {
-      // console.log('SocketContext: System blocking changed:', data);
       setSystemBlocking(data);
       
       const event = new CustomEvent('systemBlockingChanged', { 
@@ -209,6 +198,28 @@ export const SocketProvider = ({ children }) => {
       window.dispatchEvent(event);
     });
 
+    // NEW: Admin password changed event - Force logout
+    newSocket.on('admin-password-changed', (data) => {
+      console.log('SocketContext: Admin password changed event received:', data);
+      
+      // Check if current user is the affected admin
+      if (user.role === 'admin' && data.forceLogout) {
+        // Show toast notification
+        toast.error(data.message || 'Your password has been changed by Super Admin. You will be logged out.', {
+          duration: 5000,
+          icon: '🔐',
+        });
+        
+        // Disconnect socket
+        disconnectSocket();
+        
+        // Force logout after 2 seconds
+        setTimeout(() => {
+          logout();
+        }, 2000);
+      }
+    });
+
     // Error handling
     newSocket.on('connect_error', (error) => {
       console.error('SocketContext: Connection error:', error.message);
@@ -219,15 +230,9 @@ export const SocketProvider = ({ children }) => {
     });
 
     newSocket.on('disconnect', (reason) => {
-      // console.log('SocketContext: Disconnected:', reason);
       isConnectingRef.current = false;
       setIsConnected(false);
       setConnectionStatus('disconnected');
-      
-      // Don't auto-reconnect if this was a manual disconnect
-      if (reason !== 'io client disconnect') {
-        // console.log('SocketContext: Will attempt to reconnect automatically');
-      }
     });
 
     // Reconnection handling
@@ -257,26 +262,23 @@ export const SocketProvider = ({ children }) => {
     });
 
     // Shop deactivation event
-newSocket.on('shop-deactivated', (data) => {
-  console.log('SocketContext: Shop deactivated:', data);
-  
-  // Show alert to user
-  alert(`Your shop has been deactivated: ${data.message}`);
-  
-  // Log out user and redirect
-  window.dispatchEvent(new CustomEvent('shop-deactivated', { 
-    detail: data
-  }));
-  
-  // Force logout
-  setTimeout(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-  }, 1000);
-});
-
-  }, [user?.id, user?._id, user?.shopId, user?.role, user?.username, isAuthenticated, createUserHash]);
+    newSocket.on('shop-deactivated', (data) => {
+      console.log('SocketContext: Shop deactivated:', data);
+      
+      toast.error(`Your shop has been deactivated: ${data.message}`, {
+        duration: 5000,
+        icon: '⚠️',
+      });
+      
+      window.dispatchEvent(new CustomEvent('shop-deactivated', { 
+        detail: data
+      }));
+      
+      setTimeout(() => {
+        logout();
+      }, 1000);
+    });
+  }, [user?.id, user?._id, user?.shopId, user?.role, user?.username, isAuthenticated, createUserHash, logout, disconnectSocket]);
 
   const pingSocket = useCallback(() => {
     if (socketRef.current?.connected) {
@@ -294,14 +296,12 @@ newSocket.on('shop-deactivated', (data) => {
   useEffect(() => {
     const currentUserHash = createUserHash(user);
     
-    // Should connect?
     const shouldConnect = isAuthenticated && 
                          user && 
                          user.role !== 'super_admin' && 
                          user.shopId &&
                          (user.id || user._id);
 
-    // Should disconnect?
     const shouldDisconnect = !shouldConnect || 
                            (currentUserHash !== userHashRef.current && hasInitializedRef.current);
 
@@ -325,7 +325,6 @@ newSocket.on('shop-deactivated', (data) => {
       console.log('SocketContext: Connecting socket');
       connectSocket();
     }
-
   }, [isAuthenticated, user?.id, user?._id, user?.shopId, user?.role, connectSocket, disconnectSocket, createUserHash]);
 
   // Cleanup on unmount
