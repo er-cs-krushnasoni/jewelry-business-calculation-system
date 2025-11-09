@@ -198,25 +198,57 @@ export const SocketProvider = ({ children }) => {
       window.dispatchEvent(event);
     });
 
-    // NEW: Admin password changed event - Force logout
+    // Admin password changed event - Force logout (existing - for Super Admin changing Shop Admin)
     newSocket.on('admin-password-changed', (data) => {
       console.log('SocketContext: Admin password changed event received:', data);
       
       // Check if current user is the affected admin
       if (user.role === 'admin' && data.forceLogout) {
-        // Show toast notification
         toast.error(data.message || 'Your password has been changed by Super Admin. You will be logged out.', {
           duration: 5000,
           icon: '🔐',
         });
         
-        // Disconnect socket
         disconnectSocket();
         
-        // Force logout after 2 seconds
         setTimeout(() => {
           logout();
         }, 2000);
+      }
+    });
+
+    // **NEW: User credentials changed event - Force logout for shop users**
+    newSocket.on('user-credentials-changed', (data) => {
+      console.log('SocketContext: User credentials changed event received:', data);
+      
+      // Check if this event is for the current user
+      const currentUserId = user.id || user._id;
+      
+      if (data.userId === currentUserId) {
+        // This user's credentials were changed by shop admin
+        console.log('SocketContext: Current user credentials changed, forcing logout');
+        
+        // Show toast notification with details
+        const changedFieldsText = data.changedFields?.join(' and ') || 'credentials';
+        toast.error(
+          `Your ${changedFieldsText} ${data.changedFields?.length > 1 ? 'have' : 'has'} been updated by Shop Admin. You will be logged out.`,
+          {
+            duration: 4000,
+            icon: '🔐',
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+            }
+          }
+        );
+        
+        // Disconnect socket
+        disconnectSocket();
+        
+        // Force logout after 3 seconds to allow user to read the message
+        setTimeout(() => {
+          logout();
+        }, 3000);
       }
     });
 

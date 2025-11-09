@@ -222,6 +222,9 @@ const updateUserCredentials = async (req, res) => {
       console.log('[UPDATE CREDENTIALS] Old password verified');
     }
 
+    // Track what changed for notification
+    let changedFields = [];
+    
     // If username is being updated, check global uniqueness
     if (username && username.toLowerCase().trim() !== user.username) {
       const existingUser = await User.findByUsername(username);
@@ -232,6 +235,7 @@ const updateUserCredentials = async (req, res) => {
         });
       }
       user.username = username.toLowerCase().trim();
+      changedFields.push('username');
       console.log('[UPDATE CREDENTIALS] Username updated');
     }
 
@@ -270,11 +274,37 @@ const updateUserCredentials = async (req, res) => {
       // Set temporary plain password for hashing
       User.setTempPlainPassword(password);
       user.password = password;
+      changedFields.push('password');
       console.log('[UPDATE CREDENTIALS] Password updated');
     }
 
     await user.save();
     console.log('[UPDATE CREDENTIALS] User saved successfully');
+
+    // **NEW: Force logout for affected user (but not if updating own credentials)**
+    if (!isCurrentUser && changedFields.length > 0) {
+      try {
+        const io = req.app.get('io');
+        if (io) {
+          const roomName = `shop_${shopId}`;
+          
+          // Emit to the specific user's socket
+          io.to(roomName).emit('user-credentials-changed', {
+            userId: userId,
+            username: user.username,
+            changedFields: changedFields,
+            message: `Your ${changedFields.join(' and ')} ${changedFields.length > 1 ? 'have' : 'has'} been updated by Shop Admin. Please log in again with your new credentials.`,
+            updatedBy: req.user.username,
+            timestamp: new Date().toISOString()
+          });
+          
+          console.log(`[UPDATE CREDENTIALS] Sent logout event for user ${user.username} (${userId})`);
+        }
+      } catch (socketError) {
+        console.error('[UPDATE CREDENTIALS] Error sending socket event:', socketError);
+        // Don't fail the request if socket fails
+      }
+    }
 
     res.status(200).json({
       success: true,
@@ -287,7 +317,6 @@ const updateUserCredentials = async (req, res) => {
         updatedAt: user.updatedAt
       }
     });
-
   } catch (error) {
     console.error('[UPDATE CREDENTIALS] Error:', error);
     
