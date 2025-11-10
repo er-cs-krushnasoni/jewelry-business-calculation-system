@@ -372,29 +372,31 @@ const RateTables = () => {
             )}
           </div>
 
-          {/* Current Rates Card */}
+{/* Current Rates Card */}
 {/* Only show current rates for admin and manager */}
 {currentRates && ['admin', 'manager'].includes(user?.role) && (
-  <div className="glass-effect bg-gradient-to-br from-gold-50/80 to-amber-50/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-gold-200 dark:border-gold-900/30 rounded-2xl p-6 shadow-luxury animate-slide-up">
-    <div className="flex items-center gap-3 mb-4">
-      <div className="p-2 bg-gradient-gold rounded-lg">
-        <TrendingUp className="text-white" size={20} />
+  <div className="glass-effect bg-gradient-to-br from-gold-50/80 to-amber-50/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-gold-200 dark:border-gold-900/30 rounded-2xl p-3 sm:p-6 shadow-luxury animate-slide-up">
+    <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+      <div className="p-1.5 sm:p-2 bg-gradient-gold rounded-lg">
+        <TrendingUp className="text-white" size={16} />
       </div>
-      <h3 className="font-bold text-lg text-gray-900 dark:text-white">{t('rateTable.rates.currentLive')}</h3>
+      <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white">{t('rateTable.rates.currentLive')}</h3>
     </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
       {[
         { label: t('rateTable.rates.goldBuy'), value: currentRates.goldBuy, unit: t('rateTable.rates.perGram'), color: 'yellow' },
         { label: t('rateTable.rates.goldSell'), value: currentRates.goldSell, unit: t('rateTable.rates.perGram'), color: 'yellow' },
         { label: t('rateTable.rates.silverBuy'), value: currentRates.silverBuy, unit: t('rateTable.rates.perKg'), color: 'gray' },
         { label: t('rateTable.rates.silverSell'), value: currentRates.silverSell, unit: t('rateTable.rates.perKg'), color: 'gray' }
       ].map((rate, idx) => (
-        <div key={idx} className="glass-effect bg-white/50 dark:bg-slate-900/50 rounded-xl p-4 border border-gray-200 dark:border-slate-700 hover:shadow-luxury transition-all duration-300">
-          <span className="text-sm text-gray-600 dark:text-gray-400 block mb-1">{rate.label}</span>
-          <span className={`text-xl font-bold ${rate.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400'}`}>
-            ₹{rate.value}
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">{rate.unit}</span>
+        <div key={idx} className="glass-effect bg-white/50 dark:bg-slate-900/50 rounded-xl p-2 sm:p-4 border border-gray-200 dark:border-slate-700 hover:shadow-luxury transition-all duration-300">
+          <span className="text-[10px] sm:text-sm text-gray-600 dark:text-gray-400 block mb-0.5 sm:mb-1">{rate.label}</span>
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1">
+            <span className={`text-base sm:text-xl font-bold ${rate.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400'}`}>
+              ₹{rate.value}
+            </span>
+            <span className="text-[9px] sm:text-xs text-gray-500 dark:text-gray-500">{rate.unit}</span>
+          </div>
         </div>
       ))}
     </div>

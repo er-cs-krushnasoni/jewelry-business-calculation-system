@@ -317,10 +317,10 @@
       "resaleOptions": "Resaleable Options",
       "enabled": "Enabled",
       "disabled": "Disabled",
-      "resaleNote": "When enabled, you must add at least one resale category with direct resale configuration.",
+      "resaleNote": "When enabled, you must add at least one resale category with direct resaleable configuration.",
       "resaleCategories": "Resaleable Categories",
-      "noResaleCategories": "No resale categories added yet.",
-      "addFirstResaleCategory": "Click \"Add Category\" below to create your first resale category.",
+      "noResaleCategories": "No resaleable categories added yet.",
+      "addFirstResaleCategory": "Click \"Add Category\" below to create your first resaleable category.",
       "categoryNumber": "Category #{{number}}",
       "removeCategory": "Remove Category",
       "categoryName": "Category Name",
@@ -354,9 +354,9 @@
         "help": "Choose which rate to use for percentage calculation"
       },
 
-      "enablePolishNote": "Enable this option to add polish/repair resale configuration",
+      "enablePolishNote": "Enable this option to add polish/repair resaleable configuration",
       "addCategory": "Add Category",
-      "resaleCategoryRequired": "At least one resale category is required when resale is enabled",
+      "resaleCategoryRequired": "At least one resaleable category is required when resaleable is enabled",
       "duplicateCategoryNames": "Duplicate category names are not allowed",
       "descriptions": "Multi-Level Descriptions",
       "showHelp": "Show Help",
@@ -552,7 +552,7 @@
       "refreshPage": "Refresh Page",
       "selectJewelryType": "Select Jewelry Type",
       "freshStock": "Fresh stock calculations",
-      "scrapResale": "Scrap & resale calculations",
+      "scrapResale": "Scrap & resaleable calculations",
       "active": "✓ Active"
     },
     "currentRates": {
@@ -700,8 +700,8 @@
         "loading": "Loading categories...",
         "noAvailable": "No categories available",
         "noAvailableDescription": "No {{metal}} OLD jewelry categories found. Please contact your administrator to add categories.",
-        "resaleCategories": "resale categories",
-        "resaleCategory": "resale category",
+        "resaleCategories": "resaleable categories",
+        "resaleCategory": "resaleable category",
         "polishRepair": "+ Polish/Repair",
         "selected": "✓ Selected"
       },
@@ -745,7 +745,7 @@
         "polishRepairMargin": "Polish/Repair Margin",
         "polishRepairMarginPercentage": "of Final Value",
         "notAvailable": "Not Available",
-        "notAvailableMessage": "Polish/Repair resale is not enabled for this category"
+        "notAvailableMessage": "Polish/Repair resaleable is not enabled for this category"
       },
       "marginBreakdown": {
         "title": "Margin Breakdown",
@@ -768,7 +768,7 @@
       },
       "toast": {
         "selectAllFields": "Please select metal, source, category and enter weight",
-        "selectResaleCategory": "Please select a resale category type",
+        "selectResaleCategory": "Please select a resaleable category type",
         "validWeight": "Please enter a valid weight",
         "calculationComplete": "Calculation completed",
         "calculationFailed": "Calculation failed",
@@ -1028,7 +1028,7 @@
         "capabilities": "Your Capabilities",
         "calc": "Jewelry calculations with results",
         "margins": "View margin per gram and totals",
-        "resale": "Access resale options (when enabled)",
+        "resale": "Access resaleable options (when enabled)",
         "professional": "Professional-level access"
       },
       "manager": {

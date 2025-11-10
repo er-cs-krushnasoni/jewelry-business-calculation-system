@@ -267,27 +267,21 @@ const NewJewelryCalculator = ({ rates }) => {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-6 shadow-luxury border border-gold-200 dark:border-slate-700">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <div className="p-3 bg-gradient-gold rounded-xl shadow-gold">
-            <Calculator className="h-7 w-7 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{t('calculator.new.title')}</h2>
-            <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">Calculate jewelry pricing with precision</p>
-          </div>
-        </div>
-        {(metal || selectedCategory) && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={resetAll}
-            className="border-gold-300 dark:border-gold-600 text-gold-700 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-slate-700 transition-all duration-300"
-          >
-            {t('calculator.new.buttons.resetAll')}
-          </Button>
-        )}
-      </div>
+      {(metal || selectedCategory) && (
+  <div className="flex justify-end bg-white dark:bg-slate-800 rounded-xl p-3 sm:p-4 shadow-luxury border border-gold-200 dark:border-slate-700">
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={resetAll}
+      className="w-full sm:w-auto border-gold-300 dark:border-gold-600 text-gold-700 dark:text-gold-400 hover:bg-gold-50 dark:hover:bg-slate-700 transition-all duration-300 shadow-md hover:shadow-lg"
+    >
+      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      {t('calculator.new.buttons.resetAll')}
+    </Button>
+  </div>
+)}
 
       {/* Metal Selection */}
       <div className="space-y-4 animate-slide-up">
@@ -295,74 +289,74 @@ const NewJewelryCalculator = ({ rates }) => {
           <span className="text-gold-600 dark:text-gold-400">{t('calculator.new.steps.step1')}</span> {t('calculator.new.steps.selectMetal')} <span className="text-red-500">*</span>
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
-          {/* Gold Button */}
-          <button
-            type="button"
-            onClick={() => setMetal('GOLD')}
-            className={`group relative p-4 sm:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-              metal === 'GOLD'
-                ? 'border-gold-400 dark:border-gold-500 bg-gradient-gold shadow-gold scale-105'
-                : 'border-gold-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gold-300 dark:hover:border-gold-600 hover:shadow-luxury hover:scale-102'
-            }`}
-          >
-            {metal === 'GOLD' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-gold-400/20 to-gold-600/20 animate-glow"></div>
-            )}
-            <div className="relative">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Coins className={`h-8 w-8 transition-transform group-hover:scale-110 ${
-                  metal === 'GOLD' ? 'text-white' : 'text-gold-500 dark:text-gold-400'
-                }`} />
-                <span className={`text-xl font-semibold ${
-                  metal === 'GOLD' ? 'text-white' : 'text-gray-900 dark:text-white'
-                }`}>
-                  {t('calculator.new.metal.gold')}
-                </span>
-              </div>
-              {rates && ['admin', 'manager'].includes(user?.role) && (
-  <div className={`text-sm space-y-1 ${
-    metal === 'GOLD' ? 'text-gold-50' : 'text-gray-600 dark:text-slate-400'
-  }`}>
-    <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.goldSell}{t('calculator.new.metal.per10g')}</div>
-  </div>
-)}
-            </div>
-          </button>
-          
-          {/* Silver Button */}
-          <button
-            type="button"
-            onClick={() => setMetal('SILVER')}
-            className={`group relative p-4 sm:p-8 rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-              metal === 'SILVER'
-                ? 'border-silver-400 dark:border-silver-500 bg-gradient-silver shadow-silver scale-105'
-                : 'border-silver-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-silver-300 dark:hover:border-silver-600 hover:shadow-luxury hover:scale-102'
-            }`}
-          >
-            {metal === 'SILVER' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-silver-400/20 to-silver-600/20 animate-glow"></div>
-            )}
-            <div className="relative">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <Coins className={`h-8 w-8 transition-transform group-hover:scale-110 ${
-                  metal === 'SILVER' ? 'text-white' : 'text-silver-500 dark:text-silver-400'
-                }`} />
-                <span className={`text-xl font-semibold ${
-                  metal === 'SILVER' ? 'text-white' : 'text-gray-900 dark:text-white'
-                }`}>
-                  {t('calculator.new.metal.silver')}
-                </span>
-              </div>
-              {rates && ['admin', 'manager'].includes(user?.role) && (
-  <div className={`text-sm space-y-1 ${
-    metal === 'SILVER' ? 'text-silver-50' : 'text-gray-600 dark:text-slate-400'
-  }`}>
-    <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.silverSell}{t('calculator.new.metal.perKg')}</div>
-  </div>
-)}
-            </div>
-          </button>
+  {/* Gold Button */}
+  <button
+    type="button"
+    onClick={() => setMetal('GOLD')}
+    className={`group relative p-3 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+      metal === 'GOLD'
+        ? 'border-gold-400 dark:border-gold-500 bg-gradient-gold shadow-gold scale-105'
+        : 'border-gold-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gold-300 dark:hover:border-gold-600 hover:shadow-luxury hover:scale-102'
+    }`}
+  >
+    {metal === 'GOLD' && (
+      <div className="absolute inset-0 bg-gradient-to-br from-gold-400/20 to-gold-600/20 animate-glow"></div>
+    )}
+    <div className="relative">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <Coins className={`h-6 w-6 sm:h-8 sm:w-8 transition-transform group-hover:scale-110 ${
+          metal === 'GOLD' ? 'text-white' : 'text-gold-500 dark:text-gold-400'
+        }`} />
+        <span className={`text-lg sm:text-xl font-semibold ${
+          metal === 'GOLD' ? 'text-white' : 'text-gray-900 dark:text-white'
+        }`}>
+          {t('calculator.new.metal.gold')}
+        </span>
+      </div>
+      {rates && ['admin', 'manager'].includes(user?.role) && (
+        <div className={`text-xs sm:text-sm ${
+          metal === 'GOLD' ? 'text-gold-50' : 'text-gray-600 dark:text-slate-400'
+        }`}>
+          <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.goldSell}{t('calculator.new.metal.per10g')}</div>
         </div>
+      )}
+    </div>
+  </button>
+  
+  {/* Silver Button */}
+  <button
+    type="button"
+    onClick={() => setMetal('SILVER')}
+    className={`group relative p-3 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+      metal === 'SILVER'
+        ? 'border-silver-400 dark:border-silver-500 bg-gradient-silver shadow-silver scale-105'
+        : 'border-silver-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-silver-300 dark:hover:border-silver-600 hover:shadow-luxury hover:scale-102'
+    }`}
+  >
+    {metal === 'SILVER' && (
+      <div className="absolute inset-0 bg-gradient-to-br from-silver-400/20 to-silver-600/20 animate-glow"></div>
+    )}
+    <div className="relative">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <Coins className={`h-6 w-6 sm:h-8 sm:w-8 transition-transform group-hover:scale-110 ${
+          metal === 'SILVER' ? 'text-white' : 'text-silver-500 dark:text-silver-400'
+        }`} />
+        <span className={`text-lg sm:text-xl font-semibold ${
+          metal === 'SILVER' ? 'text-white' : 'text-gray-900 dark:text-white'
+        }`}>
+          {t('calculator.new.metal.silver')}
+        </span>
+      </div>
+      {rates && ['admin', 'manager'].includes(user?.role) && (
+        <div className={`text-xs sm:text-sm ${
+          metal === 'SILVER' ? 'text-silver-50' : 'text-gray-600 dark:text-slate-400'
+        }`}>
+          <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.silverSell}{t('calculator.new.metal.perKg')}</div>
+        </div>
+      )}
+    </div>
+  </button>
+</div>
       </div>
 
       {/* Category Filter */}
@@ -559,27 +553,27 @@ const NewJewelryCalculator = ({ rates }) => {
 
           {/* Selling Rate Breakdown */}
           <div className="bg-white dark:bg-slate-800 border-2 border-blue-300 dark:border-blue-700 rounded-2xl overflow-hidden shadow-luxury transition-all duration-300 hover:shadow-luxury-lg">
-            <button
-              onClick={() => toggleSection('sellingRate')}
-              className="w-full px-3 sm:px-6 py-4 sm:py-6 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-300 group"
-            >
-              <div className="flex items-center gap-2 sm:gap-4">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                  <Calculator className="text-white h-6 w-6" />
-                </div>
-                <div className="text-left">
-                  <div className="text-sm font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide">{t('calculator.new.sellingRate.title')}</div>
-                  <div className="text-3xl font-semibold text-blue-900 dark:text-blue-300">
-                    ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
-                  </div>
-                </div>
-              </div>
-              {expandedSections.sellingRate ? (
-                <ChevronUp className="text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" size={28} />
-              ) : (
-                <ChevronDown className="text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" size={28} />
-              )}
-            </button>
+          <button
+  onClick={() => toggleSection('sellingRate')}
+  className="w-full px-3 sm:px-6 py-3 sm:py-6 flex items-center justify-between hover:bg-blue-50 dark:hover:bg-slate-700 transition-all duration-300 group"
+>
+  <div className="flex items-center gap-2 sm:gap-4">
+    <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
+      <Calculator className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+    </div>
+    <div className="text-left">
+      <div className="text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide">{t('calculator.new.sellingRate.title')}</div>
+      <div className="text-xl sm:text-3xl font-semibold text-blue-900 dark:text-blue-300">
+        ₹{formatCurrency(result.sellingRateBreakdown.sellingRatePerGram)}
+      </div>
+    </div>
+  </div>
+  {expandedSections.sellingRate ? (
+    <ChevronUp className="text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform flex-shrink-0" size={24} />
+  ) : (
+    <ChevronDown className="text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform flex-shrink-0" size={24} />
+  )}
+</button>
             
             {expandedSections.sellingRate && (
               <div className="px-3 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-t-2 border-blue-200 dark:border-blue-700">
@@ -630,32 +624,32 @@ const NewJewelryCalculator = ({ rates }) => {
           {permissions?.canViewMargins && (
             <div className="bg-white dark:bg-slate-800 border-2 border-purple-300 dark:border-purple-700 rounded-2xl overflow-hidden shadow-luxury transition-all duration-300 hover:shadow-luxury-lg">
               <button
-                onClick={() => toggleSection('margin')}
-                className="w-full px-3 sm:px-6 py-4 sm:py-6 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-2 sm:gap-4">
-                  <div className="p-3 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                    <Coins className="text-white h-6 w-6" />
-                  </div>
-                  <div className="text-left">
-  <div className="text-sm font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wide">{t('calculator.new.margin.title')}</div>
-  <div className="text-2xl sm:text-3xl font-semibold text-purple-900 dark:text-purple-300 break-words">
-    ₹{formatCurrency(result.marginBreakdown.ourMargin)}
+  onClick={() => toggleSection('margin')}
+  className="w-full px-3 sm:px-6 py-3 sm:py-6 flex items-center justify-between hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 group"
+>
+  <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+    <div className="p-2 sm:p-3 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform flex-shrink-0">
+      <Coins className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+    </div>
+    <div className="text-left min-w-0">
+      <div className="text-xs sm:text-sm font-semibold text-purple-700 dark:text-purple-400 uppercase tracking-wide">{t('calculator.new.margin.title')}</div>
+      <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-purple-900 dark:text-purple-300 break-words">
+        ₹{formatCurrency(result.marginBreakdown.ourMargin)}
+      </div>
+      <div className="text-xs sm:text-sm md:text-base text-purple-600 dark:text-purple-400 font-medium mt-0.5 sm:mt-1">
+        ({formatNumber(calculateOurMarginPercentage(
+          result.marginBreakdown.ourMargin,
+          result.finalSellingAmount
+        ))}% {t('calculator.new.margin.ofSelling')})
+      </div>
+    </div>
   </div>
-  <div className="text-sm sm:text-base text-purple-600 dark:text-purple-400 font-medium mt-1">
-    ({formatNumber(calculateOurMarginPercentage(
-      result.marginBreakdown.ourMargin,
-      result.finalSellingAmount
-    ))}% {t('calculator.new.margin.ofSelling')})
-  </div>
-</div>
-                </div>
-                {expandedSections.margin ? (
-                  <ChevronUp className="text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" size={28} />
-                ) : (
-                  <ChevronDown className="text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" size={28} />
-                )}
-              </button>
+  {expandedSections.margin ? (
+    <ChevronUp className="text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform flex-shrink-0" size={24} />
+  ) : (
+    <ChevronDown className="text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform flex-shrink-0" size={24} />
+  )}
+</button>
               
               {expandedSections.margin && permissions?.canViewWholesaleRates && (
                 <div className="px-3 sm:px-6 py-4 sm:py-6 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 border-t-2 border-purple-200 dark:border-purple-700">

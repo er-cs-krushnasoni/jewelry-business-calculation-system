@@ -262,31 +262,31 @@ const OldJewelryCalculator = ({ rates }) => {
   return (
     <div className="space-y-4 sm:space-y-8 animate-fade-in">
       {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
-            <Calculator className="h-7 w-7 text-white" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {t('calculator.old.title')}
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Calculate scrap and resale values
-            </p>
-          </div>
-        </div>
-        {(metal || selectedCategory) && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={resetAll}
-            className="border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950 transition-all duration-300"
-          >
-            {t('calculator.old.buttons.resetAll')}
-          </Button>
-        )}
-      </div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+  {/* <div className="flex items-center gap-2 sm:gap-4">
+    <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
+      <Calculator className="h-5 w-5 sm:h-7 sm:w-7 text-white" />
+    </div>
+    <div>
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+        {t('calculator.old.title')}
+      </h2>
+      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
+        Calculate scrap and resale values
+      </p>
+    </div>
+  </div> */}
+  {(metal || selectedCategory) && (
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={resetAll}
+      className="w-full sm:w-auto border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950 transition-all duration-300"
+    >
+      {t('calculator.old.buttons.resetAll')}
+    </Button>
+  )}
+</div>
   
       {/* Step 1: Metal Selection */}
       <div className="space-y-2 sm:space-y-4 animate-slide-up">
@@ -300,197 +300,156 @@ const OldJewelryCalculator = ({ rates }) => {
           </label>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Gold Button */}
-          <button
-            type="button"
-            onClick={() => setMetal('GOLD')}
-            className={`group relative p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-              metal === 'GOLD'
-                ? 'border-amber-400 dark:border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/50 dark:to-orange-950/50 shadow-xl scale-105'
-                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-lg hover:scale-102'
-            }`}
-          >
-            {metal === 'GOLD' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-orange-400/20 animate-pulse" />
-            )}
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <div className={`p-3 rounded-xl transition-all duration-300 ${
-                  metal === 'GOLD'
-                    ? 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg'
-                    : 'bg-gray-100 dark:bg-slate-700 group-hover:bg-amber-100 dark:group-hover:bg-amber-950'
-                }`}>
-                  <Coins className={`w-6 h-6 ${
-                    metal === 'GOLD' ? 'text-white' : 'text-gray-400 dark:text-gray-500 group-hover:text-amber-600 dark:group-hover:text-amber-400'
-                  }`} />
-                </div>
-                <span className={`text-xl font-bold transition-colors ${
-                  metal === 'GOLD' 
-                    ? 'text-amber-900 dark:text-amber-100' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {t('calculator.old.metal.gold')}
-                </span>
-              </div>
-              
-              {rates && ['admin', 'manager'].includes(user?.role) && (
-  <div className="mt-4 p-3 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border border-amber-200 dark:border-amber-800">
-    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-      {t('calculator.old.metal.buy')}
-    </div>
-    <div className="text-2xl font-bold text-amber-700 dark:text-amber-400">
-      ₹{rates.goldBuy}
-      <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1">/10g</span>
-    </div>
-  </div>
-)}
-              
-              {metal === 'GOLD' && (
-                <div className="absolute top-3 right-3 w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg animate-scale-in">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              )}
-            </div>
-          </button>
-          
-          {/* Silver Button */}
-          <button
-            type="button"
-            onClick={() => setMetal('SILVER')}
-            className={`group relative p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
-              metal === 'SILVER'
-                ? 'border-gray-400 dark:border-gray-500 bg-gradient-to-br from-gray-50 to-slate-50 dark:from-slate-900/50 dark:to-slate-950/50 shadow-xl scale-105'
-                : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg hover:scale-102'
-            }`}
-          >
-            {metal === 'SILVER' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-300/20 to-slate-300/20 animate-pulse" />
-            )}
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <div className={`p-3 rounded-xl transition-all duration-300 ${
-                  metal === 'SILVER'
-                    ? 'bg-gradient-to-br from-gray-500 to-slate-600 shadow-lg'
-                    : 'bg-gray-100 dark:bg-slate-700 group-hover:bg-gray-200 dark:group-hover:bg-slate-600'
-                }`}>
-                  <Coins className={`w-6 h-6 ${
-                    metal === 'SILVER' ? 'text-white' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400'
-                  }`} />
-                </div>
-                <span className={`text-xl font-bold transition-colors ${
-                  metal === 'SILVER' 
-                    ? 'text-gray-900 dark:text-gray-100' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {t('calculator.old.metal.silver')}
-                </span>
-              </div>
-              
-              {rates && ['admin', 'manager'].includes(user?.role) && (
-  <div className="mt-4 p-3 rounded-xl bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm border border-gray-200 dark:border-slate-700">
-    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-      {t('calculator.old.metal.buy')}
-    </div>
-    <div className="text-2xl font-bold text-gray-700 dark:text-gray-300">
-      ₹{rates.silverBuy}
-      <span className="text-sm font-normal text-gray-600 dark:text-gray-400 ml-1">/kg</span>
-    </div>
-  </div>
-)}
-              
-              {metal === 'SILVER' && (
-                <div className="absolute top-3 right-3 w-8 h-8 bg-gradient-to-br from-gray-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg animate-scale-in">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              )}
-            </div>
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+  {/* Gold Button */}
+  <button
+    type="button"
+    onClick={() => setMetal('GOLD')}
+    className={`group relative p-3 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+      metal === 'GOLD'
+        ? 'border-gold-400 dark:border-gold-500 bg-gradient-gold shadow-gold scale-105'
+        : 'border-gold-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-gold-300 dark:hover:border-gold-600 hover:shadow-luxury hover:scale-102'
+    }`}
+  >
+    {metal === 'GOLD' && (
+      <div className="absolute inset-0 bg-gradient-to-br from-gold-400/20 to-gold-600/20 animate-glow"></div>
+    )}
+    <div className="relative">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <Coins className={`h-6 w-6 sm:h-8 sm:w-8 transition-transform group-hover:scale-110 ${
+          metal === 'GOLD' ? 'text-white' : 'text-gold-500 dark:text-gold-400'
+        }`} />
+        <span className={`text-lg sm:text-xl font-semibold ${
+          metal === 'GOLD' ? 'text-white' : 'text-gray-900 dark:text-white'
+        }`}>
+          {t('calculator.new.metal.gold')}
+        </span>
+      </div>
+      {rates && ['admin', 'manager'].includes(user?.role) && (
+        <div className={`text-xs sm:text-sm ${
+          metal === 'GOLD' ? 'text-gold-50' : 'text-gray-600 dark:text-slate-400'
+        }`}>
+          <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.goldSell}{t('calculator.new.metal.per10g')}</div>
         </div>
+      )}
+    </div>
+  </button>
+  
+  {/* Silver Button */}
+  <button
+    type="button"
+    onClick={() => setMetal('SILVER')}
+    className={`group relative p-3 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+      metal === 'SILVER'
+        ? 'border-silver-400 dark:border-silver-500 bg-gradient-silver shadow-silver scale-105'
+        : 'border-silver-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-silver-300 dark:hover:border-silver-600 hover:shadow-luxury hover:scale-102'
+    }`}
+  >
+    {metal === 'SILVER' && (
+      <div className="absolute inset-0 bg-gradient-to-br from-silver-400/20 to-silver-600/20 animate-glow"></div>
+    )}
+    <div className="relative">
+      <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+        <Coins className={`h-6 w-6 sm:h-8 sm:w-8 transition-transform group-hover:scale-110 ${
+          metal === 'SILVER' ? 'text-white' : 'text-silver-500 dark:text-silver-400'
+        }`} />
+        <span className={`text-lg sm:text-xl font-semibold ${
+          metal === 'SILVER' ? 'text-white' : 'text-gray-900 dark:text-white'
+        }`}>
+          {t('calculator.new.metal.silver')}
+        </span>
+      </div>
+      {rates && ['admin', 'manager'].includes(user?.role) && (
+        <div className={`text-xs sm:text-sm ${
+          metal === 'SILVER' ? 'text-silver-50' : 'text-gray-600 dark:text-slate-400'
+        }`}>
+          <div className="font-medium">{t('calculator.new.metal.sell')} ₹{rates.silverSell}{t('calculator.new.metal.perKg')}</div>
+        </div>
+      )}
+    </div>
+  </button>
+</div>
       </div>
   
       {/* Step 2: Source Selection */}
       {metal && (
-        <div className="space-y-2 sm:space-y-4 animate-slide-up">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
-              2
+  <div className="space-y-2 sm:space-y-4 animate-slide-up">
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-lg">
+        2
+      </div>
+      <label className="block text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
+        {t('calculator.old.steps.step2')} {t('calculator.old.steps.selectSource')}
+        <span className="text-red-500 ml-1">*</span>
+      </label>
+    </div>
+    <div className="grid grid-cols-2 gap-3 sm:gap-6">
+      {/* Own Metal */}
+      <button
+        type="button"
+        onClick={() => setSource('own')}
+        className={`group p-3 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${
+          source === 'own'
+            ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 shadow-xl scale-105'
+            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg hover:scale-102'
+        }`}
+      >
+        <div className="text-center">
+          <div
+            className={`text-lg sm:text-xl font-bold mb-1 sm:mb-2 transition-colors ${
+              source === 'own' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            {t('calculator.old.source.own')}
+          </div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            {t('calculator.old.source.ownDescription')}
+          </div>
+          {source === 'own' && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 dark:bg-blue-500 text-white text-xs sm:text-sm font-semibold rounded-full shadow-lg animate-scale-in">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {t('calculator.old.source.selected')}
             </div>
-            <label className="block text-base font-semibold text-gray-900 dark:text-white">
-              {t('calculator.old.steps.step2')} {t('calculator.old.steps.selectSource')}
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Own Metal */}
-            <button
-              type="button"
-              onClick={() => setSource('own')}
-              className={`group relative p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${
-                source === 'own'
-                  ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 shadow-xl scale-105'
-                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg hover:scale-102'
-              }`}
-            >
-              <div className="text-center">
-                <div className={`text-2xl font-bold mb-2 transition-colors ${
-                  source === 'own' ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {t('calculator.old.source.own')}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('calculator.old.source.ownDescription')}
-                </div>
-                {source === 'own' && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white text-sm font-semibold rounded-full shadow-lg animate-scale-in">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {t('calculator.old.source.selected')}
-                  </div>
-                )}
-              </div>
-            </button>
-  
-            {/* Other Source */}
-            <button
-              type="button"
-              onClick={() => setSource('other')}
-              className={`group relative p-3 sm:p-6 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${
-                source === 'other'
-                  ? 'border-purple-500 dark:border-purple-400 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/50 dark:to-pink-950/50 shadow-xl scale-105'
-                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-lg hover:scale-102'
-              }`}
-            >
-              <div className="text-center">
-                <div className={`text-2xl font-bold mb-2 transition-colors ${
-                  source === 'other' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {t('calculator.old.source.other')}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('calculator.old.source.otherDescription')}
-                </div>
-                {source === 'other' && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-purple-600 dark:bg-purple-500 text-white text-sm font-semibold rounded-full shadow-lg animate-scale-in">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {t('calculator.old.source.selected')}
-                  </div>
-                )}
-              </div>
-            </button>
-          </div>
+          )}
         </div>
-      )}
+      </button>
+      {/* Other Source */}
+      <button
+        type="button"
+        onClick={() => setSource('other')}
+        className={`group p-3 sm:p-5 rounded-xl sm:rounded-2xl border-2 transition-all duration-300 ${
+          source === 'other'
+            ? 'border-purple-500 dark:border-purple-400 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/40 dark:to-pink-950/40 shadow-xl scale-105'
+            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-lg hover:scale-102'
+        }`}
+      >
+        <div className="text-center">
+          <div
+            className={`text-lg sm:text-xl font-bold mb-1 sm:mb-2 transition-colors ${
+              source === 'other' ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            {t('calculator.old.source.other')}
+          </div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+            {t('calculator.old.source.otherDescription')}
+          </div>
+          {source === 'other' && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 dark:bg-purple-500 text-white text-xs sm:text-sm font-semibold rounded-full shadow-lg animate-scale-in">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {t('calculator.old.source.selected')}
+            </div>
+          )}
+        </div>
+      </button>
+    </div>
+  </div>
+)}
+
   
       {/* Step 3: Category Code Selection */}
       {metal && source && (
