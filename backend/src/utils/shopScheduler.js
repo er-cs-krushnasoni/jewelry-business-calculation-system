@@ -11,7 +11,7 @@ class ShopScheduler {
   // Start the scheduler
   start() {
     // Run every hour
-    this.task = cron.schedule('0 * * * *', async () => {
+    this.task = cron.schedule("0 0 * * *", async () => {
       console.log('[ShopScheduler] Running subscription check...');
       await this.checkExpiredSubscriptions();
     });
